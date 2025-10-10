@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
+
+@import "tailwindcss";
+
+/* Base theme tokens */
+:root {
+  --color-brand-navy: #0A1931;
+  --color-brand-gold: #D4AF37;
+}
+
+html, body, #app {
+  height: 100%;
+}
+
+body {
+  @apply bg-white text-gray-900 font-sans;
+}
+
+.font-display { font-family: 'Playfair Display', serif; }
+
+/* Utility for gold gradient accents */
+.gold-accent {
+  background: linear-gradient(135deg, #D4AF37, #f4e3a1);
+}
+
+
