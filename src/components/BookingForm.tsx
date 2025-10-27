@@ -12,7 +12,16 @@ export default function BookingForm({ variant = 'card' }: Props) {
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const params = new URLSearchParams({ destination, checkIn, checkOut, guests })
+    const fmt = (d: Date) => d.toISOString().slice(0, 10)
+    const today = new Date()
+    const tomorrow = new Date(today)
+    tomorrow.setDate(today.getDate() + 1)
+
+    const destinationParam = destination.trim() || 'Any destination'
+    const checkInParam = checkIn || fmt(today)
+    const checkOutParam = checkOut || fmt(tomorrow)
+
+    const params = new URLSearchParams({ destination: destinationParam, checkIn: checkInParam, checkOut: checkOutParam, guests })
     navigate(`/search?${params.toString()}`)
   }
 
@@ -30,34 +39,31 @@ export default function BookingForm({ variant = 'card' }: Props) {
     <form onSubmit={onSubmit} className={wrapClass}>
       <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-5 items-end">
         <div className="md:col-span-2">
-          <label className={`block text-[10px] tracking-wider uppercase ${variant === 'bar' ? 'text-[\#0A1931]' : 'text-gray-700'} mb-1`}>Destination</label>
+          <label className={`block text-[10px] tracking-wider uppercase ${variant === 'bar' ? 'text-[#0A1931]' : 'text-gray-700'} mb-1`}>Destination</label>
           <input
             type="text"
             placeholder="City or hotel name"
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
             className={fieldClass}
-            required
           />
         </div>
         <div>
-          <label className={`block text-[10px] tracking-wider uppercase ${variant === 'bar' ? 'text-[\#0A1931]' : 'text-gray-700'} mb-1`}>Check-in</label>
+          <label className={`block text-[10px] tracking-wider uppercase ${variant === 'bar' ? 'text-[#0A1931]' : 'text-gray-700'} mb-1`}>Check-in</label>
           <input
             type="date"
             value={checkIn}
             onChange={(e) => setCheckIn(e.target.value)}
             className={fieldClass}
-            required
           />
         </div>
         <div>
-          <label className={`block text-[10px] tracking-wider uppercase ${variant === 'bar' ? 'text-[\#0A1931]' : 'text-gray-700'} mb-1`}>Check-out</label>
+          <label className={`block text-[10px] tracking-wider uppercase ${variant === 'bar' ? 'text-[#0A1931]' : 'text-gray-700'} mb-1`}>Check-out</label>
           <input
             type="date"
             value={checkOut}
             onChange={(e) => setCheckOut(e.target.value)}
             className={fieldClass}
-            required
           />
         </div>
         <div>
