@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 
 export default function Register() {
 	const navigate = useNavigate()
@@ -7,44 +7,40 @@ export default function Register() {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [error, setError] = useState<string | null>(null)
-  const alreadyRegistered = !!localStorage.getItem('user')
-
-	useEffect(() => {
-		if (alreadyRegistered) {
-			navigate('/')
-		}
-	}, [alreadyRegistered, navigate])
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault()
 		setError(null)
-		const existing = localStorage.getItem('user')
-		if (existing) {
-			try {
-				const saved = JSON.parse(existing) as { email?: string }
-				const existingEmail = (saved.email || '').trim().toLowerCase()
-				if (existingEmail === email.trim().toLowerCase()) {
-					setError('This email is already registered on this device.')
-					return
-				} else {
-					setError('An account already exists on this device. Please logout to switch accounts.')
-					return
-				}
-			} catch {
-				setError('Existing account data is corrupted. Please logout and try again.')
-				return
-			}
-		}
+
 		if (!name || !email || !password) {
-			setError('Please enter both email and password.')
+			setError('Please enter name, email and password.')
 			return
 		}
-		localStorage.setItem('user', JSON.stringify({ name: name.trim(), email: email.trim().toLowerCase(), password }))
-		navigate('/')
-	}
 
-	if (alreadyRegistered) {
-		return null
+		// Check existing users in localStorage
+		const users = JSON.parse(localStorage.getItem('users') || '[]')
+		const normalizedEmail = email.trim().toLowerCase()
+		
+		if (users.some((user: any) => user.email.toLowerCase() === normalizedEmail)) {
+			setError('This email is already registered.')
+			return
+		}
+
+		// Add new user to users array
+		const newUser = { 
+			id: Date.now(),
+			name: name.trim(), 
+			email: normalizedEmail, 
+			password 
+		}
+		
+		users.push(newUser)
+		localStorage.setItem('users', JSON.stringify(users))
+		
+		// Set current user
+		localStorage.setItem('user', JSON.stringify(newUser))
+		
+		navigate('/')
 	}
 
 	return (
@@ -70,7 +66,9 @@ export default function Register() {
 
 				<div className="w-full max-w-md mx-auto lg:ml-auto">
 					<div className="backdrop-blur-md bg-white/90 rounded-2xl shadow-2xl border border-white/40 p-6 md:p-7">
-						<h2 className="text-xl font-semibold text-center mb-4 text-[var(--color-brand-navy)]">Create your account</h2>
+						<h2 className="text-xl font-semibold text-center mb-4 text-[var(--color-brand-navy)]">
+							Create your account
+						</h2>
 						<form onSubmit={handleSubmit} className="space-y-4">
 							<div>
 								<label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
@@ -80,7 +78,7 @@ export default function Register() {
 									value={name}
 									onChange={(e) => setName(e.target.value)}
 									className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)]"
-									placeholder="Ram Kishan"
+									placeholder="John Doe"
 								/>
 							</div>
 							<div>
@@ -106,7 +104,17 @@ export default function Register() {
 								/>
 							</div>
 							{error && (
-								<p className="text-sm text-red-600">{error}</p>
+								<div className="space-y-2">
+									<p className="text-sm text-red-600">{error}</p>
+									{error.includes('already registered') && (
+										<Link 
+											to="/login" 
+											className="block w-full text-center bg-[var(--color-brand-navy)] text-white font-medium rounded-lg py-2 hover:bg-opacity-90 transition shadow-md"
+										>
+											Go to Login
+										</Link>
+									)}
+								</div>
 							)}
 							<button
 								type="submit"
@@ -115,6 +123,13 @@ export default function Register() {
 								Register
 							</button>
 						</form>
+
+						<p className="mt-4 text-sm text-center text-gray-600">
+							Already have an account?{' '}
+							<Link to="/login" className="text-[var(--color-brand-gold)] hover:underline">
+								Login
+							</Link>
+						</p>
 					</div>
 				</div>
 			</div>

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import ImageWithFallback from './ImageWithFallback'
 
 type RoomProp = {
@@ -36,6 +37,8 @@ const defaultRooms: RoomProp[] = [
 ]
 
 export default function RoomSelector({ rooms = defaultRooms }: { rooms?: RoomProp[] }) {
+  const navigate = useNavigate()
+
   return (
     // keep selector scrollable inside the aside so it stays visible in the frame
     <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
@@ -70,7 +73,7 @@ export default function RoomSelector({ rooms = defaultRooms }: { rooms?: RoomPro
                 <button
                   className="mt-0 inline-flex items-center justify-center rounded-md px-3 py-1 text-sm"
                   style={{ backgroundColor: 'var(--color-brand-gold)', color: '#0A1931' }}
-                  onClick={() => alert('Booking flow placeholder')}
+                  onClick={() => navigate('/checkout', { state: { room: r } })}
                 >
                   Select
                 </button>

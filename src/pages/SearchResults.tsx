@@ -498,6 +498,8 @@ export default function SearchResults() {
       bankok: 'Bangkok',
       seol: 'Seoul',
       seul: 'Seoul',
+      
+
     }
     if (aliases[input]) return aliases[input]
 

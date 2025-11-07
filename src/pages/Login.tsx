@@ -17,30 +17,36 @@ export default function Login() {
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault()
 		setError(null)
+
 		if (!email || !password) {
 			setError('Please enter both email and password.')
 			return
 		}
-		const raw = localStorage.getItem('user')
-		if (!raw) {
-			// First-time login: create the account and proceed
-			localStorage.setItem('user', JSON.stringify({ email: email.trim().toLowerCase(), password }))
-			navigate('/')
-			return
-		}
+
 		try {
-			const saved = JSON.parse(raw) as { name?: string; email?: string; password?: string }
+			// Get all registered users
+			const users = JSON.parse(localStorage.getItem('users') || '[]')
 			const inputEmail = email.trim().toLowerCase()
-			const savedEmail = (saved.email || '').trim().toLowerCase()
-			const inputPw = password
-			const savedPw = saved.password || ''
-			if (inputEmail === savedEmail && inputPw === savedPw) {
+			
+			// Find user with matching email
+			const user = users.find((u: any) => u.email.toLowerCase() === inputEmail)
+			
+			if (!user) {
+				setError('User not found. Please register first.')
+				return
+			}
+
+			// Check password
+			if (user.password === password) {
+				// Set current user and redirect
+				localStorage.setItem('user', JSON.stringify(user))
 				navigate('/')
 			} else {
-				setError('Invalid email or password.')
+				setError('Invalid password.')
 			}
-		} catch {
-			setError('Stored account data is corrupted. Please logout and register again.')
+		} catch (err) {
+			setError('Something went wrong. Please try again.')
+			console.error('Login error:', err)
 		}
 	}
 

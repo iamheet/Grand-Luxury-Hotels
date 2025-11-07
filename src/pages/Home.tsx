@@ -10,7 +10,7 @@ export default function Home() {
         className="relative h-[100vh] md:h-[100vh] w-full overflow-hidden"
       >
         <ImageWithFallback
-          src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop"
+          src="https://cf.bstatic.com/xdata/images/hotel/max1024x768/439398432.jpg?k=88ec7552eb86f90272d04afc7fdc64b672eb9f1c630a9dbe53453efddd7cce6c&o="
           alt="Grand luxury hotel"
           className="absolute inset-0 h-full w-full object-cover"
         />

@@ -1,96 +1,121 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-type Props = { variant?: 'card' | 'bar' }
+type BookingFormProps = {
+  variant?: 'bar' | 'card'
+}
 
-export default function BookingForm({ variant = 'card' }: Props) {
+export default function BookingForm({ variant = 'bar' }: BookingFormProps) {
   const navigate = useNavigate()
   const [destination, setDestination] = useState('')
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
-  const [guests, setGuests] = useState('2 Adults, 0 Children')
+  const [adults, setAdults] = useState(2)
+  const [focused, setFocused] = useState(false)
+  const [showHint, setShowHint] = useState(false)
 
-  function onSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const fmt = (d: Date) => d.toISOString().slice(0, 10)
-    const today = new Date()
-    const tomorrow = new Date(today)
-    tomorrow.setDate(today.getDate() + 1)
+    
+    if (!destination.trim()) {
+      setShowHint(true)
+      return
+    }
 
-    const destinationParam = destination.trim() || 'Any destination'
-    const checkInParam = checkIn || fmt(today)
-    const checkOutParam = checkOut || fmt(tomorrow)
-
-    const params = new URLSearchParams({ destination: destinationParam, checkIn: checkInParam, checkOut: checkOutParam, guests })
+    const params = new URLSearchParams({
+      destination: destination.trim(),
+      checkIn,
+      checkOut,
+      adults: adults.toString(),
+    })
     navigate(`/search?${params.toString()}`)
   }
 
-  const wrapClass =
-    variant === 'bar'
-      ? 'rounded-xl p-4 md:p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] max-w-6xl mx-auto bg-transparent'
-      : 'backdrop-blur-md bg-white/90 rounded-2xl p-4 md:p-6 shadow-2xl max-w-4xl mx-auto'
-
-  const fieldClass =
-    variant === 'bar'
-      ? 'w-full rounded-md bg-white px-4 py-3 shadow-sm ring-1 ring-gray-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)] text-gray-900 placeholder-gray-500'
-      : 'w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)] text-gray-900 placeholder-gray-500'
+  const inputClass = "w-full rounded-lg border border-gray-300 px-4 py-2.5 transition-all duration-200 focus:border-[var(--color-brand-gold)] focus:ring-2 focus:ring-[var(--color-brand-gold)] focus:ring-opacity-20 outline-none"
+  const labelClass = "block text-sm font-medium mb-1.5 text-gray-700"
 
   return (
-    <form onSubmit={onSubmit} className={wrapClass}>
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-5 items-end">
-        <div className="md:col-span-2">
-          <label className={`block text-[10px] tracking-wider uppercase ${variant === 'bar' ? 'text-[#0A1931]' : 'text-gray-700'} mb-1`}>Destination</label>
+    <div className={`backdrop-blur-md bg-white/95 rounded-xl p-5 md:p-7 shadow-xl border border-white/40 transition-shadow duration-300 ${focused ? 'shadow-2xl' : ''}`}>
+      <form 
+        onSubmit={handleSubmit} 
+        className="flex flex-wrap gap-4"
+        onFocus={() => setFocused(true)}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            setFocused(false)
+          }
+        }}
+      >
+        <div className="flex-1 min-w-[240px] relative">
+          <label className={labelClass}>
+            Where would you like to stay?
+          </label>
           <input
             type="text"
-            placeholder="City or hotel name"
             value={destination}
-            onChange={(e) => setDestination(e.target.value)}
-            className={fieldClass}
+            onChange={(e) => {
+              setDestination(e.target.value)
+              setShowHint(false)
+            }}
+            className={`${inputClass} ${showHint ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500' : ''}`}
+            placeholder="Enter destination or hotel name"
           />
+          {showHint && (
+            <div className="absolute text-amber-600 text-sm mt-1 animate-fade-in">
+              Please enter a destination to search
+            </div>
+          )}
         </div>
-        <div>
-          <label className={`block text-[10px] tracking-wider uppercase ${variant === 'bar' ? 'text-[#0A1931]' : 'text-gray-700'} mb-1`}>Check-in</label>
-          <input
-            type="date"
-            value={checkIn}
-            onChange={(e) => setCheckIn(e.target.value)}
-            className={fieldClass}
-          />
+
+        <div className="flex flex-wrap sm:flex-nowrap items-end gap-4">
+          <div>
+            <label className={labelClass}>Check-in</label>
+            <input
+              type="date"
+              value={checkIn}
+              onChange={(e) => setCheckIn(e.target.value)}
+              className={inputClass}
+              min={new Date().toISOString().split('T')[0]}
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>Check-out</label>
+            <input
+              type="date"
+              value={checkOut}
+              onChange={(e) => setCheckOut(e.target.value)}
+              className={inputClass}
+              min={checkIn || new Date().toISOString().split('T')[0]}
+            />
+          </div>
+
+          <div className="flex items-end space-x-3">
+            <div>
+              <label className={labelClass}>Guests</label>
+              <select
+                value={adults}
+                onChange={(e) => setAdults(Number(e.target.value))}
+                className={inputClass + " min-w-[80px]"}
+              >
+                {[1, 2, 3, 4, 5, 6].map((num) => (
+                  <option key={num} value={num}>
+                    {num} {num === 1 ? 'Guest' : 'Guests'}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              className="h-[46px] bg-[var(--color-brand-gold)] text-[var(--color-brand-navy)] px-6 rounded-lg font-medium whitespace-nowrap hover:brightness-95 active:brightness-90 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg"
+            >
+              Search
+            </button>
+          </div>
         </div>
-        <div>
-          <label className={`block text-[10px] tracking-wider uppercase ${variant === 'bar' ? 'text-[#0A1931]' : 'text-gray-700'} mb-1`}>Check-out</label>
-          <input
-            type="date"
-            value={checkOut}
-            onChange={(e) => setCheckOut(e.target.value)}
-            className={fieldClass}
-          />
-        </div>
-        <div>
-          <label className={`block text-[10px] tracking-wider uppercase ${variant === 'bar' ? 'text-[\#0A1931]' : 'text-gray-700'} mb-1`}>Guests</label>
-          <select
-            value={guests}
-            onChange={(e) => setGuests(e.target.value)}
-            className={fieldClass}
-          >
-            <option>1 Adult</option>
-            <option>2 Adults</option>
-            <option>2 Adults, 1 Child</option>
-            <option>2 Adults, 2 Children</option>
-            <option>3 Adults</option>
-          </select>
-        </div>
-      </div>
-      <div className="mt-4 flex justify-end">
-        <button
-          type="submit"
-          className={`inline-flex items-center justify-center rounded-lg px-7 py-3.5 font-medium ${variant === 'bar' ? 'text-[#0A1931]' : ''}`}
-          style={variant === 'bar' ? { backgroundColor: 'var(--color-brand-gold)' } : { backgroundColor: 'var(--color-brand-gold)', color: '#0A1931' }}
-        >
-          {variant === 'bar' ? 'Check Availability' : 'Search'}
-        </button>
-      </div>
-    </form>
+      </form>
+    </div>
   )
 }
 
