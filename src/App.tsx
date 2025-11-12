@@ -10,6 +10,7 @@ import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import Checkout from './pages/Checkout'
 import BookingSuccess from './pages/BookingSuccess'
+import Membership from './pages/Membership'
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="hotel/:id" element={<HotelDetails />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="booking-success" element={<BookingSuccess />} />
+          <Route path="membership" element={<Membership />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

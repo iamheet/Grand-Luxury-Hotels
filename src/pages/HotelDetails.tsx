@@ -4,6 +4,17 @@ import useEmblaCarousel from 'embla-carousel-react'
 import ImageWithFallback from '../components/ImageWithFallback'
 import RoomSelector from '../components/RoomSelector'
 
+function getAmenityIcon(amenity: string) {
+  const iconMap: Record<string, JSX.Element> = {
+    'Free Wi‑Fi': <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.077 13.308-5.077 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.242 0 1 1 0 01-1.415-1.415 5 5 0 017.072 0 1 1 0 01-1.415 1.415zM9 16a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" /></svg>,
+    'Pool': <svg className="w-4 h-4 text-cyan-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10s3-1 4-1 4 1 4 1 3-1 4-1 4 1 4 1v1s-3-1-4-1-4 1-4 1-3-1-4-1-4 1-4 1v-1zM2 13s3-1 4-1 4 1 4 1 3-1 4-1 4 1 4 1v1s-3-1-4-1-4 1-4 1-3-1-4-1-4 1-4 1v-1z"/></svg>,
+    'Gym': <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M4 9V7a1 1 0 011-1h10a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1zM2 7a1 1 0 011-1h1v6H3a1 1 0 01-1-1V7zM17 6a1 1 0 011 1v4a1 1 0 01-1 1h-1V6h1z"/></svg>,
+    'Restaurant': <svg className="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 01-1 1H8a1 1 0 110-2h4a1 1 0 011 1zm-1 4a1 1 0 100-2H8a1 1 0 100 2h4z" clipRule="evenodd" /></svg>,
+    'Spa': <svg className="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+  }
+  return iconMap[amenity] || <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3" /></svg>
+}
+
 export default function HotelDetails() {
   const { id } = useParams<{ id: string }>()
   const location = useLocation()
@@ -85,7 +96,7 @@ export default function HotelDetails() {
         images: Array.isArray(stateHotel.images) && stateHotel.images.length
           ? stateHotel.images
           : (matchedById?.images ?? []),
-        amenities: matchedById?.amenities ?? [],
+        amenities: stateHotel.amenities ?? matchedById?.amenities ?? [],
         rooms: matchedById?.rooms ?? [
           {
             id: 'single',
@@ -177,7 +188,7 @@ export default function HotelDetails() {
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 text-sm">
             {hotel.amenities.map((label) => (
               <div key={label} className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2">
-                <span className="text-lg">•</span>
+                {getAmenityIcon(label)}
                 <span>{label}</span>
               </div>
             ))}
