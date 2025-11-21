@@ -25,6 +25,9 @@ import TravelServices from './pages/TravelServices'
 import AirportVIP from './pages/AirportVIP'
 import YachtCharter from './pages/YachtCharter'
 import TravelPlanning from './pages/TravelPlanning'
+import MemberChat from './pages/MemberChat'
+import ConciergeEmail from './pages/ConciergeEmail'
+import RoyalRewards from './pages/RoyalRewards'
 
 export default function App() {
   return (
@@ -45,6 +48,9 @@ export default function App() {
         <Route path="/airport-vip" element={<AirportVIP />} />
         <Route path="/yacht-charter" element={<YachtCharter />} />
         <Route path="/travel-planning" element={<TravelPlanning />} />
+        <Route path="/member-chat" element={<MemberChat />} />
+        <Route path="/concierge-email" element={<ConciergeEmail />} />
+        <Route path="/royal-rewards" element={<RoyalRewards />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="search" element={<SearchResults />} />

@@ -240,7 +240,10 @@ export default function MemberDashboard() {
               <p className="text-sm text-emerald-200">24/7 luxury services</p>
             </button>
 
-            <button className="group p-8 bg-gradient-to-br from-purple-900/40 to-indigo-800/40 backdrop-blur-sm text-white rounded-2xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-purple-500/30 hover:border-purple-400/50">
+            <button 
+              onClick={() => navigate('/royal-rewards')}
+              className="group p-8 bg-gradient-to-br from-purple-900/40 to-indigo-800/40 backdrop-blur-sm text-white rounded-2xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-purple-500/30 hover:border-purple-400/50"
+            >
               <div className="relative">
                 <svg className="w-10 h-10 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />

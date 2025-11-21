@@ -27,12 +27,16 @@ export default function MyBookings() {
       const bookingsWithType = allBookings.map((booking: any) => {
         // Add type field if missing (for backward compatibility)
         if (!booking.type) {
-          if ([booking.aircraft, booking.room, booking.car, booking.travel].filter(Boolean).length > 1) {
+          if ([booking.aircraft, booking.room, booking.car, booking.travel, booking.yacht, booking.airport].filter(Boolean).length > 1) {
             booking.type = 'combined'
           } else if (booking.aircraft) {
             booking.type = 'aircraft'
           } else if (booking.car) {
             booking.type = 'car'
+          } else if (booking.yacht || (booking.travel && booking.travel.category?.includes('Charter'))) {
+            booking.type = 'yacht'
+          } else if (booking.airport || (booking.travel && booking.travel.type === 'airport')) {
+            booking.type = 'airport'
           } else if (booking.travel) {
             booking.type = 'travel'
           } else {
@@ -86,7 +90,7 @@ export default function MyBookings() {
         
         {/* Filter Tabs */}
         <div className="flex gap-4 mb-6">
-          {['all', 'hotel', 'aircraft', 'car', 'travel', 'combined'].map((filter) => {
+          {['all', 'hotel', 'aircraft', 'car', 'yacht', 'airport', 'travel', 'combined'].map((filter) => {
             const count = filter === 'all' ? bookings.length : bookings.filter(b => b.type === filter).length
             return (
               <button
@@ -98,7 +102,7 @@ export default function MyBookings() {
                     : 'bg-white/10 text-white hover:bg-white/20'
                 }`}
               >
-                {filter === 'all' ? 'All' : filter === 'hotel' ? '🏨 Hotels' : filter === 'aircraft' ? '✈️ Aircraft' : filter === 'car' ? '🚗 Cars' : filter === 'travel' ? '🌍 Travel' : '📦 Combined'} ({count})
+                {filter === 'all' ? 'All' : filter === 'hotel' ? '🏨 Hotels' : filter === 'aircraft' ? '✈️ Aircraft' : filter === 'car' ? '🚗 Cars' : filter === 'yacht' ? '🛥️ Yachts' : filter === 'airport' ? '🛫 Airport VIP' : filter === 'travel' ? '🌍 Travel' : '📦 Combined'} ({count})
               </button>
             )
           })}
@@ -155,7 +159,7 @@ export default function MyBookings() {
                           {booking.type === 'combined' ? 'Luxury Package' : booking.aircraft?.name || booking.room?.name || booking.roomTitle || 'Booking'}
                         </h3>
                         <p className="text-gray-300 text-sm">
-                          {booking.type === 'combined' ? '📦 Combined Package' : booking.type === 'aircraft' ? '✈️ Aircraft Booking' : booking.type === 'car' ? '🚗 Car Rental' : booking.type === 'travel' ? '🌍 Travel Service' : '🏨 Hotel Booking'} • ID: {booking.id}
+                          {booking.type === 'combined' ? '📦 Combined Package' : booking.type === 'aircraft' ? '✈️ Aircraft Booking' : booking.type === 'car' ? '🚗 Car Rental' : booking.type === 'yacht' ? '🛥️ Yacht Charter' : booking.type === 'airport' ? '🛫 Airport VIP Service' : booking.type === 'travel' ? '🌍 Travel Service' : '🏨 Hotel Booking'} • ID: {booking.id}
                         </p>
                       </div>
                       <div className="text-right">
@@ -564,7 +568,7 @@ export default function MyBookings() {
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <p className="text-gray-400">Service Type</p>
-                          <p className="text-white">{viewingBooking.type === 'aircraft' ? '✈️ Aircraft' : viewingBooking.type === 'car' ? '🚗 Car Rental' : viewingBooking.type === 'travel' ? '🌍 Travel Service' : '🏨 Hotel'}</p>
+                          <p className="text-white">{viewingBooking.type === 'aircraft' ? '✈️ Aircraft' : viewingBooking.type === 'car' ? '🚗 Car Rental' : viewingBooking.type === 'yacht' ? '🛥️ Yacht Charter' : viewingBooking.type === 'airport' ? '🛫 Airport VIP Service' : viewingBooking.type === 'travel' ? '🌍 Travel Service' : '🏨 Hotel'}</p>
                         </div>
                         <div>
                           <p className="text-gray-400">Name</p>

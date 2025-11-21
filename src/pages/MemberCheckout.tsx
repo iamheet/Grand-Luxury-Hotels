@@ -441,6 +441,70 @@ export default function MemberCheckout() {
               </div>
             )}
 
+            {/* Points Payment Option */}
+            {(() => {
+              const memberData = localStorage.getItem('member') || localStorage.getItem('memberCheckout')
+              if (!memberData) return null
+              const parsedMember = JSON.parse(memberData)
+              const bookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
+              const spentPoints = parseInt(localStorage.getItem('spentPoints') || '0')
+              const tierMultiplier = { Bronze: 1, Silver: 1.2, Gold: 1.5, Platinum: 2, Diamond: 2.5 }
+              const earnedPoints = bookings.reduce((total, booking) => {
+                if (booking.status === 'confirmed' && booking.total && !isNaN(booking.total)) {
+                  const basePoints = Math.floor(Number(booking.total) / 10)
+                  return total + Math.floor(basePoints * tierMultiplier[parsedMember.tier])
+                }
+                return total
+              }, 0)
+              const availablePoints = Math.max(0, earnedPoints - spentPoints)
+              
+              const canPayWithPoints = availablePoints >= 10 && availablePoints >= total * 100
+              
+              return (
+                <div className={`mb-6 p-4 rounded-xl border transition-all ${
+                  availablePoints >= 10 
+                    ? 'bg-gradient-to-r from-[var(--color-brand-gold)]/20 to-yellow-400/20 border-[var(--color-brand-gold)]/30'
+                    : 'bg-gray-800/40 border-gray-600/30'
+                }`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className={`font-semibold ${
+                      availablePoints >= 10 ? 'text-[var(--color-brand-gold)]' : 'text-gray-400'
+                    }`}>👑 Pay with Rewards</h4>
+                    <span className="text-white text-sm">{availablePoints} pts available</span>
+                  </div>
+                  <p className="text-gray-300 text-sm mb-3">
+                    {availablePoints >= 10 
+                      ? 'Use your reward points to pay for this booking (100 points = $1)'
+                      : 'Unlock points payment at 10 points (100 points = $1)'
+                    }
+                  </p>
+                  <button
+                    onClick={() => {
+                      if (canPayWithPoints) {
+                        const pointsNeeded = total * 100
+                        const newSpentPoints = spentPoints + pointsNeeded
+                        localStorage.setItem('spentPoints', newSpentPoints.toString())
+                        handleConfirm()
+                      }
+                    }}
+                    disabled={!canPayWithPoints}
+                    className={`w-full py-2 rounded-lg font-medium transition-all ${
+                      canPayWithPoints
+                        ? 'bg-[var(--color-brand-gold)] text-[var(--color-brand-navy)] hover:brightness-95'
+                        : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {availablePoints < 10
+                      ? `Need ${10 - availablePoints} more points to unlock`
+                      : availablePoints >= total * 100 
+                        ? `Pay with ${total * 100} Points` 
+                        : `Need ${(total * 100) - availablePoints} more points`
+                    }
+                  </button>
+                </div>
+              )
+            })()}
+
             {/* Pricing */}
             <div className="space-y-3 border-t border-white/20 pt-4">
               {hotelServices.length > 0 && (

@@ -80,7 +80,7 @@ export default function YachtCharter() {
       image: service.image,
       price: service.price,
       features: service.features,
-      type: 'travel',
+      type: 'yacht',
       travel: service
     }
     

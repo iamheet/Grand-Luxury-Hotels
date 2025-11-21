@@ -136,7 +136,10 @@ export default function RoyalConcierge() {
                 <p className="text-blue-200 text-sm">Instant messaging</p>
               </div>
             </div>
-            <button className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:brightness-95 transition-all">
+            <button 
+              onClick={() => navigate('/member-chat')}
+              className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:brightness-95 transition-all"
+            >
               Start Chat
             </button>
           </div>
@@ -153,7 +156,10 @@ export default function RoyalConcierge() {
                 <p className="text-purple-200 text-sm">Detailed inquiries</p>
               </div>
             </div>
-            <button className="w-full bg-purple-500 text-white py-2 rounded-lg font-semibold hover:brightness-95 transition-all">
+            <button 
+              onClick={() => navigate('/concierge-email')}
+              className="w-full bg-purple-500 text-white py-2 rounded-lg font-semibold hover:brightness-95 transition-all"
+            >
               Send Email
             </button>
           </div>
@@ -199,8 +205,11 @@ export default function RoyalConcierge() {
                 ))}
               </div>
               
-              <button className="w-full mt-6 bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 text-[var(--color-brand-navy)] py-3 rounded-xl font-bold hover:brightness-95 transition-all">
-                Request {category.category} Service
+              <button 
+                onClick={() => navigate('/concierge-email')}
+                className="w-full mt-6 bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 text-[var(--color-brand-navy)] py-3 rounded-xl font-bold hover:brightness-95 transition-all"
+              >
+                Contact Concierge Team
               </button>
             </div>
           ))}
