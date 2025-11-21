@@ -394,7 +394,7 @@ export const hotelsByCity: Record<string, Hotel[]> = {
       price: 240,
       description: 'Chic rooms near BTS with rooftop pool and craft cocktails.',
       images: [
-        'https://cf.bstatic.com/xdata/images/hotel/max1024x768/555924063.jpg?k=6b3a9b6d6c3f1d5e2a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f&o=',
+        'https://cf.bstatic.com/xdata/images/hotel/max1024x768/574285481.jpg?k=ae9e8a55f78266545d7e016bc39dd67abfa109248860820931f3c137f87cda2e&o=',
         'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2069&auto=format&fit=crop'
       ],
       city: 'Bangkok',

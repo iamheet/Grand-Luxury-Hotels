@@ -21,6 +21,39 @@ export default function Checkout() {
   // If no room supplied, send user back to home or search
   useEffect(() => {
     if (!room) navigate('/', { replace: true })
+    
+    // Save pending booking when user leaves page
+    const handleBeforeUnload = () => {
+      if (room && (name || email || phone)) {
+        const pendingBooking = {
+          id: Date.now().toString(),
+          room: room,
+          guest: { name: name.trim(), email: email.trim(), phone: phone.trim() },
+          checkIn: new Date().toISOString().split('T')[0],
+          checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+          guests: 1,
+          nights: 1,
+          total: room.price,
+          bookingDate: new Date().toISOString(),
+          status: 'pending',
+          roomTitle: room.title || room.name,
+          roomImage: room.image
+        }
+        
+        const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
+        const alreadyExists = existingBookings.find((b: any) => 
+          b.room?.id === room.id && b.status === 'pending' && b.guest?.email === email.trim()
+        )
+        
+        if (!alreadyExists) {
+          existingBookings.push(pendingBooking)
+          localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
+        }
+      }
+    }
+    
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [room, navigate])
 
   // auth / stored user detection
@@ -114,36 +147,33 @@ export default function Checkout() {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' }
       if (usedToken) headers['Authorization'] = `Bearer ${usedToken}`
 
-      const res = await fetch('/api/book', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(payload),
-      })
-
-      const body = await res.json().catch(() => null)
-
-      if (res.ok) {
-        // success: navigate to booking success
-        localStorage.setItem('user', JSON.stringify({ name: payload.guest.name, email: payload.guest.email, phone: payload.guest.phone }))
-        navigate('/booking-success', { state: { booking: body || { roomTitle: payload.roomTitle, guest: payload.guest, amount: room.price } } })
-        return
+      // Create booking object
+      const booking = {
+        id: Date.now().toString(),
+        room: room,
+        guest: payload.guest,
+        checkIn: new Date().toISOString().split('T')[0],
+        checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0], // tomorrow
+        guests: 1,
+        nights: 1,
+        total: room.price,
+        bookingDate: new Date().toISOString(),
+        status: 'confirmed',
+        roomTitle: payload.roomTitle,
+        roomImage: room.image
       }
-
-      // handle auth error: redirect to login
-      if (res.status === 401) {
-        const next = encodeURIComponent(window.location.pathname + window.location.search)
-        navigate(`/login?next=${next}`)
-        setError(body?.message || 'You must be logged in to complete this booking.')
-        return
-      }
-
-      // show server-provided message if available
-      const serverMessage = body?.message || body?.error || res.statusText
-      console.error('Booking failed:', res.status, serverMessage, body)
-      throw new Error(serverMessage || `Booking failed (${res.status})`)
+      
+      // Save to localStorage
+      const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
+      existingBookings.push(booking)
+      localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
+      localStorage.setItem('user', JSON.stringify(payload.guest))
+      
+      // Navigate to success page
+      navigate('/booking-success', { state: { booking } })
     } catch (err: any) {
       console.error('Booking error:', err)
-      setError(err?.message || 'Network error')
+      setError(err?.message || 'Booking failed')
     } finally {
       setLoading(false)
     }

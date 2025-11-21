@@ -8,9 +8,21 @@ export default function BookingSuccess() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // if user lands here directly without booking data, keep page usable
-    // you may redirect home after a timeout if you prefer
-  }, [])
+    // Save booking to localStorage when we reach success page
+    if (booking) {
+      const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
+      
+      // Check if this booking already exists
+      const bookingExists = existingBookings.find((b: any) => b.id === booking.id)
+      
+      if (!bookingExists) {
+        existingBookings.push(booking)
+        localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
+        console.log('Booking saved:', booking)
+        console.log('All bookings:', existingBookings)
+      }
+    }
+  }, [booking])
 
   if (!booking) {
     return (
@@ -57,7 +69,27 @@ export default function BookingSuccess() {
         </div>
 
         <div className="mt-6 flex justify-center gap-3">
-          <button onClick={() => navigate('/')} className="px-4 py-2 rounded bg-[var(--color-brand-gold)] text-[var(--color-brand-navy)]">Back to home</button>
+          {booking.member ? (
+            <button 
+              onClick={() => {
+                const memberData = localStorage.getItem('member') || localStorage.getItem('memberCheckout')
+                if (memberData) {
+                  const parsedMember = JSON.parse(memberData)
+                  localStorage.setItem('member', JSON.stringify(parsedMember))
+                  localStorage.setItem('memberCheckout', JSON.stringify(parsedMember))
+                }
+                navigate('/member-dashboard', { replace: true })
+              }}
+              className="flex items-center gap-2 bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 text-[var(--color-brand-navy)] px-4 py-2 rounded font-semibold hover:brightness-95 transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              Go to Home
+            </button>
+          ) : (
+            <button onClick={() => navigate('/')} className="px-4 py-2 rounded bg-[var(--color-brand-gold)] text-[var(--color-brand-navy)]">Back to home</button>
+          )}
           <button onClick={() => navigate(-1)} className="px-4 py-2 rounded border">View previous</button>
         </div>
       </div>

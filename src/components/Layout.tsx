@@ -54,6 +54,9 @@ export default function Layout() {
             <Link to="/search" className="text-sm font-medium px-3 py-1.5 rounded-md shadow-sm bg-[var(--color-brand-gold)] text-[var(--color-brand-navy)] hover:brightness-95 transition">
               Search
             </Link>
+            {isLoggedIn && (
+              <Link to="/my-bookings" className="hover:text-[var(--color-brand-gold)] text-sm font-medium">My Bookings</Link>
+            )}
             {!isLoggedIn && (
               <Link to="/register" className="hover:text-[var(--color-brand-gold)]">Register</Link>
             )}

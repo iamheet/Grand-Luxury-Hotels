@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const membershipTiers = [
   {
@@ -55,6 +56,13 @@ const membershipTiers = [
 
 export default function Membership() {
   const [selectedTier, setSelectedTier] = useState<string | null>(null)
+  const navigate = useNavigate()
+
+  const handleProceedToPayment = () => {
+    if (selectedTier) {
+      navigate('/membership-payment', { state: { plan: selectedTier.toLowerCase() } })
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
@@ -67,6 +75,12 @@ export default function Membership() {
             Elevate your luxury travel experience with our premium membership programs. 
             Each tier unlocks extraordinary benefits and personalized services.
           </p>
+          <button 
+            onClick={() => navigate('/membership-payment', { state: { plan: 'platinum' } })}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
+          >
+            Test Payment Page (Platinum)
+          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
@@ -100,7 +114,13 @@ export default function Membership() {
                     ))}
                   </div>
 
-                  <button className="w-full py-3 px-6 bg-white/20 hover:bg-white/30 rounded-lg font-semibold text-white transition-all duration-300 backdrop-blur-sm border border-white/30 hover:border-white/50">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setSelectedTier(tier.name)
+                    }}
+                    className="w-full py-3 px-6 bg-white/20 hover:bg-white/30 rounded-lg font-semibold text-white transition-all duration-300 backdrop-blur-sm border border-white/30 hover:border-white/50"
+                  >
                     Select {tier.name}
                   </button>
                 </div>
@@ -118,7 +138,10 @@ export default function Membership() {
             <div className="bg-gradient-to-r from-yellow-400/10 via-pink-400/10 to-purple-400/10 rounded-2xl p-8 border border-yellow-400/20">
               <h3 className="text-2xl font-bold mb-4">Ready to join {selectedTier} Membership?</h3>
               <p className="text-gray-300 mb-6">Experience luxury like never before with exclusive benefits and personalized service.</p>
-              <button className="px-8 py-4 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 text-black font-bold rounded-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <button 
+                onClick={handleProceedToPayment}
+                className="px-8 py-4 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 text-black font-bold rounded-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+              >
                 Proceed to Payment
               </button>
             </div>

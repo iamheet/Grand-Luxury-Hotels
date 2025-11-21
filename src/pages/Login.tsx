@@ -5,8 +5,10 @@ export default function Login() {
 	const navigate = useNavigate()
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+	const [membershipId, setMembershipId] = useState('')
 	const [showPassword, setShowPassword] = useState(false)
 	const [error, setError] = useState<string | null>(null)
+	const [isExclusiveLogin, setIsExclusiveLogin] = useState(false)
 
 	useEffect(() => {
 		const existing = localStorage.getItem('user')
@@ -19,6 +21,46 @@ export default function Login() {
 		e.preventDefault()
 		setError(null)
 
+		if (isExclusiveLogin) {
+			// Exclusive member login
+			if (!membershipId || !password) {
+				setError('Please enter membership ID and password.')
+				return
+			}
+
+			// Check if member exists in localStorage
+			const storedMember = localStorage.getItem('member')
+			if (storedMember) {
+				try {
+					const memberData = JSON.parse(storedMember)
+					// For stored members, only check membership ID
+					if (memberData.membershipId === membershipId) {
+						navigate('/member-dashboard')
+						return
+					}
+				} catch (err) {
+					console.error('Error parsing member data:', err)
+				}
+			}
+			
+			// Demo login for testing
+			if (membershipId === 'GRAND2024' && password) {
+				const memberData = {
+					email: 'demo@grandstay.com',
+					name: 'Demo Member',
+					membershipId,
+					tier: 'Platinum',
+					joinDate: '2024-01-01'
+				}
+				localStorage.setItem('member', JSON.stringify(memberData))
+				navigate('/member-dashboard')
+			} else {
+				setError('Invalid membership ID or password.')
+			}
+			return
+		}
+
+		// Regular login
 		if (!email || !password) {
 			setError('Please enter both email and password.')
 			return
@@ -81,20 +123,63 @@ export default function Login() {
 
 				<div className="w-full max-w-md mx-auto lg:ml-auto">
 					<div className="backdrop-blur-md bg-white/90 rounded-2xl shadow-2xl border border-white/40 p-6 md:p-7">
-						<h2 className="text-xl font-semibold text-center mb-4 text-[var(--color-brand-navy)]">Member Login</h2>
+						{/* Login Type Toggle */}
+						<div className="flex bg-gray-100 rounded-lg p-1 mb-6">
+							<button
+								type="button"
+								onClick={() => setIsExclusiveLogin(false)}
+								className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+									!isExclusiveLogin
+										? 'bg-white text-[var(--color-brand-navy)] shadow-sm'
+										: 'text-gray-600 hover:text-gray-800'
+								}`}
+							>
+								Member Login
+							</button>
+							<button
+								type="button"
+								onClick={() => setIsExclusiveLogin(true)}
+								className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+									isExclusiveLogin
+										? 'bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 text-[var(--color-brand-navy)] shadow-sm'
+										: 'text-gray-600 hover:text-gray-800'
+								}`}
+							>
+								✨ Exclusive Member
+							</button>
+						</div>
+						<h2 className="text-xl font-semibold text-center mb-4 text-[var(--color-brand-navy)]">
+							{isExclusiveLogin ? 'Exclusive Member Login' : 'Member Login'}
+						</h2>
 						<form onSubmit={handleSubmit} className="space-y-4">
-							<div>
-								<label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-								<input
-									id="email"
-									type="email"
-									value={email}
-									onChange={(e) => setEmail(e.target.value)}
-									className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)]"
-									placeholder="you@example.com"
-									autoComplete="off"
-								/>
-							</div>
+							{isExclusiveLogin && (
+								<div>
+									<label htmlFor="membershipId" className="block text-sm font-medium text-gray-700 mb-1">Membership ID</label>
+									<input
+										id="membershipId"
+										type="text"
+										value={membershipId}
+										onChange={(e) => setMembershipId(e.target.value)}
+										className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)]"
+										placeholder="Enter your membership ID"
+										autoComplete="off"
+									/>
+								</div>
+							)}
+							{!isExclusiveLogin && (
+								<div>
+									<label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+									<input
+										id="email"
+										type="email"
+										value={email}
+										onChange={(e) => setEmail(e.target.value)}
+										className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)]"
+										placeholder="you@example.com"
+										autoComplete="off"
+									/>
+								</div>
+							)}
 							<div>
 								<label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
 								<div className="relative">
@@ -136,14 +221,32 @@ export default function Login() {
 							)}
 							<button
 								type="submit"
-								className="w-full bg-[var(--color-brand-gold)] text-[var(--color-brand-navy)] font-medium rounded-lg py-2 hover:brightness-95 transition shadow-md"
+								className={`w-full font-medium rounded-lg py-2 hover:brightness-95 transition shadow-md ${
+									isExclusiveLogin
+										? 'bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 text-[var(--color-brand-navy)]'
+										: 'bg-[var(--color-brand-gold)] text-[var(--color-brand-navy)]'
+								}`}
 							>
-								Login
+								{isExclusiveLogin ? 'Access Member Portal' : 'Login'}
 							</button>
 						</form>
+						{isExclusiveLogin && (
+							<p className="mt-4 text-xs text-center text-gray-500">
+								Demo ID: GRAND2024
+							</p>
+						)}
 						<p className="mt-4 text-sm text-center text-gray-600">
-							Don't have an account?{' '}
-							<Link to="/register" className="text-[var(--color-brand-gold)] hover:underline">Register</Link>
+							{isExclusiveLogin ? (
+								<>
+									Not a member?{' '}
+									<Link to="/membership" className="text-[var(--color-brand-gold)] hover:underline">Join our exclusive program</Link>
+								</>
+							) : (
+								<>
+									Don't have an account?{' '}
+									<Link to="/register" className="text-[var(--color-brand-gold)] hover:underline">Register</Link>
+								</>
+							)}
 						</p>
 					</div>
 				</div>
