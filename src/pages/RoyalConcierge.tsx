@@ -53,13 +53,14 @@ export default function RoyalConcierge() {
     },
     {
       category: "Business & Professional",
-      icon: "👔",
+      icon: "💼",
       services: [
-        { name: "Meeting room and conference facilities", desc: "Premium venues equipped with state-of-the-art technology" },
-        { name: "Business center and secretarial services", desc: "Professional administrative support for all business needs" },
-        { name: "Translation and interpretation services", desc: "Expert linguists for seamless international communication" },
-        { name: "Legal and financial consultation referrals", desc: "Connections to top-tier professional advisors worldwide" },
-        { name: "Corporate event management", desc: "Sophisticated business gatherings and networking events" }
+        { name: "Executive Meeting Rooms", desc: "Premium boardrooms with state-of-the-art technology and catering" },
+        { name: "Corporate Event Planning", desc: "Full-service corporate event management and coordination" },
+        { name: "Business Travel Concierge", desc: "Complete travel arrangements for executives and teams" },
+        { name: "Legal & Consulting Services", desc: "Professional legal and business consulting referrals" },
+        { name: "Executive Transportation", desc: "Luxury chauffeur services for business executives" },
+        { name: "Corporate Hospitality", desc: "Premium hospitality services for business clients" }
       ]
     }
   ]
@@ -189,6 +190,28 @@ export default function RoyalConcierge() {
                         navigate('/yacht-charter')
                       } else if (service.name === "Custom travel itinerary planning") {
                         navigate('/travel-planning')
+                      } else if (service.name === "Exclusive restaurant reservations") {
+                        navigate('/dining-reservations')
+                      } else if (service.name === "Theater and concert ticket procurement") {
+                        navigate('/theater-tickets')
+                      } else if (service.name === "Private chef and catering services") {
+                        navigate('/private-chef')
+                      } else if (service.name === "Wine cellar tours and tastings") {
+                        navigate('/wine-cellar')
+                      } else if (service.name === "Private event planning and coordination") {
+                        navigate('/private-events')
+                      } else if (service.name === "Spa and wellness retreat bookings") {
+                        navigate('/wellness-spa')
+                      } else if (service.name === "Personal trainer and fitness coaching") {
+                        navigate('/personal-trainer')
+                      } else if (service.name === "Medical appointments with specialists") {
+                        navigate('/medical-services')
+                      } else if (service.name === "Beauty and grooming services") {
+                        navigate('/beauty-grooming')
+                      } else if (service.name === "Personal shopping and styling") {
+                        navigate('/personal-shopping')
+                      } else if (service.name === "Executive Meeting Rooms" || service.name === "Corporate Event Planning" || service.name === "Business Travel Concierge" || service.name === "Legal & Consulting Services" || service.name === "Executive Transportation" || service.name === "Corporate Hospitality") {
+                        navigate('/business-services')
                       }
                     }}
                     className="flex items-start gap-3 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all cursor-pointer group"

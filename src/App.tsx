@@ -28,6 +28,28 @@ import TravelPlanning from './pages/TravelPlanning'
 import MemberChat from './pages/MemberChat'
 import ConciergeEmail from './pages/ConciergeEmail'
 import RoyalRewards from './pages/RoyalRewards'
+import DiningReservations from './pages/DiningReservations'
+import Entertainment from './pages/Entertainment'
+import PrivateChef from './pages/PrivateChef'
+import WineCellar from './pages/WineCellar'
+import TheaterTickets from './pages/TheaterTickets'
+import PrivateEvents from './pages/PrivateEvents'
+import LuxuryWedding from './pages/LuxuryWedding'
+import BirthdayCelebration from './pages/BirthdayCelebration'
+import AnniversaryDinner from './pages/AnniversaryDinner'
+import ProductLaunch from './pages/ProductLaunch'
+import CharityFundraiser from './pages/CharityFundraiser'
+import CorporateGala from './pages/CorporateGala'
+import WellnessSpa from './pages/WellnessSpa'
+import PersonalTrainer from './pages/PersonalTrainer'
+import MedicalServices from './pages/MedicalServices'
+import BeautyGrooming from './pages/BeautyGrooming'
+import PersonalShopping from './pages/PersonalShopping'
+import RedCarpetStyling from './pages/RedCarpetStyling'
+import BusinessServices from './pages/BusinessServices'
+import CorporateEvent from './pages/CorporateEvent'
+import ExecutiveMeetingRooms from './pages/ExecutiveMeetingRooms'
+import BusinessTravelConcierge from './pages/BusinessTravelConcierge'
 
 export default function App() {
   return (
@@ -51,6 +73,28 @@ export default function App() {
         <Route path="/member-chat" element={<MemberChat />} />
         <Route path="/concierge-email" element={<ConciergeEmail />} />
         <Route path="/royal-rewards" element={<RoyalRewards />} />
+        <Route path="/dining-reservations" element={<DiningReservations />} />
+        <Route path="/entertainment" element={<Entertainment />} />
+        <Route path="/private-chef" element={<PrivateChef />} />
+        <Route path="/wine-cellar" element={<WineCellar />} />
+        <Route path="/theater-tickets" element={<TheaterTickets />} />
+        <Route path="/private-events" element={<PrivateEvents />} />
+        <Route path="/luxury-wedding" element={<LuxuryWedding />} />
+        <Route path="/birthday-celebration" element={<BirthdayCelebration />} />
+        <Route path="/anniversary-dinner" element={<AnniversaryDinner />} />
+        <Route path="/product-launch" element={<ProductLaunch />} />
+        <Route path="/charity-fundraiser" element={<CharityFundraiser />} />
+        <Route path="/corporate-gala" element={<CorporateGala />} />
+        <Route path="/wellness-spa" element={<WellnessSpa />} />
+        <Route path="/personal-trainer" element={<PersonalTrainer />} />
+        <Route path="/medical-services" element={<MedicalServices />} />
+        <Route path="/beauty-grooming" element={<BeautyGrooming />} />
+        <Route path="/personal-shopping" element={<PersonalShopping />} />
+        <Route path="/red-carpet-styling" element={<RedCarpetStyling />} />
+        <Route path="/business-services" element={<BusinessServices />} />
+        <Route path="/corporate-event" element={<CorporateEvent />} />
+        <Route path="/executive-meeting-rooms" element={<ExecutiveMeetingRooms />} />
+        <Route path="/business-travel-concierge" element={<BusinessTravelConcierge />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="search" element={<SearchResults />} />

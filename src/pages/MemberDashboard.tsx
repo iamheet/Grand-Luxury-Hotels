@@ -16,7 +16,15 @@ export default function MemberDashboard() {
     { id: 'exc-5', name: 'Platinum Sky Resort', location: 'Bora Bora', price: 950, image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=400', rating: 5.0, exclusive: true },
     { id: 'exc-6', name: 'Crystal Bay Sanctuary', location: 'Seychelles', price: 780, image: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400', rating: 4.9, exclusive: true },
     { id: 'exc-7', name: 'Aurora Ice Hotel', location: 'Iceland', price: 680, image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400', rating: 4.8, exclusive: true },
-    { id: 'exc-8', name: 'Emerald Forest Lodge', location: 'Costa Rica', price: 620, image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400', rating: 4.7, exclusive: true }
+    { id: 'exc-8', name: 'Emerald Forest Lodge', location: 'Costa Rica', price: 620, image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400', rating: 4.7, exclusive: true },
+    { id: 'exc-9', name: 'Diamond Crown Palace', location: 'Monaco', price: 1200, image: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400', rating: 5.0, exclusive: true },
+    { id: 'exc-10', name: 'Royal Safari Lodge', location: 'Kenya', price: 890, image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=400', rating: 4.9, exclusive: true },
+    { id: 'exc-11', name: 'Platinum Glacier Resort', location: 'Antarctica', price: 1500, image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400', rating: 5.0, exclusive: true },
+    { id: 'exc-12', name: 'Golden Temple Retreat', location: 'Bhutan', price: 750, image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400', rating: 4.8, exclusive: true },
+    { id: 'exc-13', name: 'Royal Vineyard Estate', location: 'Tuscany', price: 820, image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400', rating: 4.9, exclusive: true },
+    { id: 'exc-14', name: 'Crown Jewel Resort', location: 'Fiji', price: 980, image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=400', rating: 4.9, exclusive: true },
+    { id: 'exc-15', name: 'Imperial Castle Hotel', location: 'Scotland', price: 690, image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400', rating: 4.8, exclusive: true },
+    { id: 'exc-16', name: 'Sovereign Island Resort', location: 'Bahamas', price: 1100, image: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400', rating: 5.0, exclusive: true }
   ]
 
   const regularHotels = [
@@ -111,21 +119,27 @@ export default function MemberDashboard() {
   if (!member) return null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-[var(--color-brand-navy)] pt-20 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-cyan-900 pt-20 relative overflow-hidden">
       {/* Luxury Background Elements */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-pink-500 to-cyan-400 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-3xl animate-pulse delay-500"></div>
+        
+        {/* Neon Grid Lines */}
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse"></div>
+        <div className="absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-pink-400 to-transparent animate-pulse delay-500"></div>
+        <div className="absolute top-3/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse delay-1500"></div>
       </div>
       
       <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
         {/* Royal Header */}
-        <div className="bg-gradient-to-r from-slate-900/90 via-[var(--color-brand-navy)]/90 to-slate-900/90 backdrop-blur-xl rounded-3xl p-8 text-white mb-8 border border-[var(--color-brand-gold)]/20 shadow-2xl">
+        <div className="bg-gradient-to-r from-black/90 via-purple-900/90 to-black/90 backdrop-blur-xl rounded-3xl p-8 text-white mb-8 border-2 border-cyan-400/50 shadow-2xl shadow-cyan-400/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <div className="relative">
-                <div className="w-20 h-20 bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 rounded-full flex items-center justify-center shadow-2xl">
+                <div className="w-20 h-20 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full flex items-center justify-center shadow-2xl shadow-cyan-400/50 animate-pulse">
                   <svg className="w-10 h-10 text-[var(--color-brand-navy)]" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732L14.146 12.8l-1.179 4.456a1 1 0 01-1.934 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732L9.854 7.2l1.179-4.456A1 1 0 0112 2z" clipRule="evenodd" />
                   </svg>
@@ -137,9 +151,9 @@ export default function MemberDashboard() {
                 </div>
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-300 bg-clip-text text-transparent mb-1">Welcome back, {member.name}!</h1>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-1 animate-pulse">⚡ Welcome back, {member.name}! ⚡</h1>
                 <p className="text-gray-300 flex items-center gap-2">
-                  <span className="bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 text-[var(--color-brand-navy)] px-3 py-1 rounded-full text-sm font-semibold">{member.tier}</span>
+                  <span className="bg-gradient-to-r from-cyan-400 to-purple-500 text-black px-3 py-1 rounded-full text-sm font-semibold shadow-lg shadow-cyan-400/30 animate-pulse">🔥 {member.tier} 🔥</span>
                   <span>•</span>
                   <span>ID: {member.membershipId}</span>
                 </p>
@@ -183,7 +197,7 @@ export default function MemberDashboard() {
             <p className="text-gray-300">Exclusive member pricing on all luxury bookings worldwide</p>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-900/40 to-indigo-800/40 backdrop-blur-xl p-6 rounded-2xl shadow-2xl border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300 group">
+          <div onClick={() => navigate('/royal-concierge')} className="bg-gradient-to-br from-purple-900/40 to-indigo-800/40 backdrop-blur-xl p-6 rounded-2xl shadow-2xl border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300 group cursor-pointer">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-400 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,7 +327,9 @@ export default function MemberDashboard() {
                           </div>
                           <div className="flex items-center justify-between">
                             <div>
-                              <span className="text-lg font-bold text-[var(--color-brand-navy)]">${discountedPrice}</span>
+                              <span className="text-lg font-bold text-white drop-shadow-[0_0_10px_rgba(0,255,255,0.8)]">
+                                ${discountedPrice}
+                              </span>
                               <span className="text-sm text-gray-500 line-through ml-2">${hotel.price}</span>
                               <p className="text-xs text-gray-500">per night</p>
                             </div>
@@ -369,7 +385,9 @@ export default function MemberDashboard() {
                           </div>
                           <div className="flex items-center justify-between">
                             <div>
-                              <span className="text-sm font-bold text-[var(--color-brand-navy)]">${discountedPrice}</span>
+                              <span className="text-sm font-bold text-white drop-shadow-[0_0_8px_rgba(0,255,255,0.8)]">
+                                ${discountedPrice}
+                              </span>
                               <span className="text-xs text-gray-500 line-through ml-1">${hotel.price}</span>
                               <p className="text-xs text-gray-500">per night</p>
                             </div>
@@ -430,7 +448,7 @@ export default function MemberDashboard() {
                           </div>
                           <div className="text-right">
                             <div className="text-sm text-gray-500 line-through">${room.price}</div>
-                            <div className="text-lg font-bold text-[var(--color-brand-navy)]">${discountedPrice}</div>
+                            <div className="text-lg font-bold text-gray-900">${discountedPrice}</div>
                             <div className="text-xs text-green-600">{memberDiscount}% off</div>
                           </div>
                         </div>

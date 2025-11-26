@@ -28,19 +28,31 @@ export default function Login() {
 				return
 			}
 
-			// Check if member exists in localStorage
-			const storedMember = localStorage.getItem('member')
-			if (storedMember) {
-				try {
-					const memberData = JSON.parse(storedMember)
-					// For stored members, only check membership ID
-					if (memberData.membershipId === membershipId) {
-						navigate('/member-dashboard')
-						return
+			// Check if member exists in localStorage (multiple possible keys)
+			const memberKeys = ['member', 'memberCheckout']
+			let foundMember = null
+			
+			for (const key of memberKeys) {
+				const storedMember = localStorage.getItem(key)
+				if (storedMember) {
+					try {
+						const memberData = JSON.parse(storedMember)
+						if (memberData.membershipId === membershipId) {
+							foundMember = memberData
+							break
+						}
+					} catch (err) {
+						console.error('Error parsing member data:', err)
 					}
-				} catch (err) {
-					console.error('Error parsing member data:', err)
 				}
+			}
+			
+			if (foundMember) {
+				// Ensure both keys are set for consistency
+				localStorage.setItem('member', JSON.stringify(foundMember))
+				localStorage.setItem('memberCheckout', JSON.stringify(foundMember))
+				navigate('/member-dashboard')
+				return
 			}
 			
 			// Demo login for testing

@@ -25,19 +25,19 @@ export default function MemberCheckout() {
       setGuestEmail(parsedMember.email || '')
       setGuestPhone(parsedMember.phone || '')
     }
-    
+
     // Add initial service to booking
     if (room) {
       setSelectedServices([room])
     }
-    
+
     // Set default dates
     const today = new Date()
     const tomorrow = new Date(today)
     tomorrow.setDate(tomorrow.getDate() + 1)
     setCheckInDate(today.toISOString().split('T')[0])
     setCheckOutDate(tomorrow.toISOString().split('T')[0])
-    
+
     // Save pending booking when user leaves page
     const handleBeforeUnload = () => {
       if (room && member && (guestEmail || guestPhone)) {
@@ -73,19 +73,19 @@ export default function MemberCheckout() {
           bookingDate: new Date().toISOString(),
           status: 'pending'
         }
-        
+
         const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
-        const alreadyExists = existingBookings.find((b: any) => 
+        const alreadyExists = existingBookings.find((b: any) =>
           b.room?.id === room.id && b.status === 'pending' && b.member?.membershipId === member.membershipId
         )
-        
+
         if (!alreadyExists) {
           existingBookings.push(pendingBooking)
           localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
         }
       }
     }
-    
+
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [room, navigate])
@@ -102,32 +102,50 @@ export default function MemberCheckout() {
 
   const handleConfirm = async () => {
     setLoading(true)
-    
+
     setTimeout(() => {
-      const hasHotel = selectedServices.some(s => s.type !== 'aircraft' && s.type !== 'car' && s.type !== 'travel')
+      const hasHotel = selectedServices.some(s => s.type !== 'aircraft' && s.type !== 'car' && s.type !== 'travel' && s.type !== 'dining' && s.type !== 'entertainment' && s.type !== 'chef')
       const hasAircraft = selectedServices.some(s => s.type === 'aircraft')
       const hasCar = selectedServices.some(s => s.type === 'car')
       const hasTravel = selectedServices.some(s => s.type === 'travel')
-      
+      const hasDining = selectedServices.some(s => s.type === 'dining')
+      const hasEntertainment = selectedServices.some(s => s.type === 'entertainment')
+      const hasChef = selectedServices.some(s => s.type === 'chef')
+
       const hotelTotal = selectedServices
-        .filter(s => s.type !== 'aircraft' && s.type !== 'car')
+        .filter(s => s.type !== 'aircraft' && s.type !== 'car' && s.type !== 'travel' && s.type !== 'dining' && s.type !== 'entertainment' && s.type !== 'chef')
         .reduce((sum, s) => sum + (s.price * nights), 0)
-      
+
       const aircraftTotal = selectedServices
         .filter(s => s.type === 'aircraft')
         .reduce((sum, s) => sum + s.aircraft.price, 0)
-        
+
       const carTotal = selectedServices
         .filter(s => s.type === 'car')
         .reduce((sum, s) => sum + s.car.price, 0)
-        
+
       const travelTotal = selectedServices
         .filter(s => s.type === 'travel')
         .reduce((sum, s) => sum + s.travel.price, 0)
-      
+
+      const diningTotal = selectedServices
+        .filter(s => s.type === 'dining')
+        .reduce((sum, s) => {
+          const price = s.dining?.price || s.price || 0
+          return sum + (isNaN(price) ? 0 : Number(price))
+        }, 0)
+
+      const entertainmentTotal = selectedServices
+        .filter(s => s.type === 'entertainment')
+        .reduce((sum, s) => sum + (s.entertainment?.price || 0), 0)
+
+      const chefTotal = selectedServices
+        .filter(s => s.type === 'chef')
+        .reduce((sum, s) => sum + (s.chef?.price || 0), 0)
+
       const booking = {
         id: Date.now().toString(),
-        type: [hasHotel, hasAircraft, hasCar, hasTravel].filter(Boolean).length > 1 ? 'combined' : hasAircraft ? 'aircraft' : hasCar ? 'car' : hasTravel ? 'travel' : 'hotel',
+        type: [hasHotel, hasAircraft, hasCar, hasTravel, hasDining, hasEntertainment, hasChef].filter(Boolean).length > 1 ? 'combined' : hasAircraft ? 'aircraft' : hasCar ? 'car' : hasTravel ? 'travel' : hasDining ? 'dining' : hasEntertainment ? 'entertainment' : hasChef ? 'chef' : 'hotel',
         services: selectedServices,
         room: selectedServices.find(s => s.type !== 'aircraft' && s.type !== 'car' && s.type !== 'travel') || selectedServices[0],
         aircraft: selectedServices.find(s => s.type === 'aircraft')?.aircraft,
@@ -145,43 +163,61 @@ export default function MemberCheckout() {
           guests: guests,
           nights: nights
         }),
-        total: hotelTotal + aircraftTotal + carTotal + travelTotal,
+        total: hotelTotal + aircraftTotal + carTotal + travelTotal + diningTotal + entertainmentTotal + chefTotal,
         hotelTotal,
         aircraftTotal,
         carTotal,
         travelTotal,
+        diningTotal,
+        entertainmentTotal,
+        chefTotal,
         bookingDate: new Date().toISOString(),
         status: 'confirmed'
       }
-      
+
       const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
       existingBookings.push(booking)
       localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
-      
+
       navigate('/booking-success', { state: { booking } })
     }, 2000)
   }
-  
+
   const addService = (service: any) => {
     setSelectedServices(prev => [...prev, service])
     setShowAddServices(false)
   }
-  
+
   const removeService = (index: number) => {
     setSelectedServices(prev => prev.filter((_, i) => i !== index))
   }
 
   if (!room || !member) return null
 
-  const hotelServices = selectedServices.filter(s => s.type !== 'aircraft' && s.type !== 'car' && s.type !== 'travel')
+  const hotelServices = selectedServices.filter(s => s.type !== 'aircraft' && s.type !== 'car' && s.type !== 'travel' && s.type !== 'dining' && s.type !== 'entertainment' && s.type !== 'chef' && s.type !== 'wine' && s.type !== 'ticket' && s.type !== 'event')
   const aircraftServices = selectedServices.filter(s => s.type === 'aircraft')
   const carServices = selectedServices.filter(s => s.type === 'car')
   const travelServices = selectedServices.filter(s => s.type === 'travel')
+  const diningServices = selectedServices.filter(s => s.type === 'dining')
+  const entertainmentServices = selectedServices.filter(s => s.type === 'entertainment')
+  const chefServices = selectedServices.filter(s => s.type === 'chef')
+  const wineServices = selectedServices.filter(s => s.type === 'wine')
+  const ticketServices = selectedServices.filter(s => s.type === 'ticket')
+  const eventServices = selectedServices.filter(s => s.type === 'event')
   const hotelTotal = hotelServices.reduce((sum, s) => sum + (s.price * nights), 0)
   const aircraftTotal = aircraftServices.reduce((sum, s) => sum + s.aircraft.price, 0)
   const carTotal = carServices.reduce((sum, s) => sum + s.car.price, 0)
   const travelTotal = travelServices.reduce((sum, s) => sum + s.travel.price, 0)
-  const total = hotelTotal + aircraftTotal + carTotal + travelTotal
+  const diningTotal = diningServices.reduce((sum, s) => {
+    const price = s.dining?.price || s.price || 0
+    return sum + (isNaN(price) ? 0 : Number(price))
+  }, 0)
+  const entertainmentTotal = entertainmentServices.reduce((sum, s) => sum + (s.entertainment?.price || 0), 0)
+  const chefTotal = chefServices.reduce((sum, s) => sum + (s.chef?.price || 0), 0)
+  const wineTotal = wineServices.reduce((sum, s) => sum + (s.wine?.price || 0), 0)
+  const ticketTotal = ticketServices.reduce((sum, s) => sum + (s.ticket?.price || 0), 0)
+  const eventTotal = eventServices.reduce((sum, s) => sum + (s.event?.price || 0), 0)
+  const total = hotelTotal + aircraftTotal + carTotal + travelTotal + diningTotal + entertainmentTotal + chefTotal + wineTotal + ticketTotal + eventTotal
   const savings = hotelServices.reduce((sum, s) => sum + ((s.originalPrice - s.price) * nights), 0)
 
   return (
@@ -207,7 +243,7 @@ export default function MemberCheckout() {
             </svg>
             Back to Dashboard
           </button>
-          
+
           <div className="text-center">
             <div className="inline-flex items-center gap-3 mb-2">
               <div className="w-12 h-12 bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 rounded-full flex items-center justify-center">
@@ -219,7 +255,7 @@ export default function MemberCheckout() {
             </div>
             <p className="text-gray-300">Complete your luxury reservation</p>
           </div>
-          
+
           <div className="w-32"></div>
         </div>
 
@@ -245,7 +281,7 @@ export default function MemberCheckout() {
             {/* Guest Details */}
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
               <h3 className="text-xl font-semibold text-white mb-6">Guest Information</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
@@ -257,7 +293,7 @@ export default function MemberCheckout() {
                     placeholder="Enter email address"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number *</label>
                   <input
@@ -276,7 +312,7 @@ export default function MemberCheckout() {
             {room?.type !== 'aircraft' && (
               <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
                 <h3 className="text-xl font-semibold text-white mb-6">Booking Details</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Check-in Date</label>
@@ -287,7 +323,7 @@ export default function MemberCheckout() {
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)] focus:border-transparent"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Check-out Date</label>
                     <input
@@ -297,7 +333,7 @@ export default function MemberCheckout() {
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)] focus:border-transparent"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Guests</label>
                     <select
@@ -305,12 +341,12 @@ export default function MemberCheckout() {
                       onChange={(e) => setGuests(Number(e.target.value))}
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)] focus:border-transparent"
                     >
-                      {[1,2,3,4,5,6].map(num => (
+                      {[1, 2, 3, 4, 5, 6].map(num => (
                         <option key={num} value={num} className="bg-slate-800">{num} Guest{num > 1 ? 's' : ''}</option>
                       ))}
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Nights</label>
                     <div className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white">
@@ -341,7 +377,7 @@ export default function MemberCheckout() {
           {/* Sidebar */}
           <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 h-fit">
             <h3 className="text-xl font-semibold text-white mb-6">Reservation Summary</h3>
-            
+
             {/* Selected Services */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
@@ -353,7 +389,7 @@ export default function MemberCheckout() {
                   + Add Service
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 {selectedServices.map((service, index) => (
                   <div key={index} className="bg-white/5 rounded-lg p-4">
@@ -381,7 +417,7 @@ export default function MemberCheckout() {
                 ))}
               </div>
             </div>
-            
+
             {/* Add Services Modal */}
             {showAddServices && (
               <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -457,23 +493,21 @@ export default function MemberCheckout() {
                 return total
               }, 0)
               const availablePoints = Math.max(0, earnedPoints - spentPoints)
-              
+
               const canPayWithPoints = availablePoints >= 10 && availablePoints >= total * 100
-              
+
               return (
-                <div className={`mb-6 p-4 rounded-xl border transition-all ${
-                  availablePoints >= 10 
+                <div className={`mb-6 p-4 rounded-xl border transition-all ${availablePoints >= 10
                     ? 'bg-gradient-to-r from-[var(--color-brand-gold)]/20 to-yellow-400/20 border-[var(--color-brand-gold)]/30'
                     : 'bg-gray-800/40 border-gray-600/30'
-                }`}>
+                  }`}>
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className={`font-semibold ${
-                      availablePoints >= 10 ? 'text-[var(--color-brand-gold)]' : 'text-gray-400'
-                    }`}>👑 Pay with Rewards</h4>
+                    <h4 className={`font-semibold ${availablePoints >= 10 ? 'text-[var(--color-brand-gold)]' : 'text-gray-400'
+                      }`}>👑 Pay with Rewards</h4>
                     <span className="text-white text-sm">{availablePoints} pts available</span>
                   </div>
                   <p className="text-gray-300 text-sm mb-3">
-                    {availablePoints >= 10 
+                    {availablePoints >= 10
                       ? 'Use your reward points to pay for this booking (100 points = $1)'
                       : 'Unlock points payment at 10 points (100 points = $1)'
                     }
@@ -488,16 +522,15 @@ export default function MemberCheckout() {
                       }
                     }}
                     disabled={!canPayWithPoints}
-                    className={`w-full py-2 rounded-lg font-medium transition-all ${
-                      canPayWithPoints
+                    className={`w-full py-2 rounded-lg font-medium transition-all ${canPayWithPoints
                         ? 'bg-[var(--color-brand-gold)] text-[var(--color-brand-navy)] hover:brightness-95'
                         : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    }`}
+                      }`}
                   >
                     {availablePoints < 10
                       ? `Need ${10 - availablePoints} more points to unlock`
-                      : availablePoints >= total * 100 
-                        ? `Pay with ${total * 100} Points` 
+                      : availablePoints >= total * 100
+                        ? `Pay with ${total * 100} Points`
                         : `Need ${(total * 100) - availablePoints} more points`
                     }
                   </button>
@@ -521,7 +554,7 @@ export default function MemberCheckout() {
                   ))}
                 </>
               )}
-              
+
               {aircraftServices.length > 0 && (
                 <>
                   <div className="flex justify-between text-white font-medium">
@@ -536,7 +569,7 @@ export default function MemberCheckout() {
                   ))}
                 </>
               )}
-              
+
               {carServices.length > 0 && (
                 <>
                   <div className="flex justify-between text-white font-medium">
@@ -551,7 +584,7 @@ export default function MemberCheckout() {
                   ))}
                 </>
               )}
-              
+
               {travelServices.length > 0 && (
                 <>
                   <div className="flex justify-between text-white font-medium">
@@ -566,14 +599,104 @@ export default function MemberCheckout() {
                   ))}
                 </>
               )}
-              
+
+              {diningServices.length > 0 && (
+                <>
+                  <div className="flex justify-between text-white font-medium">
+                    <span>🍽️ Dining Services</span>
+                    <span>${diningTotal}</span>
+                  </div>
+                  {diningServices.map((service, i) => (
+                    <div key={i} className="flex justify-between text-gray-300 text-sm ml-4">
+                      <span>{service.name}</span>
+                      <span>${service.dining?.price || service.price || 0}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {entertainmentServices.length > 0 && (
+                <>
+                  <div className="flex justify-between text-white font-medium">
+                    <span>🎭 Entertainment Services</span>
+                    <span>${entertainmentTotal}</span>
+                  </div>
+                  {entertainmentServices.map((service, i) => (
+                    <div key={i} className="flex justify-between text-gray-300 text-sm ml-4">
+                      <span>{service.name}</span>
+                      <span>${service.entertainment.price}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {chefServices.length > 0 && (
+                <>
+                  <div className="flex justify-between text-white font-medium">
+                    <span>👨🍳 Chef Services</span>
+                    <span>${chefTotal}</span>
+                  </div>
+                  {chefServices.map((service, i) => (
+                    <div key={i} className="flex justify-between text-gray-300 text-sm ml-4">
+                      <span>{service.name}</span>
+                      <span>${service.chef.price}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {wineServices.length > 0 && (
+                <>
+                  <div className="flex justify-between text-white font-medium">
+                    <span>🍷 Wine Services</span>
+                    <span>${wineTotal}</span>
+                  </div>
+                  {wineServices.map((service, i) => (
+                    <div key={i} className="flex justify-between text-gray-300 text-sm ml-4">
+                      <span>{service.name}</span>
+                      <span>${service.wine.price}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {ticketServices.length > 0 && (
+                <>
+                  <div className="flex justify-between text-white font-medium">
+                    <span>🎭 Ticket Services</span>
+                    <span>${ticketTotal}</span>
+                  </div>
+                  {ticketServices.map((service, i) => (
+                    <div key={i} className="flex justify-between text-gray-300 text-sm ml-4">
+                      <span>{service.name}</span>
+                      <span>${service.ticket.price}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {eventServices.length > 0 && (
+                <>
+                  <div className="flex justify-between text-white font-medium">
+                    <span>🎉 Event Services</span>
+                    <span>${eventTotal}</span>
+                  </div>
+                  {eventServices.map((service, i) => (
+                    <div key={i} className="flex justify-between text-gray-300 text-sm ml-4">
+                      <span>{service.name}</span>
+                      <span>${service.event.price}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+
               {savings > 0 && (
                 <div className="flex justify-between text-green-400">
                   <span>Member Savings</span>
                   <span>-${savings}</span>
                 </div>
               )}
-              
+
               <div className="flex justify-between text-xl font-bold text-[var(--color-brand-gold)] border-t border-white/20 pt-3">
                 <span>Total</span>
                 <span>${total}</span>
