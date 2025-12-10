@@ -15,7 +15,7 @@ export default function MemberLogin() {
     setLoading(true)
 
     // Simulate member validation
-    if (membershipId === 'GRAND2024' && email && password) {
+    if (membershipId === 'GRAND2024' && email && password === '1234') {
       const memberData = {
         email,
         name: 'Premium Member',
@@ -107,7 +107,7 @@ export default function MemberLogin() {
 
           <div className="mt-6 text-center">
             <p className="text-white/70 text-sm mb-4">
-              Demo Credentials: ID: GRAND2024
+              Demo Credentials: ID: GRAND2024 | Password: 1234
             </p>
             <Link
               to="/membership"

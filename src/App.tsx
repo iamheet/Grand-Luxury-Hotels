@@ -50,6 +50,9 @@ import BusinessServices from './pages/BusinessServices'
 import CorporateEvent from './pages/CorporateEvent'
 import ExecutiveMeetingRooms from './pages/ExecutiveMeetingRooms'
 import BusinessTravelConcierge from './pages/BusinessTravelConcierge'
+import AdminDashboard from './pages/AdminDashboard'
+import AdminLogin from './pages/AdminLogin'
+import NormalHotelsDashboard from './pages/NormalHotelsDashboard'
 
 export default function App() {
   return (
@@ -95,6 +98,9 @@ export default function App() {
         <Route path="/corporate-event" element={<CorporateEvent />} />
         <Route path="/executive-meeting-rooms" element={<ExecutiveMeetingRooms />} />
         <Route path="/business-travel-concierge" element={<BusinessTravelConcierge />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/normal-hotels-dashboard" element={<NormalHotelsDashboard />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="search" element={<SearchResults />} />

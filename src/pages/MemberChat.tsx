@@ -32,7 +32,7 @@ export default function MemberChat() {
   }, [messages, isTyping])
 
   const memberResponses = {
-    'booking': `As a ${member?.tier} member, I can help you with your bookings. You have access to exclusive hotels, private aircraft, luxury cars, and premium travel services. Would you like me to check your current bookings or help you make a new reservation?`,
+    'booking': `I can help you book instantly! Tell me what you need: "Book a car", "Book a hotel", "Book spa", "Book dining", "Book yacht", or "Book private jet" and I'll take you there!`,
     'services': `Your ${member?.tier} membership includes: Priority concierge service, exclusive hotel access, private aircraft booking, luxury car rentals, yacht charters, airport VIP services, and custom travel planning. Which service interests you?`,
     'account': `Your ${member?.tier} membership (ID: ${member?.membershipId}) is active with premium benefits. You enjoy ${member?.tier === 'Diamond' ? '35%' : member?.tier === 'Platinum' ? '25%' : member?.tier === 'Gold' ? '15%' : member?.tier === 'Silver' ? '10%' : '5%'} discounts on all services. Is there anything specific about your account you'd like to know?`,
     'upgrade': `As a ${member?.tier} member, you're already enjoying premium benefits! ${member?.tier === 'Diamond' ? 'You have our highest tier with maximum privileges.' : 'Would you like to learn about upgrading to a higher tier for additional exclusive benefits?'}`,
@@ -47,8 +47,240 @@ export default function MemberChat() {
   const getResponse = (message: string) => {
     const lowerMessage = message.toLowerCase()
     
+    // Greetings
+    if (lowerMessage.match(/\b(hi|hello|hey|greetings|good morning|good afternoon|good evening|howdy|sup)\b/)) {
+      return `Hello ${member?.name}! Welcome back to your ${member?.tier} concierge service. I'm here to assist you with any luxury travel needs. How may I help you today?`
+    }
+    
+    // Goodbye
+    if (lowerMessage.match(/\b(bye|goodbye|see you|later|farewell)\b/)) {
+      return `Thank you for chatting with us, ${member?.name}! Your ${member?.tier} concierge team is always here for you 24/7. Have a wonderful day!`
+    }
+    
+    // Thanks
+    if (lowerMessage.match(/\b(thank|thanks|appreciate|grateful)\b/)) {
+      return `You're very welcome, ${member?.name}! It's my pleasure to serve you as your ${member?.tier} concierge. Is there anything else I can help you with today?`
+    }
+    
+    // How are you
+    if (lowerMessage.match(/\b(how are you|how r u|hows it going|whats up)\b/)) {
+      return `I'm doing excellent, thank you for asking ${member?.name}! I'm here and ready to help you with any luxury travel arrangements. What can I assist you with today?`
+    }
+    
+    // Who are you
+    if (lowerMessage.match(/\b(who are you|what are you|your name)\b/)) {
+      return `I'm your dedicated ${member?.tier} Royal Concierge AI Assistant, specially trained to help you with luxury travel bookings, exclusive services, and personalized recommendations. I'm available 24/7 to serve you, ${member?.name}!`
+    }
+    
+    // Pricing questions
+    if (lowerMessage.match(/\b(price|cost|fee|charge|expensive|cheap|rate|how much)\b/)) {
+      return `As a ${member?.tier} member, you enjoy exclusive pricing with ${member?.tier === 'Diamond' ? '35%' : member?.tier === 'Platinum' ? '25%' : member?.tier === 'Gold' ? '15%' : '10%'} discount on all services. Prices vary by service: Hotels start at $200/night, private jets from $5,000/flight, luxury cars from $500/day, and yacht charters from $10,000/day. Would you like specific pricing for any service?`
+    }
+    
+    // Discount questions
+    if (lowerMessage.match(/\b(discount|save|savings|deal|offer|promotion|coupon|promo)\b/)) {
+      return `Excellent question! Your ${member?.tier} membership includes ${member?.tier === 'Diamond' ? '35%' : member?.tier === 'Platinum' ? '25%' : member?.tier === 'Gold' ? '15%' : '10%'} discount on all bookings. Plus, you get priority access to exclusive deals, complimentary upgrades, and special seasonal promotions. Would you like to see current offers?`
+    }
+    
+    // Payment questions
+    if (lowerMessage.match(/\b(pay|payment|credit card|debit|cash|invoice|bill|transaction)\b/)) {
+      return `We accept all major credit cards (Visa, Mastercard, Amex), wire transfers, and cryptocurrency. As a ${member?.tier} member, you can also use our flexible payment plans with 0% interest for bookings over $10,000. All transactions are secure and encrypted. Would you like to set up a payment method?`
+    }
+    
+    // Cancellation questions
+    if (lowerMessage.match(/\b(cancel|refund|change|modify|reschedule|postpone)\b/)) {
+      return `Your ${member?.tier} membership includes flexible cancellation. You can cancel or modify bookings up to 24 hours before with full refund. For same-day changes, we offer 50% credit towards future bookings. Would you like to modify an existing reservation?`
+    }
+    
+    // Location/destination questions
+    if (lowerMessage.match(/\b(where|location|destination|city|country|place|destinations)\b/)) {
+      return `We serve over 500 luxury destinations worldwide including Paris, Dubai, Maldives, New York, Tokyo, Singapore, London, Bali, Santorini, and more. Our exclusive hotels are in prime locations, and we can arrange private travel to any destination. Where would you like to go?`
+    }
+    
+    // Booking/Availability questions - Instant booking
+    if (lowerMessage.match(/\b(book|reserve|rent|get|need)\b.{0,20}\b(car|vehicle|rental|rolls|royce|bentley|mercedes|lamborghini|ferrari|porsche)\b/)) {
+      const carMatch = message.match(/\b(rolls royce|rollsroyce|rolls-royce|bentley|mercedes|lamborghini|ferrari|porsche|bmw|audi|tesla)\b/i)
+      
+      // If no specific car mentioned, show options
+      if (!carMatch) {
+        return `🚗 Perfect, ${member?.name}! Which luxury vehicle would you like?\n\n1️⃣ Rolls Royce - $2,500/day\n2️⃣ Bentley - $2,000/day\n3️⃣ Mercedes S-Class - $1,500/day\n4️⃣ Lamborghini - $3,500/day\n5️⃣ Ferrari - $4,000/day\n6️⃣ Porsche - $2,200/day\n\nJust tell me the car name or number!`
+      }
+      
+      const dateMatch = message.match(/\b(today|tomorrow|tonight|\d{1,2}\/\d{1,2}|\d{4}-\d{2}-\d{2})\b/i)
+      const daysMatch = message.match(/\b(\d+)\s*(day|days|week|weeks)\b/i)
+      
+      const carType = carMatch[0]
+      const bookingDate = dateMatch ? dateMatch[0] : 'today'
+      const duration = daysMatch ? daysMatch[0] : '1 day'
+      
+      const carPrices: any = {
+        'rolls royce': 2500,
+        'rollsroyce': 2500,
+        'rolls-royce': 2500,
+        'bentley': 2000,
+        'mercedes': 1500,
+        'lamborghini': 3500,
+        'ferrari': 4000,
+        'porsche': 2200,
+        'bmw': 1200,
+        'audi': 1300,
+        'tesla': 1000
+      }
+      
+      const price = carPrices[carType.toLowerCase()] || 1500
+      
+      const bookingId = 'BK' + Math.floor(10000 + Math.random() * 90000)
+      const booking = {
+        id: bookingId,
+        type: 'car',
+        vehicle: carType,
+        date: bookingDate,
+        duration: duration,
+        price: price,
+        status: 'Confirmed',
+        memberTier: member?.tier,
+        bookingDate: new Date().toISOString(),
+        timestamp: new Date().toISOString()
+      }
+      
+      const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
+      existingBookings.push(booking)
+      localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
+      
+      return `✅ Excellent choice, ${member?.name}! I've instantly booked a ${carType} for you!\n\n📋 Booking Confirmation:\n🚗 Vehicle: ${carType}\n📅 Date: ${bookingDate}\n⏱️ Duration: ${duration}\n💰 Price: $${price.toLocaleString()} (${member?.tier} discount applied)\n🎫 Confirmation: ${bookingId}\n\n✨ Your luxury vehicle will be delivered with a professional chauffeur. Confirmation email sent to your registered address!`
+    }
+    if (lowerMessage.match(/\b(book|reserve)\b.{0,20}\b(hotel|room|suite)\b/)) {
+      navigate('/hotels')
+      return `🏨 Taking you to our Hotels page to browse and book your perfect stay...`
+    }
+    if (lowerMessage.match(/\b(book|charter)\b.{0,20}\b(yacht|boat)\b/)) {
+      navigate('/yacht-charter')
+      return `🛥️ Taking you to Yacht Charter page...`
+    }
+    if (lowerMessage.match(/\b(book|charter)\b.{0,20}\b(jet|aircraft|plane)\b/)) {
+      navigate('/aircraft-booking')
+      return `✈️ Taking you to Aircraft Booking page...`
+    }
+    if (lowerMessage.match(/\b(book|reserve)\b.{0,20}\b(spa|massage)\b/)) {
+      navigate('/wellness-spa')
+      return `💆 Taking you to Wellness & Spa page...`
+    }
+    if (lowerMessage.match(/\b(book|reserve)\b.{0,20}\b(table|restaurant|dining)\b/)) {
+      navigate('/dining-reservations')
+      return `🍽️ Taking you to Dining Reservations page...`
+    }
+    if (lowerMessage.match(/\b(available|availability|free|open|vacant)\b/)) {
+      return `As a ${member?.tier} member, you have priority access to all services! Tell me what you'd like to book: "Book a car", "Book a hotel", "Book spa", "Book dining", "Book yacht", or "Book private jet" and I'll take you there instantly!`
+    }
+    
+    // Contact questions
+    if (lowerMessage.match(/\b(contact|call|phone|email|reach|speak|talk)\b/)) {
+      return `You can reach our ${member?.tier} concierge team 24/7 at: Phone: +1 (800) ROYAL-01, Email: concierge@thegrandstay.com, or continue chatting here. We also offer video consultations. Would you like to schedule a call?`
+    }
+    
+    // Time/hours questions
+    if (lowerMessage.match(/\b(when|time|hour|schedule|open|close|timing)\b/)) {
+      return `Our ${member?.tier} concierge service is available 24/7, 365 days a year. You can reach us anytime, day or night. We guarantee response within 15 minutes for all ${member?.tier} members. What time works best for you?`
+    }
+    
+    // Amenities questions
+    if (lowerMessage.match(/\b(amenity|amenities|facility|facilities|feature|include|what do you have)\b/)) {
+      return `Our exclusive properties include: Private pools, spa facilities, gourmet restaurants, fitness centers, concierge service, airport transfers, and more. ${member?.tier} members also get complimentary breakfast, late checkout, and room upgrades. Which amenities interest you most?`
+    }
+    
+    // Food/dining questions
+    if (lowerMessage.match(/\b(food|restaurant|dining|eat|breakfast|lunch|dinner|meal|cuisine)\b/)) {
+      return `We offer world-class dining experiences! Our hotels feature Michelin-starred restaurants, private chef services, and in-room dining. We can also arrange exclusive restaurant reservations worldwide. ${member?.tier} members receive complimentary breakfast and priority seating. What cuisine do you prefer?`
+    }
+    
+    // Spa/wellness questions
+    if (lowerMessage.match(/\b(spa|massage|wellness|relax|treatment|therapy)\b/)) {
+      return `Our luxury properties feature world-class spa facilities with treatments including massages, facials, body treatments, and wellness programs. ${member?.tier} members receive 20% off all spa services and priority booking. Would you like to book a spa treatment?`
+    }
+    
+    // Airport/transfer questions
+    if (lowerMessage.match(/\b(airport|transfer|pickup|drop off|transportation)\b/)) {
+      return `We provide complimentary airport transfers for all ${member?.tier} members! Our luxury vehicles will pick you up from any airport and transport you to your hotel. We also offer private jet terminals and VIP lounge access. Need to arrange a transfer?`
+    }
+    
+    // Family/kids questions
+    if (lowerMessage.match(/\b(family|kid|child|children|baby|infant)\b/)) {
+      return `We're family-friendly! Our properties offer kids clubs, babysitting services, family suites, and child-friendly amenities. Children under 12 stay free with ${member?.tier} members. We can also arrange family activities and excursions. How many children will be traveling?`
+    }
+    
+    // Pet questions
+    if (lowerMessage.match(/\b(pet|dog|cat|animal)\b/)) {
+      return `Many of our luxury properties are pet-friendly! We welcome well-behaved pets and provide pet amenities including beds, bowls, and treats. ${member?.tier} members receive complimentary pet services. Please let us know your pet's size and breed for the best accommodations.`
+    }
+    
+    // Weather questions
+    if (lowerMessage.match(/\b(weather|temperature|climate|season|rain|sunny)\b/)) {
+      return `I can help you choose the perfect destination based on weather! Which type of climate do you prefer? Tropical beaches, mountain retreats, desert luxury, or city escapes? I can recommend the best destinations for your preferred season.`
+    }
+    
+    // Romantic/honeymoon questions
+    if (lowerMessage.match(/\b(romantic|honeymoon|anniversary|couple|romance|wedding)\b/)) {
+      return `How wonderful! We specialize in romantic getaways. Our packages include: Private beach dinners, couples spa treatments, champagne on arrival, rose petal turndown, and more. ${member?.tier} members get complimentary honeymoon upgrades. When is your special occasion?`
+    }
+    
+    // Group/event questions
+    if (lowerMessage.match(/\b(group|event|meeting|conference|party|celebration)\b/)) {
+      return `We excel at group bookings and events! We can arrange: Corporate meetings, weddings, celebrations, and group travel. ${member?.tier} members receive group discounts starting at 5+ rooms. Our event planners will handle all details. How many guests?`
+    }
+    
+    // Safety/security questions
+    if (lowerMessage.match(/\b(safe|safety|security|secure|protection)\b/)) {
+      return `Your safety is our priority! All properties have 24/7 security, secure payment systems, travel insurance options, and emergency support. ${member?.tier} members get dedicated security liaison and emergency hotline. We also provide COVID-19 safety protocols. Any specific concerns?`
+    }
+    
+    // Loyalty/points questions
+    if (lowerMessage.match(/\b(point|points|reward|loyalty|earn|redeem)\b/)) {
+      return `Great question! ${member?.tier} members earn 10 points per dollar spent. Points can be redeemed for free nights, upgrades, and exclusive experiences. You currently have access to exclusive ${member?.tier} rewards. Would you like to check your points balance?`
+    }
+    
+    // Language questions
+    if (lowerMessage.match(/\b(language|speak|english|spanish|french|translate)\b/)) {
+      return `Our concierge team speaks over 20 languages including English, Spanish, French, German, Italian, Chinese, Japanese, and Arabic. All ${member?.tier} members get multilingual support 24/7. Which language do you prefer?`
+    }
+    
+    // Visa/passport questions
+    if (lowerMessage.match(/\b(visa|passport|document|immigration|travel document)\b/)) {
+      return `We can assist with visa requirements and travel documentation! Our concierge team can help with visa applications, passport renewals, and provide destination-specific entry requirements. ${member?.tier} members get expedited visa processing assistance. Which country are you traveling to?`
+    }
+    
+    // Insurance questions
+    if (lowerMessage.match(/\b(insurance|coverage|protect|medical)\b/)) {
+      return `We offer comprehensive travel insurance covering cancellations, medical emergencies, lost baggage, and trip interruptions. ${member?.tier} members receive premium insurance at discounted rates. Would you like to add travel insurance to your booking?`
+    }
+    
+    // Recommendation questions
+    if (lowerMessage.match(/\b(recommend|suggest|best|top|popular|favorite)\b/)) {
+      return `I'd love to recommend something perfect for you! Based on your ${member?.tier} status, I suggest: Maldives for beaches, Swiss Alps for luxury skiing, Dubai for shopping, Paris for culture, or Tokyo for unique experiences. What type of experience are you looking for?`
+    }
+    
+    // Existing keyword responses - Direct booking actions
     if (lowerMessage.includes('book') || lowerMessage.includes('reservation')) {
-      return memberResponses.booking
+      if (lowerMessage.includes('car') || lowerMessage.includes('vehicle')) {
+        navigate('/car-rental')
+        return `🚗 Taking you to our Car Rental page to book your luxury vehicle...`
+      } else if (lowerMessage.includes('hotel') || lowerMessage.includes('room')) {
+        navigate('/hotels')
+        return `🏨 Taking you to our Hotels page to browse and book...`
+      } else if (lowerMessage.includes('yacht') || lowerMessage.includes('boat')) {
+        navigate('/yacht-charter')
+        return `🛥️ Taking you to Yacht Charter page...`
+      } else if (lowerMessage.includes('jet') || lowerMessage.includes('aircraft') || lowerMessage.includes('plane')) {
+        navigate('/aircraft-booking')
+        return `✈️ Taking you to Aircraft Booking page...`
+      } else if (lowerMessage.includes('spa') || lowerMessage.includes('massage')) {
+        navigate('/wellness-spa')
+        return `💆 Taking you to Wellness & Spa page...`
+      } else if (lowerMessage.includes('dining') || lowerMessage.includes('restaurant') || lowerMessage.includes('table')) {
+        navigate('/dining-reservations')
+        return `🍽️ Taking you to Dining Reservations page...`
+      } else {
+        return `I can help you book instantly! Just tell me: "Book a car", "Book a hotel", "Book spa", "Book dining", "Book yacht", or "Book private jet". I'll take you directly to the booking page!`
+      }
     } else if (lowerMessage.includes('service') || lowerMessage.includes('benefit')) {
       return memberResponses.services
     } else if (lowerMessage.includes('account') || lowerMessage.includes('membership')) {
@@ -68,7 +300,12 @@ export default function MemberChat() {
     } else if (lowerMessage.includes('help') || lowerMessage.includes('support')) {
       return memberResponses.help
     } else {
-      return `Thank you for your message. As your ${member?.tier} concierge assistant, I'm here to help with all luxury services. You can ask me about bookings, travel planning, exclusive services, or your membership benefits. How may I assist you further?`
+      // Intelligent fallback with context
+      const keywords = lowerMessage.match(/\b(\w+)\b/g) || []
+      if (keywords.length > 0) {
+        return `I understand you're asking about "${message}". As your ${member?.tier} concierge, I can help with: bookings, hotels, flights, cars, yachts, pricing, availability, payments, cancellations, destinations, amenities, dining, spa services, events, and much more. Could you please provide more details so I can assist you better?`
+      }
+      return `Thank you for your message, ${member?.name}. As your ${member?.tier} concierge assistant, I'm here to help with all your luxury travel needs. You can ask me about: bookings, pricing, availability, destinations, amenities, dining, spa, transfers, events, and more. What would you like to know?`
     }
   }
 
@@ -137,11 +374,6 @@ export default function MemberChat() {
           {/* Animated Luxury Border */}
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-brand-gold)]/20 via-yellow-400/10 to-[var(--color-brand-gold)]/20 rounded-3xl animate-pulse"></div>
           <div className="absolute inset-0 bg-gradient-to-br from-transparent via-[var(--color-brand-gold)]/5 to-transparent rounded-3xl"></div>
-          
-          {/* Royal Crown Pattern */}
-          <div className="absolute top-4 right-4 text-[var(--color-brand-gold)]/20 text-6xl animate-pulse">
-            👑
-          </div>
           
           {/* Chat Header */}
           <div className="relative bg-gradient-to-r from-[var(--color-brand-gold)]/40 via-yellow-500/30 to-[var(--color-brand-gold)]/40 p-8 border-b-2 border-[var(--color-brand-gold)]/50">
@@ -268,25 +500,24 @@ export default function MemberChat() {
             <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-brand-gold)]/5 via-transparent to-[var(--color-brand-gold)]/5 animate-pulse"></div>
             
             <div className="flex gap-6 relative z-10">
-              <div className="flex-1 relative group">
-                {/* Input Field Glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-brand-gold)]/20 to-yellow-400/20 rounded-2xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity duration-300"></div>
-                
+              <div className="flex-1 relative">
                 <input
                   type="text"
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="👑 Share your royal request..."
-                  className="w-full px-8 py-5 bg-gradient-to-r from-white/15 to-white/10 border-2 border-[var(--color-brand-gold)]/40 rounded-2xl text-white placeholder-gray-300 focus:outline-none focus:ring-4 focus:ring-[var(--color-brand-gold)]/30 focus:border-[var(--color-brand-gold)] backdrop-blur-xl transition-all duration-300 font-medium shadow-2xl relative z-10"
+                  placeholder="Type your message..."
+                  style={{
+                    width: '100%',
+                    padding: '20px',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '2px solid rgba(212, 175, 55, 0.4)',
+                    borderRadius: '16px',
+                    color: '#ffffff',
+                    fontSize: '16px',
+                    outline: 'none'
+                  }}
                 />
-                
-                {/* Animated Input Icon */}
-                <div className="absolute right-6 top-1/2 transform -translate-y-1/2 text-[var(--color-brand-gold)] animate-pulse">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                </div>
               </div>
               
               <button

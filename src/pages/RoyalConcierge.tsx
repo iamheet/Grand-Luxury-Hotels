@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom'
 
 export default function RoyalConcierge() {
   const [member, setMember] = useState<any>(null)
+  const [showCallForm, setShowCallForm] = useState(false)
+  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [scheduledCall, setScheduledCall] = useState({ date: '', time: '', topic: '', phone: '' })
+  const [callForm, setCallForm] = useState({ date: '', time: '', topic: '', phone: '' })
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -120,8 +124,11 @@ export default function RoyalConcierge() {
                 <p className="text-emerald-200 text-sm">+1 (800) ROYAL-01</p>
               </div>
             </div>
-            <button className="w-full bg-emerald-500 text-white py-2 rounded-lg font-semibold hover:brightness-95 transition-all">
-              Call Now
+            <button 
+              onClick={() => setShowCallForm(true)}
+              className="w-full bg-emerald-500 text-white py-2 rounded-lg font-semibold hover:brightness-95 transition-all"
+            >
+              Schedule Call
             </button>
           </div>
 
@@ -274,6 +281,136 @@ export default function RoyalConcierge() {
             </div>
           </div>
         </div>
+
+        {/* Confirmation Card */}
+        {showConfirmation && (
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-gradient-to-br from-emerald-900 to-green-800 rounded-3xl p-8 max-w-md w-full border-2 border-emerald-400 shadow-2xl">
+              <div className="text-center mb-6">
+                <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-3xl font-bold text-white mb-2">✅ Call Scheduled!</h3>
+                <p className="text-emerald-200">Your concierge will call you at the scheduled time</p>
+              </div>
+              
+              <div className="bg-white/10 rounded-2xl p-6 mb-6 space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl">📞</div>
+                  <div>
+                    <p className="text-emerald-200 text-sm">Phone Number</p>
+                    <p className="text-white font-bold text-lg">{scheduledCall.phone}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl">📅</div>
+                  <div>
+                    <p className="text-emerald-200 text-sm">Date</p>
+                    <p className="text-white font-bold text-lg">{new Date(scheduledCall.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl">⏰</div>
+                  <div>
+                    <p className="text-emerald-200 text-sm">Time</p>
+                    <p className="text-white font-bold text-lg">{scheduledCall.time}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl">📝</div>
+                  <div>
+                    <p className="text-emerald-200 text-sm">Topic</p>
+                    <p className="text-white font-bold">{scheduledCall.topic}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => setShowConfirmation(false)}
+                className="w-full bg-white text-emerald-900 py-3 rounded-xl font-bold hover:brightness-95 transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Schedule Call Modal */}
+        {showCallForm && (
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 max-w-md w-full border border-emerald-500/30">
+              <h3 className="text-2xl font-bold text-white mb-6">📞 Schedule a Call</h3>
+              <form onSubmit={(e) => {
+                e.preventDefault()
+                setScheduledCall(callForm)
+                setShowCallForm(false)
+                setShowConfirmation(true)
+                setCallForm({ date: '', time: '', topic: '', phone: '' })
+              }}>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-gray-300 mb-2">Phone Number</label>
+                    <input
+                      type="tel"
+                      value={callForm.phone}
+                      onChange={(e) => setCallForm({...callForm, phone: e.target.value})}
+                      className="w-full bg-white/10 text-white border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="Your contact number"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-300 mb-2">Preferred Date</label>
+                    <input
+                      type="date"
+                      value={callForm.date}
+                      onChange={(e) => setCallForm({...callForm, date: e.target.value})}
+                      className="w-full bg-white/10 text-white border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-300 mb-2">Preferred Time</label>
+                    <input
+                      type="time"
+                      value={callForm.time}
+                      onChange={(e) => setCallForm({...callForm, time: e.target.value})}
+                      className="w-full bg-white/10 text-white border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-300 mb-2">Topic/Reason</label>
+                    <textarea
+                      value={callForm.topic}
+                      onChange={(e) => setCallForm({...callForm, topic: e.target.value})}
+                      className="w-full bg-white/10 text-white border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 h-24"
+                      placeholder="What would you like to discuss?"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3 mt-6">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold hover:brightness-95 transition-all"
+                  >
+                    Confirm Schedule
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowCallForm(false)}
+                    className="flex-1 bg-gray-600 text-white py-3 rounded-xl font-bold hover:brightness-95 transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

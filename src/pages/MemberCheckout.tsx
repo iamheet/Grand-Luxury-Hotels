@@ -217,6 +217,8 @@ export default function MemberCheckout() {
   const wineTotal = wineServices.reduce((sum, s) => sum + (s.wine?.price || 0), 0)
   const ticketTotal = ticketServices.reduce((sum, s) => sum + (s.ticket?.price || 0), 0)
   const eventTotal = eventServices.reduce((sum, s) => sum + (s.event?.price || 0), 0)
+  const grandTotal = hotelTotal + aircraftTotal + carTotal + travelTotal + diningTotal + entertainmentTotal + chefTotal + wineTotal + ticketTotal + eventTotal
+
   const total = hotelTotal + aircraftTotal + carTotal + travelTotal + diningTotal + entertainmentTotal + chefTotal + wineTotal + ticketTotal + eventTotal
   const savings = hotelServices.reduce((sum, s) => sum + ((s.originalPrice - s.price) * nights), 0)
 

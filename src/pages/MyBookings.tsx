@@ -127,6 +127,8 @@ export default function MyBookings() {
               onClick={() => {
                 const memberData = localStorage.getItem('member') || localStorage.getItem('memberCheckout')
                 if (memberData) {
+                  // Set flag to show hotels section
+                  sessionStorage.setItem('showHotels', 'true')
                   navigate('/member-dashboard')
                 } else {
                   navigate('/')

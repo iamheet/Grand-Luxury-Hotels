@@ -7,6 +7,9 @@ export default function Layout() {
   const [email, setEmail] = useState('')
   const [subscribed, setSubscribed] = useState(false)
   const [avatarClicked, setAvatarClicked] = useState(false)
+  const [showEmailForm, setShowEmailForm] = useState(false)
+  const [emailQuery, setEmailQuery] = useState({ name: '', email: '', subject: '', message: '' })
+  const [emailSent, setEmailSent] = useState(false)
   const userRaw = localStorage.getItem('user')
   const isLoggedIn = !!userRaw
   let initials = 'GU'
@@ -34,6 +37,16 @@ export default function Layout() {
     }
   }
 
+  const handleEmailQuery = (e: React.FormEvent) => {
+    e.preventDefault()
+    setEmailSent(true)
+    setTimeout(() => {
+      setShowEmailForm(false)
+      setEmailSent(false)
+      setEmailQuery({ name: '', email: '', subject: '', message: '' })
+    }, 2000)
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-gray-900">
       <header className={`${transparent ? 'absolute top-0 left-0 right-0 bg-transparent' : 'sticky top-0 bg-[var(--color-brand-navy)]'} z-30 text-white/95`}>
@@ -51,14 +64,17 @@ export default function Layout() {
               </span>
               <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-yellow-300 via-amber-300 to-orange-300 opacity-0 group-hover:opacity-25 transition-opacity duration-300"></div>
             </Link>
-            <Link to="/search" className="text-sm font-medium px-3 py-1.5 rounded-md shadow-sm bg-[var(--color-brand-gold)] text-[var(--color-brand-navy)] hover:brightness-95 transition">
-              Search
+            <Link to="/search" className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 hover:from-cyan-600 hover:via-blue-600 hover:to-indigo-600 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+              <span className="flex items-center gap-2 text-white font-medium">
+                <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                Search
+              </span>
+              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-300 via-blue-300 to-indigo-300 opacity-0 group-hover:opacity-25 transition-opacity duration-300"></div>
             </Link>
             {isLoggedIn && (
               <Link to="/my-bookings" className="hover:text-[var(--color-brand-gold)] text-sm font-medium">My Bookings</Link>
-            )}
-            {!isLoggedIn && (
-              <Link to="/register" className="hover:text-[var(--color-brand-gold)]">Register</Link>
             )}
             {isLoggedIn && (
               <div className="ml-2 group relative">
@@ -116,18 +132,16 @@ export default function Layout() {
                 }`}></div>
               </div>
             )}
-            <button
-              onClick={() => {
-                localStorage.removeItem('user')
-                navigate('/login')
-              }}
-              className="group ml-4 flex items-center gap-2 rounded-lg border border-slate-500/30 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 px-4 py-2 text-white font-medium shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-            >
-              <svg className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Logout
-            </button>
+            <Link to="/admin-login" className="group relative px-4 py-2 rounded-full bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 hover:from-amber-600 hover:via-yellow-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+              <span className="flex items-center gap-2 text-white font-medium">
+                <svg className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Admin
+              </span>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+            </Link>
             <Link to="/help" className="group relative px-4 py-2 rounded-full bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-violet-700 hover:via-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
               <span className="flex items-center gap-2 text-white font-medium">
                 <svg className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,6 +151,18 @@ export default function Layout() {
               </span>
               <div className="absolute inset-0 rounded-full bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
             </Link>
+            <button
+              onClick={() => {
+                localStorage.removeItem('user')
+                navigate('/login')
+              }}
+              className="group flex items-center gap-2 rounded-lg border border-slate-500/30 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 px-4 py-2 text-white font-medium shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+            >
+              <svg className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Logout
+            </button>
           </nav>
         </div>
       </header>
@@ -212,7 +238,7 @@ export default function Layout() {
             <div>
               <div className="text-white font-semibold mb-5">Contact & Support</div>
               <div className="space-y-4">
-                <div className="group cursor-pointer">
+                <div className="group cursor-pointer" onClick={() => setShowEmailForm(true)}>
                   <div className="flex items-start gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200">
                     <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-[var(--color-brand-gold)] to-[var(--color-brand-gold)]/80 rounded-lg flex items-center justify-center shadow-lg">
                       <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,7 +248,7 @@ export default function Layout() {
                     <div className="flex-1 min-w-0">
                       <div className="text-white font-medium text-sm">Email Support</div>
                       <div className="text-white/70 text-xs mt-0.5 truncate">concierge@grandstay.example</div>
-                      <div className="text-[var(--color-brand-gold)] text-xs mt-1">Response within 2 hours</div>
+                      <div className="text-[var(--color-brand-gold)] text-xs mt-1">Click to send query</div>
                     </div>
                   </div>
                 </div>
@@ -347,6 +373,96 @@ export default function Layout() {
           </div>
         </div>
       </footer>
+
+      {/* Email Query Modal */}
+      {showEmailForm && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+            {emailSent ? (
+              <div className="text-center py-6">
+                <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Query Sent!</h3>
+                <p className="text-gray-600">We'll respond within 2 hours</p>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900">📧 Email Support</h3>
+                  <button onClick={() => setShowEmailForm(false)} className="text-gray-400 hover:text-gray-600">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <form onSubmit={handleEmailQuery} className="space-y-4">
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Name</label>
+                    <input
+                      type="text"
+                      value={emailQuery.name}
+                      onChange={(e) => setEmailQuery({...emailQuery, name: e.target.value})}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Your name"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Email</label>
+                    <input
+                      type="email"
+                      value={emailQuery.email}
+                      onChange={(e) => setEmailQuery({...emailQuery, email: e.target.value})}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="your@email.com"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Subject</label>
+                    <input
+                      type="text"
+                      value={emailQuery.subject}
+                      onChange={(e) => setEmailQuery({...emailQuery, subject: e.target.value})}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Query subject"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Message</label>
+                    <textarea
+                      value={emailQuery.message}
+                      onChange={(e) => setEmailQuery({...emailQuery, message: e.target.value})}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-32 resize-none"
+                      placeholder="Describe your query..."
+                      required
+                    />
+                  </div>
+                  <div className="flex gap-3 mt-6">
+                    <button
+                      type="submit"
+                      className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-bold hover:from-blue-500 hover:to-indigo-500 transition-all"
+                    >
+                      Send Query
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowEmailForm(false)}
+                      className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition-all"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

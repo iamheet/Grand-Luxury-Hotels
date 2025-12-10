@@ -1,7 +1,11 @@
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import FloatingParticles from '../components/FloatingParticles'
+import AIConcierge from '../components/AIConcierge'
 
 export default function BusinessServices() {
   const navigate = useNavigate()
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null)
 
   const services = [
     {
@@ -60,26 +64,18 @@ export default function BusinessServices() {
     }
   ]
 
-  const handleBookService = (service: any) => {
-    console.log('Clicked service:', service.name, 'Route:', service.route)
-    if (service.hasForm && service.route) {
-      navigate(service.route)
-    } else {
-      localStorage.setItem('memberCheckout', JSON.stringify({
-        type: 'business',
-        business: service
-      }))
-      navigate('/member-checkout')
-    }
-  }
+
 
   return (
     <div style={{ 
       background: 'linear-gradient(135deg, #1a1a2e, #16213e, #0f3460)',
       minHeight: '100vh',
       padding: '40px 20px',
-      color: 'white'
+      color: 'white',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
+      <FloatingParticles />
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '50px' }}>
           <h1 style={{ 
@@ -105,16 +101,31 @@ export default function BusinessServices() {
           {services.map((service) => (
             <div
               key={service.id}
+              onMouseEnter={() => setHoveredCard(service.id)}
+              onMouseLeave={() => setHoveredCard(null)}
               style={{
-                background: 'rgba(0,0,0,0.7)',
+                background: hoveredCard === service.id 
+                  ? 'rgba(0,0,0,0.9)' 
+                  : 'rgba(0,0,0,0.7)',
                 borderRadius: '20px',
                 padding: '25px',
-                border: '2px solid #3b82f6',
-                boxShadow: '0 10px 30px rgba(59, 130, 246, 0.2)',
-                transition: 'all 0.3s ease',
+                border: hoveredCard === service.id 
+                  ? '2px solid #fbbf24' 
+                  : '2px solid #3b82f6',
+                boxShadow: hoveredCard === service.id 
+                  ? '0 20px 60px rgba(251, 191, 36, 0.4), 0 0 0 1px rgba(251, 191, 36, 0.1)' 
+                  : '0 10px 30px rgba(59, 130, 246, 0.2)',
+                transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                 display: 'flex',
                 flexDirection: 'column',
-                height: '100%'
+                height: '100%',
+                transform: hoveredCard === service.id 
+                  ? 'translateY(-10px) rotateX(5deg) rotateY(5deg)' 
+                  : 'translateY(0) rotateX(0) rotateY(0)',
+                transformStyle: 'preserve-3d',
+                cursor: 'pointer',
+                position: 'relative',
+                zIndex: 2
               }}
             >
               <img
@@ -168,29 +179,32 @@ export default function BusinessServices() {
                   <span style={{ 
                     fontSize: '28px', 
                     fontWeight: 'bold',
-                    color: '#3b82f6'
+                    color: hoveredCard === service.id ? '#fbbf24' : '#3b82f6',
+                    transition: 'color 0.3s ease'
                   }}>
                     ${service.price}
                   </span>
                 </div>
                 
                 <button
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    console.log('Button clicked for:', service.name)
-                    if (service.id === 1) {
-                      navigate('/executive-meeting-rooms')
-                    } else if (service.id === 2) {
-                      navigate('/corporate-event')
-                    } else if (service.id === 3) {
-                      navigate('/business-travel-concierge')
+                  onClick={() => {
+                    if (service.hasForm && service.route) {
+                      navigate(service.route)
                     } else {
-                      localStorage.setItem('memberCheckout', JSON.stringify({
+                      // Create a room-like object for MemberCheckout compatibility
+                      const businessRoom = {
+                        id: service.id,
+                        name: service.name,
+                        description: service.description,
+                        price: service.price,
+                        image: service.image,
                         type: 'business',
-                        business: service
-                      }))
-                      navigate('/member-checkout')
+                        features: service.features
+                      }
+                      
+                      navigate('/member-checkout', { 
+                        state: { room: businessRoom }
+                      })
                     }
                   }}
                   style={{
@@ -225,13 +239,14 @@ export default function BusinessServices() {
               cursor: 'pointer',
               transition: 'all 0.3s ease'
             }}
-            onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'}
-            onMouseOut={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
+                  onMouseOver={(e) => (e.target as HTMLElement).style.background = 'rgba(255,255,255,0.2)'}
+                  onMouseOut={(e) => (e.target as HTMLElement).style.background = 'rgba(255,255,255,0.1)'}
           >
             ← Back to Member Dashboard
           </button>
         </div>
       </div>
+      <AIConcierge />
     </div>
   )
 }
