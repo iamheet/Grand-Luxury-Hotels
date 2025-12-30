@@ -2,12 +2,12 @@ import { initializeApp } from "firebase/app"
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth"
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBcrvpytyWAoBMUI1_6SwuHx5ew_vBAA_A",
-  authDomain: "grand-luxury-b49dc.firebaseapp.com",
-  projectId: "grand-luxury-b49dc",
-  storageBucket: "grand-luxury-b49dc.firebasestorage.app",
-  messagingSenderId: "185872592144",
-  appId: "1:185872592144:web:56826e89ea1265fd450995"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "your-firebase-api-key",
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "your-project.firebaseapp.com",
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "your-project-id",
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "your-project.firebasestorage.app",
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "123456789",
+  appId: process.env.REACT_APP_FIREBASE_APP_ID || "your-app-id"
 }
 
 const app = initializeApp(firebaseConfig)
