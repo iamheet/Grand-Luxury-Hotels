@@ -1,7 +1,9 @@
 import requests
 import json
+import os
 
-API_KEY = "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"
+# Use environment variable for API key
+API_KEY = os.getenv('OPENAI_API_KEY', 'your-openai-api-key-here')
 
 def test_openai():
     url = "https://api.openai.com/v1/chat/completions"
