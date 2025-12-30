@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Viewer - Grand Stay</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .section { background: white; margin: 20px 0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .section h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        .count { background: #007bff; color: white; padding: 5px 15px; border-radius: 20px; font-size: 14px; }
+        .item { background: #f8f9fa; margin: 10px 0; padding: 15px; border-radius: 5px; border-left: 4px solid #007bff; }
+        .member-item { border-left-color: #28a745; }
+        .booking-item { border-left-color: #ffc107; }
+        .field { margin: 5px 0; }
+        .field strong { color: #495057; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 10px 5px 0 0; }
+        button:hover { background: #0056b3; }
+        .refresh { background: #28a745; }
+        .refresh:hover { background: #1e7e34; }
+        .error { color: #dc3545; background: #f8d7da; padding: 15px; border-radius: 5px; }
+        .loading { text-align: center; padding: 40px; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Grand Stay Database Viewer</h1>
+        
+        <button onclick="loadData()" class="refresh">🔄 Refresh Data</button>
+        <button onclick="openCompass()">📊 Open MongoDB Compass</button>
+        
+        <div id="loading" class="loading" style="display: none;">Loading database data...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <!-- Users Section -->
+        <div class="section">
+            <h2>Regular Users <span id="users-count" class="count">0</span></h2>
+            <div id="users-container"></div>
+        </div>
+        
+        <!-- Members Section -->
+        <div class="section">
+            <h2>Exclusive Members <span id="members-count" class="count">0</span></h2>
+            <div id="members-container"></div>
+        </div>
+        
+        <!-- Bookings Section -->
+        <div class="section">
+            <h2>Bookings <span id="bookings-count" class="count">0</span></h2>
+            <div id="bookings-container"></div>
+        </div>
+    </div>
+
+    <script>
+        async function loadData() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/database');
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayUsers(result.data.users);
+                    displayMembers(result.data.members);
+                    displayBookings(result.data.bookings);
+                } else {
+                    throw new Error('Failed to load data');
+                }
+            } catch (err) {
+                error.textContent = 'Error loading data: ' + err.message;
+                error.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        function displayUsers(users) {
+            document.getElementById('users-count').textContent = users.count;
+            const container = document.getElementById('users-container');
+            
+            if (users.count === 0) {
+                container.innerHTML = '<p>No users found</p>';
+                return;
+            }
+            
+            container.innerHTML = users.data.map(user => `
+                <div class="item">
+                    <div class="field"><strong>Name:</strong> ${user.name}</div>
+                    <div class="field"><strong>Email:</strong> ${user.email}</div>
+                    <div class="field"><strong>Phone:</strong> ${user.phone || 'N/A'}</div>
+                    <div class="field"><strong>Member:</strong> ${user.isMember ? 'Yes' : 'No'}</div>
+                    <div class="field"><strong>Tier:</strong> ${user.membershipTier || 'N/A'}</div>
+                    <div class="field"><strong>Created:</strong> ${new Date(user.createdAt).toLocaleDateString()}</div>
+                    <div class="field"><strong>ID:</strong> ${user._id}</div>
+                </div>
+            `).join('');
+        }
+        
+        function displayMembers(members) {
+            document.getElementById('members-count').textContent = members.count;
+            const container = document.getElementById('members-container');
+            
+            if (members.count === 0) {
+                container.innerHTML = '<p>No exclusive members found</p>';
+                return;
+            }
+            
+            container.innerHTML = members.data.map(member => `
+                <div class="item member-item">
+                    <div class="field"><strong>Name:</strong> ${member.name}</div>
+                    <div class="field"><strong>Email:</strong> ${member.email}</div>
+                    <div class="field"><strong>Phone:</strong> ${member.phone || 'N/A'}</div>
+                    <div class="field"><strong>Membership ID:</strong> ${member.membershipId}</div>
+                    <div class="field"><strong>Tier:</strong> ${member.tier}</div>
+                    <div class="field"><strong>Points:</strong> ${member.points}</div>
+                    <div class="field"><strong>Created:</strong> ${new Date(member.createdAt).toLocaleDateString()}</div>
+                    <div class="field"><strong>ID:</strong> ${member._id}</div>
+                </div>
+            `).join('');
+        }
+        
+        function displayBookings(bookings) {
+            document.getElementById('bookings-count').textContent = bookings.count;
+            const container = document.getElementById('bookings-container');
+            
+            if (bookings.count === 0) {
+                container.innerHTML = '<p>No bookings found</p>';
+                return;
+            }
+            
+            container.innerHTML = bookings.data.map(booking => `
+                <div class="item booking-item">
+                    <div class="field"><strong>Hotel:</strong> ${booking.hotelName || 'N/A'}</div>
+                    <div class="field"><strong>Location:</strong> ${booking.location || 'N/A'}</div>
+                    <div class="field"><strong>Check-in:</strong> ${booking.checkIn ? new Date(booking.checkIn).toLocaleDateString() : 'N/A'}</div>
+                    <div class="field"><strong>Check-out:</strong> ${booking.checkOut ? new Date(booking.checkOut).toLocaleDateString() : 'N/A'}</div>
+                    <div class="field"><strong>Guests:</strong> ${booking.guests || 'N/A'}</div>
+                    <div class="field"><strong>Price:</strong> $${booking.price || 'N/A'}</div>
+                    <div class="field"><strong>Type:</strong> ${booking.bookingType || 'Regular User'}</div>
+                    <div class="field"><strong>Member Tier:</strong> ${booking.memberTier || 'N/A'}</div>
+                    <div class="field"><strong>Status:</strong> ${booking.status || 'confirmed'}</div>
+                    <div class="field"><strong>Booked:</strong> ${new Date(booking.createdAt).toLocaleDateString()}</div>
+                    <div class="field"><strong>User ID:</strong> ${booking.userId}</div>
+                    <div class="field"><strong>Booking ID:</strong> ${booking._id}</div>
+                </div>
+            `).join('');
+        }
+        
+        function openCompass() {
+            alert('MongoDB Compass Connection String:\\n\\nmongodb://localhost:27017\\n\\nDatabase Name: the-grand-stay\\n\\nCollections:\\n- users\\n- members\\n- bookings');
+        }
+        
+        // Load data on page load
+        window.onload = loadData;
+    </script>
+</body>
+</html>

@@ -44,17 +44,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Amenities / Value Proposition */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <ValueCard title="Best Price Guarantee" icon="💎" desc="Exclusive rates and member-only offers." />
-            <ValueCard title="24/7 Concierge" icon="🛎️" desc="Round-the-clock assistance for your stay." />
-            <ValueCard title="Curated Collection" icon="🏨" desc="Handpicked hotels meeting our luxury standards." />
-          </div>
-        </div>
-      </section>
     </div>
   )
 }

@@ -10,6 +10,10 @@ export default function BookingSuccess() {
   useEffect(() => {
     // Save booking to localStorage when we reach success page
     if (booking) {
+      console.log('BookingSuccess - Full booking object:', booking)
+      console.log('BookingSuccess - hotelName:', booking.hotelName)
+      console.log('BookingSuccess - roomTitle:', booking.roomTitle)
+      
       const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
       
       // Check if this booking already exists
@@ -44,20 +48,51 @@ export default function BookingSuccess() {
         <h1 className="text-2xl font-semibold mb-2">Booking confirmed</h1>
         <p className="text-sm text-gray-600 mb-4">Reference: <span className="font-medium">{booking.id || booking.reference || '—'}</span></p>
 
-        <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-4 items-start mb-4">
-          {booking.roomImage && (
-            <div className="w-full md:w-28 h-20 rounded overflow-hidden">
-              <ImageWithFallback src={booking.roomImage} alt={booking.roomTitle || 'Room'} className="w-full h-full object-cover" />
+        <div className="space-y-4 mb-4">
+          {/* Hotel Section */}
+          {booking.hotelName && (
+            <div className="border-b pb-3">
+              <div className="text-xs text-gray-500 uppercase mb-1">Hotel</div>
+              <div className="font-semibold text-lg">{booking.hotelName}</div>
             </div>
           )}
-          <div className="text-left">
-            <div className="font-semibold">{booking.roomTitle || booking.roomName || 'Room'}</div>
-            <div className="text-sm text-gray-600">{booking.hotelName ?? ''}</div>
-            <div className="mt-2 text-sm">
-              Guest: <span className="font-medium">{booking.guest?.name ?? booking.guestName ?? '—'}</span>
+
+          {/* Room Section */}
+          <div className="border-b pb-3">
+            <div className="text-xs text-gray-500 uppercase mb-2">Room Details</div>
+            <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-4 items-start">
+              {booking.roomImage && (
+                <div className="w-full md:w-28 h-20 rounded overflow-hidden">
+                  <ImageWithFallback src={booking.roomImage} alt={booking.roomTitle || 'Room'} className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div className="text-left space-y-1">
+                <div className="font-semibold">{booking.roomTitle || booking.roomName || 'Room'}</div>
+                {booking.checkIn && booking.checkOut && (
+                  <div className="text-sm text-gray-600">
+                    <span>Check-in: {new Date(booking.checkIn).toLocaleDateString()}</span>
+                    <span className="mx-2">•</span>
+                    <span>Check-out: {new Date(booking.checkOut).toLocaleDateString()}</span>
+                  </div>
+                )}
+                {booking.guests && (
+                  <div className="text-sm text-gray-600">Guests: {booking.guests}</div>
+                )}
+                {booking.nights && (
+                  <div className="text-sm text-gray-600">Nights: {booking.nights}</div>
+                )}
+              </div>
             </div>
-            <div className="text-sm">Email: {booking.guest?.email ?? '—'}</div>
-            <div className="text-sm">Phone: {booking.guest?.phone ?? '—'}</div>
+          </div>
+
+          {/* Guest Section */}
+          <div className="border-t pt-3">
+            <div className="text-xs text-gray-500 uppercase mb-2">Guest Information</div>
+            <div className="text-sm space-y-1">
+              <div>Name: <span className="font-medium">{booking.guest?.name ?? booking.guestName ?? '—'}</span></div>
+              <div>Email: <span className="font-medium">{booking.guest?.email ?? '—'}</span></div>
+              <div>Phone: <span className="font-medium">{booking.guest?.phone ?? '—'}</span></div>
+            </div>
           </div>
         </div>
 

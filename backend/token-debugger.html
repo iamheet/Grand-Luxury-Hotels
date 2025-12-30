@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Token Debugger</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .clear-btn { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Token Debugger</h1>
+    
+    <button onclick="checkToken()">Check Current Token</button>
+    <button onclick="clearToken()" class="clear-btn">Clear Token</button>
+    <button onclick="testBookings()">Test Bookings API</button>
+    
+    <div id="results"></div>
+
+    <script>
+        function checkToken() {
+            const token = localStorage.getItem('token');
+            const results = document.getElementById('results');
+            
+            if (!token) {
+                results.innerHTML = '<div class="debug">❌ No token found in localStorage</div>';
+                return;
+            }
+            
+            try {
+                // Decode JWT payload (not secure, just for debugging)
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                
+                results.innerHTML = `
+                    <div class="debug">
+                        <h3>🔑 Token Found</h3>
+                        <p><strong>Token (first 50 chars):</strong> ${token.substring(0, 50)}...</p>
+                        <p><strong>User ID:</strong> ${payload.userId || 'N/A'}</p>
+                        <p><strong>Member ID:</strong> ${payload.memberId || 'N/A'}</p>
+                        <p><strong>Is Exclusive:</strong> ${payload.isExclusive || false}</p>
+                        <p><strong>Login Time:</strong> ${payload.loginTime ? new Date(payload.loginTime).toLocaleString() : 'N/A'}</p>
+                        <p><strong>Expires:</strong> ${new Date(payload.exp * 1000).toLocaleString()}</p>
+                        <p><strong>Full Payload:</strong></p>
+                        <pre>${JSON.stringify(payload, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                results.innerHTML = `<div class="debug">❌ Error decoding token: ${error.message}</div>`;
+            }
+        }
+        
+        function clearToken() {
+            localStorage.removeItem('token');
+            document.getElementById('results').innerHTML = '<div class="debug">✅ Token cleared from localStorage</div>';
+        }
+        
+        async function testBookings() {
+            const token = localStorage.getItem('token');
+            const results = document.getElementById('results');
+            
+            if (!token) {
+                results.innerHTML = '<div class="debug">❌ No token to test with</div>';
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/bookings', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                results.innerHTML = `
+                    <div class="debug">
+                        <h3>📅 Bookings API Response</h3>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Current User ID:</strong> ${data.currentUserId}</p>
+                        <p><strong>Bookings Count:</strong> ${data.count}</p>
+                        <p><strong>Response:</strong></p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                results.innerHTML = `<div class="debug">❌ API Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-check on load
+        window.onload = checkToken;
+    </script>
+</body>
+</html>

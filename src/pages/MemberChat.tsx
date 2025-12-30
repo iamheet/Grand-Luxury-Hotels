@@ -20,7 +20,7 @@ export default function MemberChat() {
       // Welcome message
       setMessages([{
         id: 1,
-        text: `Welcome to Exclusive Member Support, ${parsedMember.name}! I'm your dedicated ${parsedMember.tier} concierge assistant. How may I assist you today?`,
+        text: `Hey ${parsedMember.name}! 👋 I'm Sophie, your personal ${parsedMember.tier} concierge. So glad to have you here! What can I help you with today?`,
         sender: 'bot',
         timestamp: new Date()
       }])
@@ -44,8 +44,82 @@ export default function MemberChat() {
     'help': `I'm here to assist with all your luxury travel needs. I can help with bookings, account information, service inquiries, travel planning, or connect you with your personal concierge. What do you need help with?`
   }
 
-  const getResponse = (message: string) => {
+  const getResponse = async (message: string) => {
     const lowerMessage = message.toLowerCase()
+    
+    // Try AI first for complex questions - use rotation with all 4 keys
+    if (!lowerMessage.match(/\b(hi|hello|hey|bye|goodbye|thank|thanks)\b/)) {
+      const googleKeys = [
+        import.meta.env.VITE_GOOGLE_API_KEY_5,
+        import.meta.env.VITE_GOOGLE_API_KEY_4,
+        import.meta.env.VITE_GOOGLE_API_KEY_3,
+        import.meta.env.VITE_GOOGLE_API_KEY_MEMBER,
+        import.meta.env.VITE_GOOGLE_API_KEY
+      ].filter(key => key).sort(() => Math.random() - 0.5)
+      
+      // Dynamic token allocation based on question complexity
+      let maxTokens = 2000 // default
+      
+      if (lowerMessage.match(/\b(hi|hello|hey|bye|thanks|yes|no|ok)\b/) && lowerMessage.split(' ').length < 5) {
+        maxTokens = 500 // simple greeting/response
+      } else if (lowerMessage.match(/\b(itinerary|plan|detailed|complete|full|day by day|week|days|tour|trip)\b/) || lowerMessage.length > 100) {
+        maxTokens = 8000 // complex detailed request
+      } else if (lowerMessage.match(/\b(list|all|multiple|several|many|various)\b/)) {
+        maxTokens = 4000 // medium-complex list request
+      }
+      
+      // Try each key until one works
+      for (const googleKey of googleKeys) {
+        try {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${googleKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: `You are Sophie, a dedicated ${member?.tier} tier luxury concierge at The Grand Stay. Speak naturally like a real person - use casual language, contractions (I'm, you're, we'll), and be warm and conversational. Don't be overly formal or robotic. Show personality and empathy. Provide detailed answers naturally. Never say you're an AI - you're Sophie, their personal concierge. Question: ${message}` }] }],
+              generationConfig: { temperature: 0.7, maxOutputTokens: maxTokens }
+            })
+          })
+          
+          if (response.ok) {
+            const data = await response.json()
+            let aiResponse = data.candidates[0]?.content?.parts[0]?.text || ''
+            
+            // Try continuation with remaining keys if response was cut off
+            if (aiResponse && (aiResponse.length > 7000 || !aiResponse.match(/[.!?]\s*$/))) {
+              const remainingKeys = googleKeys.filter(k => k !== googleKey)
+              for (const continueKey of remainingKeys) {
+                try {
+                  const continueResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${continueKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      contents: [{ parts: [{ text: `Continue this response: ${aiResponse.slice(-500)}` }] }],
+                      generationConfig: { temperature: 0.7, maxOutputTokens: 8000 }
+                    })
+                  })
+                  
+                  if (continueResponse.ok) {
+                    const continueData = await continueResponse.json()
+                    const continuation = continueData.candidates[0]?.content?.parts[0]?.text || ''
+                    aiResponse = aiResponse + '\n' + continuation
+                    if (continuation.match(/[.!?]\s*$/)) break
+                  }
+                } catch (error) {}
+              }
+            }
+            
+            if (aiResponse) {
+              const decoded = aiResponse.replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+              return decoded
+            }
+          } else if (response.status === 429) {
+            alert('⚠️ API rate limit hit! Rotating to next key...')
+          }
+        } catch (error) {
+          console.warn('API call failed, trying next key...')
+        }
+      }
+    }
     
     // Greetings
     if (lowerMessage.match(/\b(hi|hello|hey|greetings|good morning|good afternoon|good evening|howdy|sup)\b/)) {
@@ -309,7 +383,7 @@ export default function MemberChat() {
     }
   }
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputMessage.trim()) return
 
     const userMessage = {
@@ -323,10 +397,10 @@ export default function MemberChat() {
     setInputMessage('')
     setIsTyping(true)
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const botResponse = {
         id: messages.length + 2,
-        text: getResponse(inputMessage),
+        text: await getResponse(inputMessage),
         sender: 'bot',
         timestamp: new Date()
       }
@@ -456,7 +530,7 @@ export default function MemberChat() {
                         ? 'bg-gradient-to-r from-yellow-300/20 via-transparent to-yellow-300/20'
                         : 'bg-gradient-to-r from-white/10 via-transparent to-white/10'
                     } animate-pulse`}></div>
-                    <p className="text-sm leading-relaxed relative z-10 font-medium">{message.text}</p>
+                    <div className="text-sm leading-relaxed relative z-10 font-medium whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: message.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/###\s+(.*?)\n/g, '<h3 class="text-lg font-bold mt-4 mb-2">$1</h3>').replace(/\n/g, '<br/>') }} />
                     <p className={`text-xs mt-2 flex items-center gap-1 ${
                       message.sender === 'user' ? 'text-[var(--color-brand-navy)]/70 justify-end' : 'text-gray-400'
                     }`}>
@@ -507,16 +581,7 @@ export default function MemberChat() {
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                   placeholder="Type your message..."
-                  style={{
-                    width: '100%',
-                    padding: '20px',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '2px solid rgba(212, 175, 55, 0.4)',
-                    borderRadius: '16px',
-                    color: '#ffffff',
-                    fontSize: '16px',
-                    outline: 'none'
-                  }}
+                  className="w-full p-5 bg-white/10 border-2 border-[var(--color-brand-gold)]/40 rounded-2xl text-white text-base focus:outline-none focus:border-[var(--color-brand-gold)] transition-colors"
                 />
               </div>
               
@@ -564,10 +629,10 @@ export default function MemberChat() {
                   }
                   setMessages(prev => [...prev, userMessage])
                   setIsTyping(true)
-                  setTimeout(() => {
+                  setTimeout(async () => {
                     const botResponse = {
                       id: messages.length + 2,
-                      text: getResponse(action.text),
+                      text: await getResponse(action.text),
                       sender: 'bot',
                       timestamp: new Date()
                     }

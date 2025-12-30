@@ -111,7 +111,8 @@ export default function MemberDashboard() {
     const room = {
       id: `${selectedHotel.id}-${roomType.toLowerCase().replace(' ', '-')}`,
       name: `${selectedHotel.name} - ${roomType}`,
-      title: `${selectedHotel.name} - ${roomType}`,
+      title: roomType,
+      hotelName: selectedHotel.name,
       image: selectedHotel.image,
       price: discountedPrice,
       features: [`${selectedHotel.location}`, `${selectedHotel.rating} stars`, `${memberDiscount}% member discount`],

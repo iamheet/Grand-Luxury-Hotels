@@ -121,7 +121,7 @@ export default function RoyalConcierge() {
               </div>
               <div>
                 <h3 className="text-white font-bold">Call Concierge</h3>
-                <p className="text-emerald-200 text-sm">+1 (800) ROYAL-01</p>
+                <p className="text-white text-sm">+1 (800) ROYAL-01</p>
               </div>
             </div>
             <button 
@@ -141,7 +141,7 @@ export default function RoyalConcierge() {
               </div>
               <div>
                 <h3 className="text-white font-bold">Live Chat</h3>
-                <p className="text-blue-200 text-sm">Instant messaging</p>
+                <p className="text-white text-sm">Instant messaging</p>
               </div>
             </div>
             <button 
@@ -161,7 +161,7 @@ export default function RoyalConcierge() {
               </div>
               <div>
                 <h3 className="text-white font-bold">Email Request</h3>
-                <p className="text-purple-200 text-sm">Detailed inquiries</p>
+                <p className="text-white text-sm">Detailed inquiries</p>
               </div>
             </div>
             <button 
@@ -226,7 +226,7 @@ export default function RoyalConcierge() {
                     <div className="w-2 h-2 bg-[var(--color-brand-gold)] rounded-full mt-2 group-hover:scale-150 transition-transform"></div>
                     <div className="flex-1">
                       <p className="text-white font-medium group-hover:text-[var(--color-brand-gold)] transition-colors mb-1">{service.name}</p>
-                      <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors">{service.desc}</p>
+                      <p className="text-gray-300 text-sm group-hover:text-white transition-colors">{service.desc}</p>
                     </div>
                     <svg className="w-5 h-5 text-gray-400 group-hover:text-[var(--color-brand-gold)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -257,7 +257,7 @@ export default function RoyalConcierge() {
                 </svg>
               </div>
               <h4 className="text-white font-bold mb-2">Priority Response</h4>
-              <p className="text-gray-300 text-sm">Guaranteed response within 15 minutes, 24/7</p>
+              <p className="text-white text-sm">Guaranteed response within 15 minutes, 24/7</p>
             </div>
             
             <div className="text-center">
@@ -267,7 +267,7 @@ export default function RoyalConcierge() {
                 </svg>
               </div>
               <h4 className="text-white font-bold mb-2">No Request Too Small</h4>
-              <p className="text-gray-300 text-sm">From simple tasks to extraordinary experiences</p>
+              <p className="text-white text-sm">From simple tasks to extraordinary experiences</p>
             </div>
             
             <div className="text-center">
@@ -277,7 +277,7 @@ export default function RoyalConcierge() {
                 </svg>
               </div>
               <h4 className="text-white font-bold mb-2">Personal Touch</h4>
-              <p className="text-gray-300 text-sm">Dedicated concierge who knows your preferences</p>
+              <p className="text-white text-sm">Dedicated concierge who knows your preferences</p>
             </div>
           </div>
         </div>

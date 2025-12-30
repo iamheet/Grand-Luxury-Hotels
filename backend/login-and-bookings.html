@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & My Bookings - Grand Stay</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { background: white; margin: 20px 0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .user-info { background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .booking-card { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; background: #f9f9f9; }
+        .booking-type { background: #007bff; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .exclusive { background: #28a745; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .logout-btn { background: #dc3545; }
+        .logout-btn:hover { background: #c82333; }
+        input { padding: 10px; margin: 5px; width: 250px; border: 1px solid #ddd; border-radius: 4px; }
+        .debug { background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏨 Grand Stay - Login & Bookings</h1>
+        
+        <!-- Login Section -->
+        <div id="login-section" class="section">
+            <h3>Login</h3>
+            <div>
+                <input type="email" id="email" placeholder="Email" />
+                <input type="password" id="password" placeholder="Password" />
+            </div>
+            <div>
+                <input type="text" id="membershipId" placeholder="Membership ID (for exclusive members)" />
+                <label>
+                    <input type="checkbox" id="isExclusive"> Exclusive Member Login
+                </label>
+            </div>
+            <div>
+                <button onclick="login()">Login</button>
+                <a href="#" onclick="showForgotPassword()" style="
+                    display: block;
+                    text-align: center;
+                    margin-top: 15px;
+                    color: #007bff;
+                    text-decoration: none;
+                    font-size: 14px;
+                ">Forgot Password?</a>
+            </div>
+            
+            <!-- Divider -->
+            <div style="text-align: center; margin: 20px 0; color: #6c757d;">
+                <hr style="border: none; border-top: 1px solid #dee2e6; margin: 10px 0;">
+                <span style="background: white; padding: 0 15px;">OR</span>
+            </div>
+            
+            <!-- Google Login Button -->
+            <div style="text-align: center;">
+                <button onclick="googleLogin()" style="
+                    background: #4285f4;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                    margin: 0 auto;
+                    width: 200px;
+                ">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+            </div>
+        </div>
+
+        <!-- Forgot Password Section -->
+        <div id="forgot-password-section" class="section" style="display: none;">
+            <h3>Reset Password</h3>
+            <p style="color: #6c757d; margin-bottom: 15px;">Choose your account type and enter your credentials to reset password.</p>
+            
+            <div style="margin-bottom: 15px;">
+                <label>
+                    <input type="radio" name="resetType" value="regular" checked onchange="toggleResetFields()"> Regular User (Email)
+                </label>
+                <label style="margin-left: 20px;">
+                    <input type="radio" name="resetType" value="exclusive" onchange="toggleResetFields()"> Exclusive Member (Membership ID)
+                </label>
+            </div>
+            
+            <div id="regular-reset" style="display: block;">
+                <input type="email" id="forgot-email" placeholder="Enter your email" style="width: 100%; margin-bottom: 15px;" />
+            </div>
+            
+            <div id="exclusive-reset" style="display: none;">
+                <input type="text" id="forgot-membershipId" placeholder="Enter your Membership ID" style="width: 100%; margin-bottom: 15px;" />
+            </div>
+            
+            <div>
+                <button onclick="sendResetLink()">Send Reset Link</button>
+                <button onclick="showLogin()" style="background: #6c757d; margin-left: 10px;">Back to Login</button>
+            </div>
+            <div id="reset-message" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- User Info Section -->
+        <div id="user-section" class="section" style="display: none;">
+            <div class="user-info">
+                <h4>Logged in as:</h4>
+                <div id="user-details"></div>
+                <button onclick="logout()" class="logout-btn">Logout</button>
+                <button onclick="fetchBookings()">Refresh My Bookings</button>
+            </div>
+            
+            <!-- Debug Info -->
+            <div id="debug-info" class="debug"></div>
+            
+            <!-- Bookings -->
+            <h3>My Bookings</h3>
+            <div id="bookings-container"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let currentToken = null;
+
+        // Check if already logged in
+        window.onload = function() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                currentToken = token;
+                fetchUserProfile();
+            }
+        };
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const membershipId = document.getElementById('membershipId').value;
+            const isExclusive = document.getElementById('isExclusive').checked;
+
+            // Clear previous session data
+            clearUserData();
+
+            const loginData = { email, password };
+            if (isExclusive && membershipId) {
+                loginData.membershipId = membershipId;
+                loginData.isExclusive = true;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(loginData)
+                });
+
+                const data = await response.json();
+                
+                if (data.token) {
+                    // Store new token and clear old data
+                    localStorage.setItem('token', data.token);
+                    currentToken = data.token;
+                    currentUser = data.user || data.member;
+                    
+                    console.log('Login successful:', currentUser);
+                    showUserSection();
+                    fetchBookings();
+                } else {
+                    alert('Login failed: ' + data.message);
+                }
+            } catch (error) {
+                alert('Login error: ' + error.message);
+            }
+        }
+
+        async function fetchUserProfile() {
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    currentUser = data.user;
+                    showUserSection();
+                    fetchBookings();
+                } else {
+                    logout();
+                }
+            } catch (error) {
+                console.error('Profile fetch error:', error);
+                logout();
+            }
+        }
+
+        async function fetchBookings() {
+            if (!currentToken) {
+                alert('Please login first');
+                return;
+            }
+
+            try {
+                console.log('Fetching bookings with token:', currentToken.substring(0, 20) + '...');
+                
+                const response = await fetch('http://localhost:5000/api/bookings', {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                console.log('Bookings response:', data);
+                
+                // Update debug info
+                document.getElementById('debug-info').innerHTML = `
+                    <strong>Debug Info:</strong><br>
+                    Current User ID: ${currentUser?.id}<br>
+                    Token User ID: ${data.currentUserId}<br>
+                    Bookings Count: ${data.count}<br>
+                    Response: ${JSON.stringify(data, null, 2)}
+                `;
+                
+                displayBookings(data.bookings || []);
+            } catch (error) {
+                console.error('Fetch bookings error:', error);
+                alert('Error fetching bookings: ' + error.message);
+            }
+        }
+
+        function displayBookings(bookings) {
+            const container = document.getElementById('bookings-container');
+            
+            if (bookings.length === 0) {
+                container.innerHTML = '<p>✅ No bookings found for this user. This is correct for a new login!</p>';
+                return;
+            }
+
+            container.innerHTML = bookings.map(booking => `
+                <div class="booking-card">
+                    <h4>${booking.hotelName || 'Hotel Name'}</h4>
+                    <span class="booking-type ${booking.bookingType === 'Exclusive Member' ? 'exclusive' : ''}">
+                        ${booking.bookingType || 'Regular User'}
+                        ${booking.memberTier ? ` - ${booking.memberTier}` : ''}
+                    </span>
+                    <p><strong>Location:</strong> ${booking.location || 'N/A'}</p>
+                    <p><strong>Check-in:</strong> ${new Date(booking.checkIn).toLocaleDateString()}</p>
+                    <p><strong>Check-out:</strong> ${new Date(booking.checkOut).toLocaleDateString()}</p>
+                    <p><strong>Guests:</strong> ${booking.guests || 'N/A'}</p>
+                    <p><strong>Price:</strong> $${booking.price || 'N/A'}</p>
+                    <p><strong>Status:</strong> ${booking.status || 'confirmed'}</p>
+                    <p><strong>Booking ID:</strong> ${booking._id}</p>
+                    <p><strong>User ID:</strong> ${booking.userId}</p>
+                </div>
+            `).join('');
+        }
+
+        function showUserSection() {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('user-section').style.display = 'block';
+            
+            const userDetails = document.getElementById('user-details');
+            userDetails.innerHTML = `
+                <p><strong>Name:</strong> ${currentUser.name}</p>
+                <p><strong>Email:</strong> ${currentUser.email}</p>
+                <p><strong>ID:</strong> ${currentUser.id}</p>
+                ${currentUser.membershipId ? `<p><strong>Membership ID:</strong> ${currentUser.membershipId}</p>` : ''}
+                ${currentUser.membershipTier ? `<p><strong>Tier:</strong> ${currentUser.membershipTier}</p>` : ''}
+            `;
+        }
+
+        function clearUserData() {
+            currentUser = null;
+            currentToken = null;
+            document.getElementById('bookings-container').innerHTML = '';
+            document.getElementById('debug-info').innerHTML = '';
+        }
+
+        function logout() {
+            // Clear all data
+            localStorage.removeItem('token');
+            clearUserData();
+            
+            // Reset form
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('membershipId').value = '';
+            document.getElementById('isExclusive').checked = false;
+            
+            // Show login section
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('user-section').style.display = 'none';
+            
+            console.log('Logged out successfully');
+        }
+        
+        function googleLogin() {
+            // Placeholder for Google OAuth integration
+            alert('Google Login integration coming soon!\n\nTo implement:\n1. Set up Google OAuth 2.0\n2. Add Google Sign-In JavaScript library\n3. Configure redirect URIs\n4. Handle Google auth response');
+            
+            // Example of what Google login would do:
+            // 1. Open Google OAuth popup
+            // 2. User signs in with Google
+            // 3. Get Google user info
+            // 4. Send to your backend to create/login user
+            // 5. Receive JWT token from your backend
+            // 6. Store token and redirect to dashboard
+        }
+        
+        function toggleResetFields() {
+            const resetType = document.querySelector('input[name="resetType"]:checked').value;
+            const regularDiv = document.getElementById('regular-reset');
+            const exclusiveDiv = document.getElementById('exclusive-reset');
+            
+            if (resetType === 'regular') {
+                regularDiv.style.display = 'block';
+                exclusiveDiv.style.display = 'none';
+            } else {
+                regularDiv.style.display = 'none';
+                exclusiveDiv.style.display = 'block';
+            }
+        }
+        
+        function showForgotPassword() {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('forgot-password-section').style.display = 'block';
+            document.getElementById('user-section').style.display = 'none';
+        }
+        
+        function showLogin() {
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('forgot-password-section').style.display = 'none';
+            document.getElementById('user-section').style.display = 'none';
+        }
+        
+        async function sendResetLink() {
+            const resetType = document.querySelector('input[name="resetType"]:checked').value;
+            const messageDiv = document.getElementById('reset-message');
+            
+            let requestData = {};
+            
+            if (resetType === 'regular') {
+                const email = document.getElementById('forgot-email').value;
+                if (!email) {
+                    messageDiv.innerHTML = '<p style="color: red;">Please enter your email address.</p>';
+                    return;
+                }
+                requestData = { email };
+            } else {
+                const membershipId = document.getElementById('forgot-membershipId').value;
+                if (!membershipId) {
+                    messageDiv.innerHTML = '<p style="color: red;">Please enter your Membership ID.</p>';
+                    return;
+                }
+                requestData = { membershipId, isExclusive: true };
+            }
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    messageDiv.innerHTML = `
+                        <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; border: 1px solid #c3e6cb;">
+                            <p><strong>✅ ${data.message}</strong></p>
+                            ${data.resetLink ? `<p><strong>Reset Link:</strong> <a href="${data.resetLink}" target="_blank">${data.resetLink}</a></p>` : ''}
+                            <p><em>Note: In production, this link would be sent to your ${resetType === 'regular' ? 'email' : 'registered contact'}.</em></p>
+                        </div>
+                    `;
+                } else {
+                    messageDiv.innerHTML = `<p style="color: red;">❌ ${data.message}</p>`;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<p style="color: red;">❌ Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

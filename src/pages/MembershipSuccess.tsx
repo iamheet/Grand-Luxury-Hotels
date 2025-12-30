@@ -78,10 +78,15 @@ export default function MembershipSuccess() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <h3 className="font-semibold text-yellow-800 mb-2">Important: Save Your Membership ID</h3>
+              <h3 className="font-semibold text-yellow-800 mb-2">Important: Save Your Login Credentials</h3>
+              <p className="text-yellow-700 text-sm mb-2">
+                <strong>Membership ID:</strong> {memberData.membershipId}
+              </p>
               <p className="text-yellow-700 text-sm">
-                Please save your Membership ID <strong>{memberData.membershipId}</strong> in a secure place. 
-                You'll need it to access your exclusive member portal.
+                <strong>Temporary Password:</strong> {memberData.password}
+              </p>
+              <p className="text-yellow-700 text-sm mt-2">
+                Please save these credentials. Use them to login to your exclusive member portal.
               </p>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { API_ENDPOINTS } from '../config/api'
 
 export default function MemberCheckout() {
   const navigate = useNavigate()
@@ -103,7 +104,7 @@ export default function MemberCheckout() {
   const handleConfirm = async () => {
     setLoading(true)
 
-    setTimeout(() => {
+    try {
       const hasHotel = selectedServices.some(s => s.type !== 'aircraft' && s.type !== 'car' && s.type !== 'travel' && s.type !== 'dining' && s.type !== 'entertainment' && s.type !== 'chef')
       const hasAircraft = selectedServices.some(s => s.type === 'aircraft')
       const hasCar = selectedServices.some(s => s.type === 'car')
@@ -143,8 +144,46 @@ export default function MemberCheckout() {
         .filter(s => s.type === 'chef')
         .reduce((sum, s) => sum + (s.chef?.price || 0), 0)
 
-      const booking = {
-        id: Date.now().toString(),
+      const backendData = {
+        hotelName: selectedServices[0]?.hotelName || 'Service',
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        guests: guests,
+        nights: nights,
+        room: {
+          ...selectedServices[0],
+          customerName: member.name,
+          customerEmail: guestEmail || member.email,
+          customerPhone: guestPhone || member.phone,
+          guestName: member.name,
+          guestEmail: guestEmail || member.email,
+          guestPhone: guestPhone || member.phone
+        },
+        customerName: member.name,
+        customerEmail: guestEmail || member.email,
+        customerPhone: guestPhone || member.phone,
+        guestName: member.name,
+        guestEmail: guestEmail || member.email,
+        guestPhone: guestPhone || member.phone,
+        name: member.name,
+        email: guestEmail || member.email,
+        phone: guestPhone || member.phone,
+        member: member,
+        guest: {
+          name: member.name,
+          email: guestEmail || member.email,
+          phone: guestPhone || member.phone
+        },
+        total: total,
+        status: 'confirmed'
+      }
+
+      console.log('MemberCheckout - Sending to backend:', backendData)
+      console.log('MemberCheckout - Member name:', member.name)
+      console.log('MemberCheckout - Guest email:', guestEmail)
+      console.log('MemberCheckout - Member email:', member.email)
+
+      const fullData = {
         type: [hasHotel, hasAircraft, hasCar, hasTravel, hasDining, hasEntertainment, hasChef].filter(Boolean).length > 1 ? 'combined' : hasAircraft ? 'aircraft' : hasCar ? 'car' : hasTravel ? 'travel' : hasDining ? 'dining' : hasEntertainment ? 'entertainment' : hasChef ? 'chef' : 'hotel',
         services: selectedServices,
         room: selectedServices.find(s => s.type !== 'aircraft' && s.type !== 'car' && s.type !== 'travel') || selectedServices[0],
@@ -175,12 +214,84 @@ export default function MemberCheckout() {
         status: 'confirmed'
       }
 
-      const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
-      existingBookings.push(booking)
-      localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
+      // Save to backend
+      const token = localStorage.getItem('token')
+      if (token) {
+        const response = await fetch(API_ENDPOINTS.bookings, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(backendData)
+        })
 
-      navigate('/booking-success', { state: { booking } })
-    }, 2000)
+        if (response.ok) {
+          const result = await response.json()
+          
+          console.log('MemberCheckout - Backend result:', result)
+          console.log('MemberCheckout - result.booking.room:', result.booking.room)
+          
+          const booking = { 
+            id: result.booking._id,
+            hotelName: result.booking.hotelName || result.booking.room?.hotelName,
+            roomTitle: result.booking.room?.title,
+            roomImage: result.booking.room?.image,
+            guest: {
+              name: member.name,
+              email: guestEmail || member.email,
+              phone: guestPhone || member.phone
+            },
+            member: member,
+            total: result.booking.total || total,
+            checkIn: result.booking.checkIn,
+            checkOut: result.booking.checkOut,
+            guests: result.booking.guests,
+            nights: result.booking.nights,
+            status: result.booking.status
+          }
+          
+          console.log('MemberCheckout - Final booking object:', booking)
+          
+          // Also save to localStorage for backward compatibility
+          const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
+          existingBookings.push(booking)
+          localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
+
+          navigate('/booking-success', { state: { booking } })
+        } else {
+          throw new Error('Failed to save booking')
+        }
+      } else {
+        const booking = { 
+          id: Date.now().toString(),
+          hotelName: selectedServices[0]?.hotelName || selectedServices[0]?.name,
+          roomTitle: selectedServices[0]?.title || selectedServices[0]?.name,
+          roomImage: selectedServices[0]?.image,
+          guest: {
+            name: member.name,
+            email: guestEmail || member.email,
+            phone: guestPhone || member.phone
+          },
+          member: member,
+          total: total,
+          checkIn: checkInDate,
+          checkOut: checkOutDate,
+          guests: guests,
+          nights: nights,
+          status: 'confirmed'
+        }
+        const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
+        existingBookings.push(booking)
+        localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
+        navigate('/booking-success', { state: { booking } })
+      }
+    } catch (error) {
+      console.error('Booking error:', error)
+      alert('Failed to create booking. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const addService = (service: any) => {
@@ -272,9 +383,12 @@ export default function MemberCheckout() {
                     <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <div className="overflow-hidden">
-                  <p className="text-xl font-semibold text-white whitespace-nowrap overflow-hidden text-ellipsis">
-                    {member.name} • <span className="text-[var(--color-brand-gold)]">{member.tier} Member</span> • <span className="text-gray-300">ID: {member.membershipId}</span>
+                <div>
+                  <p className="text-xl font-semibold text-white">
+                    {member.name}
+                  </p>
+                  <p className="text-sm text-gray-300 mt-1">
+                    <span className="text-[var(--color-brand-gold)]">{member.tier} Member</span> • ID: {member.membershipId}
                   </p>
                 </div>
               </div>

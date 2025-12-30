@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import ImageWithFallback from '../components/ImageWithFallback'
+import { API_ENDPOINTS } from '../config/api'
 
 type RoomProp = {
   id: string
@@ -57,9 +58,9 @@ export default function Checkout() {
   }, [room, navigate])
 
   // auth / stored user detection
-  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null
-  const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null
-  const parsedUser = storedUser ? JSON.parse(storedUser) : null
+  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') || localStorage.getItem('token') : null
+  const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') || localStorage.getItem('member') || localStorage.getItem('memberCheckout') : null
+  const parsedUser = storedUser && storedUser !== 'undefined' ? JSON.parse(storedUser) : null
 
   // form fields
   const [name, setName] = useState(parsedUser?.name || '')
@@ -126,50 +127,53 @@ export default function Checkout() {
 
     setLoading(true)
     try {
-      // If user wants to create account, register first
+      console.log('Room object:', room)
+      
       let usedToken = token
       if (!usedToken && createAccount) {
         usedToken = await doRegisterIfNeeded()
       }
 
-      // prepare booking payload
-      const payload = {
-        roomId: room.id,
-        roomTitle: room.title || room.name,
-        guest: {
-          name: name.trim(),
-          email: email.trim().toLowerCase(),
-          phone: phone.trim(),
-        },
-        // add dates, hotel id, extras here if available in state
+      const backendData = {
+        hotelName: room.hotel || room.hotelName || room.title || room.name || 'Hotel',
+        checkIn: new Date().toISOString().split('T')[0],
+        checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+        guests: 1,
+        status: 'confirmed'
       }
 
       const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-      if (usedToken) headers['Authorization'] = `Bearer ${usedToken}`
+      const userToken = localStorage.getItem('token')
+      if (userToken) headers['Authorization'] = `Bearer ${userToken}`
 
-      // Create booking object
+      const response = await fetch(API_ENDPOINTS.bookings, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(backendData)
+      })
+
+      if (!response.ok) throw new Error('Booking failed')
+
+      const data = await response.json()
+      
       const booking = {
-        id: Date.now().toString(),
-        room: room,
-        guest: payload.guest,
-        checkIn: new Date().toISOString().split('T')[0],
-        checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0], // tomorrow
-        guests: 1,
-        nights: 1,
+        id: data.booking._id,
+        hotelName: room.hotel || room.hotelName ,
+        roomTitle: room.title || room.name,
+        roomImage: room.image,
+        guest: {
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          phone: phone.trim()
+        },
         total: room.price,
-        bookingDate: new Date().toISOString(),
-        status: 'confirmed',
-        roomTitle: payload.roomTitle,
-        roomImage: room.image
+        checkIn: backendData.checkIn,
+        checkOut: backendData.checkOut,
+        guests: backendData.guests,
+        status: 'confirmed'
       }
       
-      // Save to localStorage
-      const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
-      existingBookings.push(booking)
-      localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
-      localStorage.setItem('user', JSON.stringify(payload.guest))
-      
-      // Navigate to success page
+      localStorage.setItem('user', JSON.stringify({ name: name.trim(), email: email.trim().toLowerCase(), phone: phone.trim() }))
       navigate('/booking-success', { state: { booking } })
     } catch (err: any) {
       console.error('Booking error:', err)
@@ -193,12 +197,12 @@ export default function Checkout() {
 
               <label className="block mb-2">
                 <span className="text-sm">Full name</span>
-                <input value={name} onChange={(e) => setName(e.target.value)} className="w-full mt-1 rounded-md border px-2 py-1" />
+                <input value={name} disabled className="w-full mt-1 rounded-md border px-2 py-1 bg-gray-100 cursor-not-allowed" />
               </label>
 
               <label className="block mb-2">
                 <span className="text-sm">Email</span>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full mt-1 rounded-md border px-2 py-1" />
+                <input type="email" value={email} disabled className="w-full mt-1 rounded-md border px-2 py-1 bg-gray-100 cursor-not-allowed" />
               </label>
 
               <label className="block mb-2">

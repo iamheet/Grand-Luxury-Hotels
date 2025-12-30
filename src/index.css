@@ -16,6 +16,19 @@ html, body, #app {
 
 body {
   @apply bg-white text-gray-900 font-sans;
+  cursor: default !important;
+}
+
+* {
+  cursor: default !important;
+}
+
+a, button, [role="button"], input[type="submit"], input[type="button"] {
+  cursor: pointer !important;
+}
+
+input, textarea, select {
+  cursor: text !important;
 }
 
 .font-display { font-family: 'Playfair Display', serif; }

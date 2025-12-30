@@ -71,21 +71,47 @@ export default function MembershipPayment() {
     e.preventDefault()
     setProcessing(true)
 
-    // Simulate payment processing
-    setTimeout(() => {
+    try {
       const membershipId = generateMembershipId()
-      const memberData = {
-        email: formData.email,
-        name: formData.cardName,
-        membershipId,
-        tier: currentPlan.name,
-        joinDate: new Date().toISOString().split('T')[0],
-        paymentAmount: currentPlan.price
-      }
+      const password = Math.random().toString(36).slice(-8)
       
-      localStorage.setItem('member', JSON.stringify(memberData))
-      navigate('/membership-success', { state: { memberData } })
-    }, 2000)
+      const response = await fetch('http://localhost:5000/api/members/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.cardName,
+          email: formData.email,
+          password,
+          phone: formData.phone,
+          tier: currentPlan.name,
+          membershipId
+        })
+      })
+
+      const data = await response.json()
+      
+      if (response.ok) {
+        const memberData = {
+          email: formData.email,
+          name: formData.cardName,
+          membershipId,
+          tier: currentPlan.name,
+          joinDate: new Date().toISOString().split('T')[0],
+          paymentAmount: currentPlan.price,
+          password
+        }
+        
+        localStorage.setItem('member', JSON.stringify(memberData))
+        navigate('/membership-success', { state: { memberData } })
+      } else {
+        alert(data.message || 'Registration failed')
+        setProcessing(false)
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('Payment processing failed')
+      setProcessing(false)
+    }
   }
 
   return (

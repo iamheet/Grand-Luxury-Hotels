@@ -197,7 +197,7 @@ export default function HotelDetails() {
 
         {/* Room Selector */}
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <RoomSelector rooms={hotel.rooms} />
+          <RoomSelector rooms={hotel.rooms} hotelName={hotel.name} />
         </aside>
       </section>
     </div>

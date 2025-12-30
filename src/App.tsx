@@ -53,6 +53,7 @@ import BusinessTravelConcierge from './pages/BusinessTravelConcierge'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminLogin from './pages/AdminLogin'
 import NormalHotelsDashboard from './pages/NormalHotelsDashboard'
+import Games from './pages/Games'
 
 export default function App() {
   return (
@@ -101,6 +102,7 @@ export default function App() {
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/normal-hotels-dashboard" element={<NormalHotelsDashboard />} />
+        <Route path="/games" element={<Games />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="search" element={<SearchResults />} />

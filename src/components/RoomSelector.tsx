@@ -36,7 +36,7 @@ const defaultRooms: RoomProp[] = [
   },
 ]
 
-export default function RoomSelector({ rooms = defaultRooms }: { rooms?: RoomProp[] }) {
+export default function RoomSelector({ rooms = defaultRooms, hotelName }: { rooms?: RoomProp[], hotelName?: string }) {
   const navigate = useNavigate()
 
   return (
@@ -73,7 +73,7 @@ export default function RoomSelector({ rooms = defaultRooms }: { rooms?: RoomPro
                 <button
                   className="mt-0 inline-flex items-center justify-center rounded-md px-3 py-1 text-sm"
                   style={{ backgroundColor: 'var(--color-brand-gold)', color: '#0A1931' }}
-                  onClick={() => navigate('/checkout', { state: { room: r } })}
+                  onClick={() => navigate('/checkout', { state: { room: { ...r, hotelName } } })}
                 >
                   Select
                 </button>

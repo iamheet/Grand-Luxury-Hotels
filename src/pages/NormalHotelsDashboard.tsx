@@ -15,6 +15,7 @@ export default function NormalHotelsDashboard() {
   const [hotels, setHotels] = useState<Hotel[]>([])
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingHotel, setEditingHotel] = useState<Hotel | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [formData, setFormData] = useState({
     name: '',
     location: '',
@@ -23,7 +24,6 @@ export default function NormalHotelsDashboard() {
     rating: ''
   })
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -32,9 +32,7 @@ export default function NormalHotelsDashboard() {
       navigate('/admin-login')
       return
     }
-  }, [navigate])
 
-  useEffect(() => {
     try {
       const saved = localStorage.getItem('normalHotels')
       if (saved) {
@@ -43,40 +41,18 @@ export default function NormalHotelsDashboard() {
         const defaultHotels = [
           { id: 'paris-1', name: 'Hôtel Étoile Royale', location: 'Paris', price: 520, image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=400&auto=format&fit=crop', rating: 5, exclusive: false },
           { id: 'paris-2', name: 'Le Jardin Suites', location: 'Paris', price: 360, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/549415122.jpg?k=6aa38e1d6d970b5756c6e0bd4297a603ce8618ffec17a5e8c2332ac20ab1bc2e&o=', rating: 4, exclusive: false },
-          { id: 'paris-3', name: 'Montmartre Inn', location: 'Paris', price: 180, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/269945146.jpg?k=705f092a0e86ab775de93f8e2013b12ae5981739f5a513bcecead2c0db4e109d&o=', rating: 3, exclusive: false },
           { id: 'nyc-1', name: 'The Skyline Tower', location: 'New York', price: 480, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/763346606.jpg?k=6ec8469c977fbd5e6867bd1da4f454db5914ccf5c962cd9b9ae74a5c2c766ca4&o=', rating: 5, exclusive: false },
-          { id: 'nyc-2', name: 'Central Grand', location: 'New York', price: 340, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/674961168.jpg?k=478bea50dd93b61a34be446f180c1b079e08ed9ce425d2680b87f91afea36272&o=', rating: 4, exclusive: false },
-          { id: 'nyc-3', name: 'Hudson Pods', location: 'New York', price: 150, image: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=400&auto=format&fit=crop', rating: 3, exclusive: false },
           { id: 'tokyo-1', name: 'Shinjuku Imperial', location: 'Tokyo', price: 450, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/677082763.jpg?k=1e0efd2d22e212697c98ff09502775672c39f4b38dc54b729c3a76f800173d12&o=', rating: 5, exclusive: false },
-          { id: 'tokyo-2', name: 'Ginza Artisan Hotel', location: 'Tokyo', price: 310, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/622864288.jpg?k=6709fc69eab0ae881792007d3d099fb03e92be6f6a925e19dce4f212b0664971&o=', rating: 4, exclusive: false },
-          { id: 'tokyo-3', name: 'Asakusa Capsule', location: 'Tokyo', price: 90, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/488327823.jpg?k=ff6638640efe474a5079fc280b26ba9e3ea4e1a4cfc0dbfaef69d29b3d3cb821&o=', rating: 3, exclusive: false },
           { id: 'dubai-1', name: 'Palm Marina Resort', location: 'Dubai', price: 530, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/727476358.jpg?k=aec126bb04f23b6b833361fd74d87bd9512216d5bc27827f96554dbe59602a31&o=', rating: 5, exclusive: false },
-          { id: 'dubai-2', name: 'Desert Pearl', location: 'Dubai', price: 330, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/598095554.jpg?k=a6feffaab51bf2d7bdbdb6eb5ea1ef8f9e7800524f7f7cfc093519c50f28fd48&o=', rating: 4, exclusive: false },
-          { id: 'dubai-3', name: 'Old Town Lodge', location: 'Dubai', price: 160, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/567316864.jpg?k=5a093e3d899bc5afd867cd1db35ee8eeb8c7ececdf92067eeb7ee0981fb4bbd0&o=', rating: 3, exclusive: false },
-          { id: 'rome-1', name: 'Palazzo Aurelia', location: 'Rome', price: 400, image: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?q=80&w=400&auto=format&fit=crop', rating: 5, exclusive: false },
-          { id: 'rome-2', name: 'Via Condotti House', location: 'Rome', price: 290, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/435714928.jpg?k=bbf01bc66b9366bb644a3910b74e29a7da359a2c70f450de03bc37275d91c005&o=', rating: 4, exclusive: false },
-          { id: 'rome-3', name: 'Trastevere Rooms', location: 'Rome', price: 140, image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=400&auto=format&fit=crop', rating: 3, exclusive: false },
-          { id: 'sg-1', name: 'The Fullerton Hotel', location: 'Singapore', price: 470, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/106988145.jpg?k=4dc750be5829df9afb3485ee7555b8d4697c151d3a403062908c4a5a1fd87112&o=', rating: 5, exclusive: false },
-          { id: 'sg-2', name: 'Orchard Grove', location: 'Singapore', price: 320, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/721154462.jpg?k=12932700b7c14aaeb157ec0bf77bbb0cf9cfac9f88c4fdb93100a16b91b31196&o=', rating: 4, exclusive: false },
-          { id: 'sg-3', name: 'Bugis Budget Inn', location: 'Singapore', price: 120, image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=400&auto=format&fit=crop', rating: 3, exclusive: false },
-          { id: 'my-1', name: 'Kuala Vista Residences', location: 'Malaysia', price: 380, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/624148627.jpg?k=f1f6ef6b9ef5a4a1a952ad5d47ad8bfdf0e2dba2c286e028bc1b628968fd6e5c&o=', rating: 5, exclusive: false },
-          { id: 'my-2', name: 'Penang Heritage Hotel', location: 'Malaysia', price: 220, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/326893205.jpg?k=977021538d51e8e7d1ee65fd16d26db58547c263f681d78ad6f3f8bb41837865&o=', rating: 4, exclusive: false },
-          { id: 'bkk-1', name: 'Chao Phraya Riverside', location: 'Bangkok', price: 390, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/593370627.jpg?k=c91650aace08fef98582558db6adb9a1332327278c3727ee89b59fa41cb4dde5&o=', rating: 5, exclusive: false },
-          { id: 'bkk-2', name: 'Sukhumvit Urban Hotel', location: 'Bangkok', price: 240, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/555924063.jpg?k=6b3a9b6d6c3f1d5e2a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f&o=', rating: 4, exclusive: false },
-          { id: 'bkk-3', name: 'Old Town Guesthouse', location: 'Bangkok', price: 120, image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=400&auto=format&fit=crop', rating: 3, exclusive: false },
-          { id: 'seoul-1', name: 'Gangnam Heights', location: 'Seoul', price: 410, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/225664341.jpg?k=0f8d1d1cce6e784a6c9589e46a112f9f2193c96867c2e44dcac670ccd7b7d6c2&o=', rating: 5, exclusive: false },
-          { id: 'seoul-2', name: 'Myeongdong Boutique', location: 'Seoul', price: 260, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/763709548.jpg?k=8f4711a661ffe9156cc27298b7972526f7c2638ec9aab6d4cbc5a2c9fd6390c2&o=', rating: 4, exclusive: false },
-          { id: 'seoul-3', name: 'Hanok House', location: 'Seoul', price: 130, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/409143054.jpg?k=2e65ea2a4bd321768e91741df75162d8ae60256c808a36fd1521c53ebe79ab89&o=', rating: 3, exclusive: false }
+          { id: 'rome-1', name: 'Palazzo Aurelia', location: 'Rome', price: 400, image: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?q=80&w=400&auto=format&fit=crop', rating: 5, exclusive: false }
         ]
         setHotels(defaultHotels)
         localStorage.setItem('normalHotels', JSON.stringify(defaultHotels))
       }
-    } catch (err) {
-      setError('Failed to load hotels')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [navigate])
 
   const saveHotels = (updatedHotels: Hotel[]) => {
     setHotels(updatedHotels)
@@ -90,7 +66,7 @@ export default function NormalHotelsDashboard() {
     }
 
     const newHotel: Hotel = {
-      id: `norm-${Date.now()}`,
+      id: `hotel-${Date.now()}`,
       name: formData.name.trim(),
       location: formData.location.trim(),
       price: parseFloat(formData.price),
@@ -135,143 +111,196 @@ export default function NormalHotelsDashboard() {
   }
 
   const handleDeleteHotel = (id: string) => {
-    if (confirm('Are you sure?')) {
+    if (confirm('Are you sure you want to delete this hotel?')) {
       saveHotels(hotels.filter(h => h.id !== id))
     }
   }
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center text-white">Loading...</div>
+    return (
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-6 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-500 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-      </div>
-      
-      <div className="max-w-7xl mx-auto relative z-10">
-        {error && (
-          <div className="bg-red-500/20 backdrop-blur-xl border border-red-400/50 text-red-300 px-6 py-4 rounded-2xl mb-6 flex items-center justify-between">
-            <span>⚠️ {error}</span>
-            <button onClick={() => setError('')} className="text-2xl">×</button>
-          </div>
-        )}
-
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 mb-8 border border-white/20 shadow-2xl">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-2">🏨 Normal Hotels Dashboard</h1>
-              <p className="text-gray-300">Manage Regular Hotels</p>
-            </div>
-            <div className="flex gap-3">
-              <button onClick={() => { localStorage.removeItem('normalHotels'); window.location.reload(); }} className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-                🔄 Reset All Hotels
-              </button>
-              <button onClick={() => navigate('/admin-dashboard')} className="bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500 text-white px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-                ← Back to Exclusive
-              </button>
-            </div>
-          </div>
+    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+      {/* Sidebar */}
+      <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-200 transition-all duration-300 flex flex-col shadow-xl`}>
+        <div className="p-6 border-b border-gray-200">
+          <h1 className={`font-bold text-xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent ${!sidebarOpen && 'text-center'}`}>
+            {sidebarOpen ? '✨ The Grand Stay' : '✨'}
+          </h1>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-xl p-8 rounded-2xl border border-blue-400/30 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-blue-400 font-semibold">Total Hotels</h3>
-              <span className="text-3xl">🏨</span>
-            </div>
-            <p className="text-5xl font-bold text-white">{hotels.length}</p>
-          </div>
-          <div className="bg-gradient-to-br from-cyan-500/20 to-teal-500/20 backdrop-blur-xl p-8 rounded-2xl border border-cyan-400/30 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-cyan-400 font-semibold">Avg Rating</h3>
-              <span className="text-3xl">⭐</span>
-            </div>
-            <p className="text-5xl font-bold text-white">
-              {hotels.length > 0 ? (hotels.reduce((sum, h) => sum + h.rating, 0) / hotels.length).toFixed(1) : '0.0'}
-            </p>
-          </div>
-          <div className="bg-gradient-to-br from-teal-500/20 to-green-500/20 backdrop-blur-xl p-8 rounded-2xl border border-teal-400/30 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-teal-400 font-semibold">Avg Price</h3>
-              <span className="text-3xl">💰</span>
-            </div>
-            <p className="text-5xl font-bold text-white">
-              ${hotels.length > 0 ? Math.round(hotels.reduce((sum, h) => sum + h.price, 0) / hotels.length) : '0'}
-            </p>
-          </div>
-        </div>
-
-        <div className="mb-8">
-          <button onClick={() => setShowAddForm(true)} className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-2xl transition-all duration-300 transform hover:scale-105">
-            + Add New Hotel
+        
+        <nav className="flex-1 p-4 space-y-2">
+          <button onClick={() => navigate('/admin-dashboard')} className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            {sidebarOpen && <span>Dashboard</span>}
           </button>
-        </div>
+          
+          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform hover:scale-105 transition-all duration-200">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            {sidebarOpen && <span>Hotels</span>}
+          </button>
 
-        {showAddForm && (
-          <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 mb-8 border border-white/20 shadow-2xl">
-            <h2 className="text-3xl font-bold text-white mb-6">{editingHotel ? '✏️ Edit Hotel' : '✨ Add New Hotel'}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block mb-2 text-gray-300 font-medium">Hotel Name</label>
-                <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-white/10 text-white border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter hotel name" />
-              </div>
-              <div>
-                <label className="block mb-2 text-gray-300 font-medium">Location</label>
-                <input type="text" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} className="w-full bg-white/10 text-white border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter location" />
-              </div>
-              <div>
-                <label className="block mb-2 text-gray-300 font-medium">Price per Night ($)</label>
-                <input type="number" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} className="w-full bg-white/10 text-white border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter price" />
-              </div>
-              <div>
-                <label className="block mb-2 text-gray-300 font-medium">Rating (1-5)</label>
-                <input type="number" step="0.1" min="1" max="5" value={formData.rating} onChange={(e) => setFormData({...formData, rating: e.target.value})} className="w-full bg-white/10 text-white border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter rating" />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block mb-2 text-gray-300 font-medium">Image URL</label>
-                <input type="url" value={formData.image} onChange={(e) => setFormData({...formData, image: e.target.value})} className="w-full bg-white/10 text-white border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter image URL" />
-              </div>
+          <button onClick={() => navigate('/admin-dashboard')} className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            {sidebarOpen && <span>Users</span>}
+          </button>
+
+          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            {sidebarOpen && <span>Transactions</span>}
+          </button>
+
+          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            {sidebarOpen && <span>Settings</span>}
+          </button>
+        </nav>
+
+        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-4 border-t border-gray-200 text-gray-600 hover:bg-gray-100 transition-all duration-200">
+          <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Header */}
+        <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200 px-6 py-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">🏨 Hotels Management</h1>
+              <p className="text-sm text-gray-500">Manage your hotel listings</p>
             </div>
-            <div className="flex gap-4 mt-8">
-              <button onClick={editingHotel ? handleUpdateHotel : handleAddHotel} className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white px-8 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 shadow-lg">
-                {editingHotel ? '✔️ Update' : '✨ Add'}
+            <div className="flex items-center gap-3">
+              <button onClick={() => setShowAddForm(true)} className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                + Add Hotel
               </button>
-              <button onClick={() => { setShowAddForm(false); setEditingHotel(null); setFormData({ name: '', location: '', price: '', image: '', rating: '' }); }} className="bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500 text-white px-8 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 shadow-lg">
-                ❌ Cancel
+              <button onClick={() => navigate('/admin-dashboard')} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-200">
+                ← Back
               </button>
             </div>
           </div>
-        )}
+        </header>
 
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
-          <h2 className="text-3xl font-bold text-white mb-8">🏨 Hotels Management</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {hotels.map((hotel) => (
-              <div key={hotel.id} className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg rounded-2xl overflow-hidden border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 group">
-                <div className="relative overflow-hidden">
-                  <img src={hotel.image} alt={hotel.name} className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" />
+        {/* Content */}
+        <main className="flex-1 overflow-y-auto p-6">
+          {/* Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-gray-600 text-sm font-medium">Total Hotels</h3>
+                <span className="text-2xl">🏨</span>
+              </div>
+              <p className="text-3xl font-bold text-gray-900">{hotels.length}</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-gray-600 text-sm font-medium">Avg Rating</h3>
+                <span className="text-2xl">⭐</span>
+              </div>
+              <p className="text-3xl font-bold text-gray-900">
+                {hotels.length > 0 ? (hotels.reduce((sum, h) => sum + h.rating, 0) / hotels.length).toFixed(1) : '0.0'}
+              </p>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-gray-600 text-sm font-medium">Avg Price</h3>
+                <span className="text-2xl">💰</span>
+              </div>
+              <p className="text-3xl font-bold text-gray-900">
+                ${hotels.length > 0 ? Math.round(hotels.reduce((sum, h) => sum + h.price, 0) / hotels.length) : '0'}
+              </p>
+            </div>
+          </div>
+
+          {/* Add/Edit Form */}
+          {showAddForm && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">{editingHotel ? '✏️ Edit Hotel' : '✨ Add New Hotel'}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Hotel Name</label>
+                  <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter hotel name" />
                 </div>
-                <div className="p-6">
-                  <h3 className="font-bold text-white mb-2 text-lg">{hotel.name}</h3>
-                  <p className="text-gray-300 text-sm mb-3">📍 {hotel.location}</p>
-                  <div className="flex items-center gap-1 mb-4">
-                    {Array.from({ length: Math.floor(hotel.rating) }).map((_, i) => (
-                      <span key={i} className="text-yellow-400">⭐</span>
-                    ))}
-                    <span className="text-sm text-gray-300 ml-1">{hotel.rating}</span>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                  <input type="text" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter location" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price per Night ($)</label>
+                  <input type="number" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter price" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Rating (1-5)</label>
+                  <input type="number" step="0.1" min="1" max="5" value={formData.rating} onChange={(e) => setFormData({...formData, rating: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter rating" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                  <input type="url" value={formData.image} onChange={(e) => setFormData({...formData, image: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter image URL" />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-4">
+                <button onClick={editingHotel ? handleUpdateHotel : handleAddHotel} className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                  {editingHotel ? '✔️ Update' : '✨ Add'}
+                </button>
+                <button onClick={() => { setShowAddForm(false); setEditingHotel(null); setFormData({ name: '', location: '', price: '', image: '', rating: '' }); }} className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-200">
+                  ❌ Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Hotels Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {hotels.map((hotel) => (
+              <div key={hotel.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 group">
+                <div className="relative overflow-hidden h-48">
+                  <img src={hotel.image} alt={hotel.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1">
+                    <span className="text-yellow-500 text-sm">⭐</span>
+                    <span className="text-sm font-semibold text-gray-900">{hotel.rating}</span>
                   </div>
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-2xl font-bold text-white">${hotel.price}</span>
-                    <span className="text-xs text-gray-400">per night</span>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold text-gray-900 text-lg mb-1 truncate">{hotel.name}</h3>
+                  <p className="text-gray-500 text-sm mb-3 flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {hotel.location}
+                  </p>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <span className="text-2xl font-bold text-purple-600">${hotel.price}</span>
+                      <span className="text-xs text-gray-500 ml-1">/night</span>
+                    </div>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => handleEditHotel(hotel)} className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white py-2.5 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <button onClick={() => handleEditHotel(hotel)} className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white py-2 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200">
                       ✏️ Edit
                     </button>
-                    <button onClick={() => handleDeleteHotel(hotel.id)} className="flex-1 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white py-2.5 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <button onClick={() => handleDeleteHotel(hotel.id)} className="flex-1 bg-gradient-to-r from-red-600 to-red-500 text-white py-2 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200">
                       🗑️ Delete
                     </button>
                   </div>
@@ -279,7 +308,18 @@ export default function NormalHotelsDashboard() {
               </div>
             ))}
           </div>
-        </div>
+
+          {hotels.length === 0 && (
+            <div className="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-200">
+              <div className="text-6xl mb-4">🏨</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Hotels Found</h3>
+              <p className="text-gray-500 mb-6">Start by adding your first hotel</p>
+              <button onClick={() => setShowAddForm(true)} className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                + Add Hotel
+              </button>
+            </div>
+          )}
+        </main>
       </div>
     </div>
   )

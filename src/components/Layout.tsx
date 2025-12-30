@@ -1,5 +1,8 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import Chatbot from './Chatbot'
+import { auth } from '../firebase'
+import { signOut } from 'firebase/auth'
 
 export default function Layout() {
   const { pathname } = useLocation()
@@ -10,6 +13,7 @@ export default function Layout() {
   const [showEmailForm, setShowEmailForm] = useState(false)
   const [emailQuery, setEmailQuery] = useState({ name: '', email: '', subject: '', message: '' })
   const [emailSent, setEmailSent] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const userRaw = localStorage.getItem('user')
   const isLoggedIn = !!userRaw
   let initials = 'GU'
@@ -54,6 +58,19 @@ export default function Layout() {
           <Link to="/" className="font-semibold tracking-wide text-lg">
             The <span className="text-[var(--color-brand-gold)]">Grand</span> Stay
           </Link>
+          
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-white/20 hover:bg-gradient-to-r hover:from-purple-500/30 hover:to-pink-500/30 hover:border-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          >
+            <div className="relative w-6 h-6 flex flex-col justify-center items-center">
+              <span className={`block h-0.5 w-6 bg-white rounded-full transition-all duration-300 transform ${mobileMenuOpen ? 'rotate-45 translate-y-0.5' : '-translate-y-1'}`}></span>
+              <span className={`block h-0.5 w-6 bg-white rounded-full transition-all duration-300 ${mobileMenuOpen ? 'opacity-0' : 'opacity-100'}`}></span>
+              <span className={`block h-0.5 w-6 bg-white rounded-full transition-all duration-300 transform ${mobileMenuOpen ? '-rotate-45 -translate-y-0.5' : 'translate-y-1'}`}></span>
+            </div>
+          </button>
+
           <nav className="hidden md:flex items-center gap-8 text-sm">
             <Link to="/" className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 hover:from-yellow-600 hover:via-amber-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
               <span className="flex items-center gap-2 text-white font-medium">
@@ -64,83 +81,14 @@ export default function Layout() {
               </span>
               <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-yellow-300 via-amber-300 to-orange-300 opacity-0 group-hover:opacity-25 transition-opacity duration-300"></div>
             </Link>
-            <Link to="/search" className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 hover:from-cyan-600 hover:via-blue-600 hover:to-indigo-600 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+            <Link to="/membership" className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
               <span className="flex items-center gap-2 text-white font-medium">
                 <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                Search
+                Join Membership
               </span>
-              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-300 via-blue-300 to-indigo-300 opacity-0 group-hover:opacity-25 transition-opacity duration-300"></div>
-            </Link>
-            {isLoggedIn && (
-              <Link to="/my-bookings" className="hover:text-[var(--color-brand-gold)] text-sm font-medium">My Bookings</Link>
-            )}
-            {isLoggedIn && (
-              <div className="ml-2 group relative">
-                <div className="relative">
-                  <button 
-                    onClick={() => {
-                      setAvatarClicked(true)
-                      setTimeout(() => setAvatarClicked(false), 2000)
-                    }}
-                    className={`w-9 h-9 rounded-none backdrop-blur-sm border-2 flex items-center justify-center text-xs font-semibold transition-all duration-700 hover:scale-105 shadow-lg hover:shadow-xl relative overflow-visible ${
-                      avatarClicked 
-                        ? 'bg-gradient-to-br from-black via-gray-900 to-black border-cyan-400 animate-pulse scale-100 shadow-2xl shadow-cyan-500/80 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50' 
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30'
-                    }`}
-                  >
-                    {avatarClicked && (
-                      <>
-                        <div className="absolute -inset-2 bg-gradient-conic from-cyan-500 via-purple-500 via-pink-500 via-green-500 to-cyan-500 animate-spin opacity-60 blur-sm"></div>
-                        <div className="absolute -inset-3 border-2 border-cyan-400 animate-ping opacity-40"></div>
-                        <div className="absolute -inset-4 border border-purple-500 animate-ping opacity-30" style={{animationDelay: '0.5s'}}></div>
-                        <div className="absolute -inset-5 border border-pink-500 animate-ping opacity-20" style={{animationDelay: '1s'}}></div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-transparent to-purple-500/20 animate-pulse"></div>
-                        <div className="absolute inset-0 bg-black/60 backdrop-blur-md border border-cyan-300"></div>
-                        <div className="absolute -top-2 left-1/2 w-0.5 h-4 bg-gradient-to-t from-cyan-400 to-transparent animate-pulse"></div>
-                        <div className="absolute -bottom-2 left-1/2 w-0.5 h-4 bg-gradient-to-b from-cyan-400 to-transparent animate-pulse"></div>
-                        <div className="absolute -left-2 top-1/2 h-0.5 w-4 bg-gradient-to-l from-cyan-400 to-transparent animate-pulse"></div>
-                        <div className="absolute -right-2 top-1/2 h-0.5 w-4 bg-gradient-to-r from-cyan-400 to-transparent animate-pulse"></div>
-                      </>
-                    )}
-                    <span className={`relative z-20 transition-all duration-1000 font-mono tracking-wider ${
-                      avatarClicked 
-                        ? 'text-cyan-300 scale-150 animate-bounce font-black drop-shadow-[0_0_20px_rgba(34,211,238,1)] filter brightness-150 transform rotate-[360deg]' 
-                        : 'text-white'
-                    }`}>
-                      {avatarClicked ? '★' : initials}
-                    </span>
-                  </button>
-                  {avatarClicked && (
-                    <>
-                      <div className="absolute -top-3 -left-3 w-1 h-1 bg-cyan-400 rounded-full animate-ping opacity-90"></div>
-                      <div className="absolute -top-3 -right-3 w-1 h-1 bg-purple-500 rounded-full animate-ping opacity-90" style={{animationDelay: '0.2s'}}></div>
-                      <div className="absolute -bottom-3 -left-3 w-1 h-1 bg-pink-500 rounded-full animate-ping opacity-90" style={{animationDelay: '0.4s'}}></div>
-                      <div className="absolute -bottom-3 -right-3 w-1 h-1 bg-green-400 rounded-full animate-ping opacity-90" style={{animationDelay: '0.6s'}}></div>
-                      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 text-xs font-mono text-cyan-300 animate-pulse opacity-80">SYS</div>
-                      <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 text-xs font-mono text-cyan-300 animate-pulse opacity-80">ON</div>
-                      <div className="absolute top-0 left-0 w-full h-full border border-dashed border-cyan-300 animate-spin opacity-60"></div>
-                      <div className="absolute -inset-2 border border-dotted border-purple-400 animate-spin opacity-40" style={{animationDirection: 'reverse', animationDelay: '0.3s'}}></div>
-                    </>
-                  )}
-                </div>
-                <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white shadow-sm transition-all duration-500 ${
-                  avatarClicked 
-                    ? 'bg-rainbow animate-spin scale-200 shadow-lg' 
-                    : 'bg-green-500'
-                }`}></div>
-              </div>
-            )}
-            <Link to="/admin-login" className="group relative px-4 py-2 rounded-full bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 hover:from-amber-600 hover:via-yellow-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-              <span className="flex items-center gap-2 text-white font-medium">
-                <svg className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Admin
-              </span>
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300 opacity-0 group-hover:opacity-25 transition-opacity duration-300"></div>
             </Link>
             <Link to="/help" className="group relative px-4 py-2 rounded-full bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-violet-700 hover:via-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
               <span className="flex items-center gap-2 text-white font-medium">
@@ -151,25 +99,68 @@ export default function Layout() {
               </span>
               <div className="absolute inset-0 rounded-full bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
             </Link>
-            <button
-              onClick={() => {
-                localStorage.removeItem('user')
-                navigate('/login')
-              }}
-              className="group flex items-center gap-2 rounded-lg border border-slate-500/30 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 px-4 py-2 text-white font-medium shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-            >
-              <svg className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Logout
-            </button>
+            {isLoggedIn ? (
+              <button
+                onClick={async () => {
+                  await signOut(auth)
+                  localStorage.removeItem('user')
+                  navigate('/')
+                  window.location.reload()
+                }}
+                className="group flex items-center gap-2 rounded-lg border border-slate-500/30 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 px-4 py-2 text-white font-medium shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+              >
+                <svg className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Logout
+              </button>
+            ) : (
+              <Link to="/login" className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+                <span className="flex items-center gap-2 text-white font-medium">
+                  <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                  Login
+                </span>
+                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-300 via-indigo-300 to-purple-300 opacity-0 group-hover:opacity-25 transition-opacity duration-300"></div>
+              </Link>
+            )}
           </nav>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-[var(--color-brand-navy)] border-t border-white/10">
+            <nav className="px-6 py-4 space-y-3">
+              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-medium text-center">Home</Link>
+              <Link to="/membership" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-medium text-center">Join Membership</Link>
+              <Link to="/help" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-violet-600 to-pink-600 text-white font-medium text-center">Help</Link>
+              {isLoggedIn ? (
+                <button
+                  onClick={async () => {
+                    await signOut(auth)
+                    localStorage.removeItem('user')
+                    setMobileMenuOpen(false)
+                    navigate('/')
+                    window.location.reload()
+                  }}
+                  className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-slate-600 to-slate-700 text-white font-medium text-center"
+                >
+                  Logout
+                </button>
+              ) : (
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium text-center">Login</Link>
+              )}
+            </nav>
+          </div>
+        )}
       </header>
 
       <main className="flex-1">
         <Outlet />
       </main>
+
+      <Chatbot />
 
       <footer className="bg-[var(--color-brand-navy)] text-white/80">
         <div className="mx-auto max-w-7xl px-6 py-12">
@@ -223,14 +214,6 @@ export default function Layout() {
                   </div>
                   <span className="text-white/70 group-hover:text-[var(--color-brand-gold)] text-sm font-medium">Join Membership</span>
                 </Link>
-                <a href="/login" className="group flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all duration-200">
-                  <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-[var(--color-brand-gold)]/20 transition-colors">
-                    <svg className="w-4 h-4 text-white/70 group-hover:text-[var(--color-brand-gold)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                    </svg>
-                  </div>
-                  <span className="text-white/70 group-hover:text-[var(--color-brand-gold)] text-sm font-medium">Member Login</span>
-                </a>
               </div>
             </div>
 
@@ -264,26 +247,6 @@ export default function Layout() {
                       <div className="text-white font-medium text-sm">Phone Support</div>
                       <div className="text-white/70 text-xs mt-0.5">+1 (212) 555‑0199</div>
                       <div className="text-[var(--color-brand-gold)] text-xs mt-1">Mon-Fri 9AM-6PM EST</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="group cursor-pointer">
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-[var(--color-brand-gold)]/10 to-[var(--color-brand-gold)]/5 border border-[var(--color-brand-gold)]/20 hover:border-[var(--color-brand-gold)]/40 transition-all duration-200">
-                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-[var(--color-brand-gold)] to-[var(--color-brand-gold)]/80 rounded-lg flex items-center justify-center shadow-lg">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-white font-semibold text-sm flex items-center gap-2">
-                        24/7 Concierge
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-brand-gold)] text-[var(--color-brand-navy)]">
-                          LIVE
-                        </span>
-                      </div>
-                      <div className="text-white/80 text-xs mt-0.5">Premium assistance anytime</div>
-                      <div className="text-[var(--color-brand-gold)] text-xs mt-1 font-medium">Always Available • Instant Response</div>
                     </div>
                   </div>
                 </div>

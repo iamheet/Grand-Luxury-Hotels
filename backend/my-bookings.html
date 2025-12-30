@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - Grand Stay</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .booking-card { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .booking-type { background: #007bff; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .exclusive { background: #28a745; }
+        button { background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; width: 300px; }
+        #login-section { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>My Bookings - Grand Stay</h1>
+        
+        <!-- Login Section -->
+        <div id="login-section">
+            <h3>Login to View Bookings</h3>
+            <input type="email" id="email" placeholder="Email" />
+            <input type="password" id="password" placeholder="Password" />
+            <br>
+            <input type="text" id="membershipId" placeholder="Membership ID (for exclusive members)" />
+            <br>
+            <label>
+                <input type="checkbox" id="isExclusive"> Exclusive Member Login
+            </label>
+            <br><br>
+            <button onclick="login()">Login</button>
+        </div>
+
+        <!-- Bookings Section -->
+        <div id="bookings-section" style="display: none;">
+            <button onclick="fetchBookings()">Refresh Bookings</button>
+            <button onclick="logout()">Logout</button>
+            <div id="bookings-container"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentToken = localStorage.getItem('token');
+        
+        if (currentToken) {
+            showBookingsSection();
+        }
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const membershipId = document.getElementById('membershipId').value;
+            const isExclusive = document.getElementById('isExclusive').checked;
+
+            const loginData = { email, password };
+            if (isExclusive && membershipId) {
+                loginData.membershipId = membershipId;
+                loginData.isExclusive = true;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(loginData)
+                });
+
+                const data = await response.json();
+                
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    currentToken = data.token;
+                    showBookingsSection();
+                    fetchBookings();
+                } else {
+                    alert('Login failed: ' + data.message);
+                }
+            } catch (error) {
+                alert('Login error: ' + error.message);
+            }
+        }
+
+        async function fetchBookings() {
+            if (!currentToken) {
+                alert('Please login first');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/api/bookings', {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                displayBookings(data.bookings || []);
+            } catch (error) {
+                alert('Error fetching bookings: ' + error.message);
+            }
+        }
+
+        function displayBookings(bookings) {
+            const container = document.getElementById('bookings-container');
+            
+            if (bookings.length === 0) {
+                container.innerHTML = '<p>No bookings found.</p>';
+                return;
+            }
+
+            container.innerHTML = bookings.map(booking => `
+                <div class="booking-card">
+                    <h3>${booking.hotelName || 'Hotel Name'}</h3>
+                    <span class="booking-type ${booking.bookingType === 'Exclusive Member' ? 'exclusive' : ''}">
+                        ${booking.bookingType || 'Regular User'}
+                        ${booking.memberTier ? ` - ${booking.memberTier}` : ''}
+                    </span>
+                    <p><strong>Location:</strong> ${booking.location || 'N/A'}</p>
+                    <p><strong>Check-in:</strong> ${new Date(booking.checkIn).toLocaleDateString()}</p>
+                    <p><strong>Check-out:</strong> ${new Date(booking.checkOut).toLocaleDateString()}</p>
+                    <p><strong>Guests:</strong> ${booking.guests || 'N/A'}</p>
+                    <p><strong>Price:</strong> $${booking.price || 'N/A'}</p>
+                    <p><strong>Status:</strong> ${booking.status || 'confirmed'}</p>
+                    <p><strong>Booked on:</strong> ${new Date(booking.createdAt).toLocaleDateString()}</p>
+                    ${booking.status === 'confirmed' ? 
+                        `<button onclick="cancelBooking('${booking._id}')">Cancel Booking</button>` : 
+                        ''
+                    }
+                </div>
+            `).join('');
+        }
+
+        async function cancelBooking(bookingId) {
+            if (!confirm('Are you sure you want to cancel this booking?')) return;
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Booking cancelled successfully');
+                    fetchBookings(); // Refresh the list
+                } else {
+                    alert('Failed to cancel booking');
+                }
+            } catch (error) {
+                alert('Error cancelling booking: ' + error.message);
+            }
+        }
+
+        function showBookingsSection() {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('bookings-section').style.display = 'block';
+            fetchBookings();
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            currentToken = null;
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('bookings-section').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
