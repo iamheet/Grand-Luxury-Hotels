@@ -11,91 +11,113 @@ export default function MemberDashboard() {
 
   const [exclusiveHotels, setExclusiveHotels] = useState<any[]>([])
   const [hongKongHotels, setHongKongHotels] = useState<any[]>([])
-
-  const regularHotels = [
-    { id: 'paris-1', name: 'Hôtel Étoile Royale', location: 'Paris', price: 520, image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=400&auto=format&fit=crop', rating: 5, exclusive: false },
-    { id: 'paris-2', name: 'Le Jardin Suites', location: 'Paris', price: 360, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/549415122.jpg?k=6aa38e1d6d970b5756c6e0bd4297a603ce8618ffec17a5e8c2332ac20ab1bc2e&o=', rating: 4, exclusive: false },
-    { id: 'paris-3', name: 'Montmartre Inn', location: 'Paris', price: 180, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/269945146.jpg?k=705f092a0e86ab775de93f8e2013b12ae5981739f5a513bcecead2c0db4e109d&o=', rating: 3, exclusive: false },
-    { id: 'nyc-1', name: 'The Skyline Tower', location: 'New York', price: 480, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/763346606.jpg?k=6ec8469c977fbd5e6867bd1da4f454db5914ccf5c962cd9b9ae74a5c2c766ca4&o=', rating: 5, exclusive: false },
-    { id: 'nyc-2', name: 'Central Grand', location: 'New York', price: 340, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/674961168.jpg?k=478bea50dd93b61a34be446f180c1b079e08ed9ce425d2680b87f91afea36272&o=', rating: 4, exclusive: false },
-    { id: 'nyc-3', name: 'Hudson Pods', location: 'New York', price: 150, image: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=400&auto=format&fit=crop', rating: 3, exclusive: false },
-    { id: 'tokyo-1', name: 'Shinjuku Imperial', location: 'Tokyo', price: 450, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/677082763.jpg?k=1e0efd2d22e212697c98ff09502775672c39f4b38dc54b729c3a76f800173d12&o=', rating: 5, exclusive: false },
-    { id: 'tokyo-2', name: 'Ginza Artisan Hotel', location: 'Tokyo', price: 310, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/622864288.jpg?k=6709fc69eab0ae881792007d3d099fb03e92be6f6a925e19dce4f212b0664971&o=', rating: 4, exclusive: false },
-    { id: 'tokyo-3', name: 'Asakusa Capsule', location: 'Tokyo', price: 90, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/488327823.jpg?k=ff6638640efe474a5079fc280b26ba9e3ea4e1a4cfc0dbfaef69d29b3d3cb821&o=', rating: 3, exclusive: false },
-    { id: 'dubai-1', name: 'Palm Marina Resort', location: 'Dubai', price: 530, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/727476358.jpg?k=aec126bb04f23b6b833361fd74d87bd9512216d5bc27827f96554dbe59602a31&o=', rating: 5, exclusive: false },
-    { id: 'dubai-2', name: 'Desert Pearl', location: 'Dubai', price: 330, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/598095554.jpg?k=a6feffaab51bf2d7bdbdb6eb5ea1ef8f9e7800524f7f7cfc093519c50f28fd48&o=', rating: 4, exclusive: false },
-    { id: 'dubai-3', name: 'Old Town Lodge', location: 'Dubai', price: 160, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/567316864.jpg?k=5a093e3d899bc5afd867cd1db35ee8eeb8c7ececdf92067eeb7ee0981fb4bbd0&o=', rating: 3, exclusive: false },
-    { id: 'rome-1', name: 'Palazzo Aurelia', location: 'Rome', price: 400, image: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?q=80&w=400&auto=format&fit=crop', rating: 5, exclusive: false },
-    { id: 'rome-2', name: 'Via Condotti House', location: 'Rome', price: 290, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/435714928.jpg?k=bbf01bc66b9366bb644a3910b74e29a7da359a2c70f450de03bc37275d91c005&o=', rating: 4, exclusive: false },
-    { id: 'rome-3', name: 'Trastevere Rooms', location: 'Rome', price: 140, image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=400&auto=format&fit=crop', rating: 3, exclusive: false },
-    { id: 'sg-1', name: 'The Fullerton Hotel', location: 'Singapore', price: 470, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/106988145.jpg?k=4dc750be5829df9afb3485ee7555b8d4697c151d3a403062908c4a5a1fd87112&o=', rating: 5, exclusive: false },
-    { id: 'sg-2', name: 'Orchard Grove', location: 'Singapore', price: 320, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/721154462.jpg?k=12932700b7c14aaeb157ec0bf77bbb0cf9cfac9f88c4fdb93100a16b91b31196&o=', rating: 4, exclusive: false },
-    { id: 'sg-3', name: 'Bugis Budget Inn', location: 'Singapore', price: 120, image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=400&auto=format&fit=crop', rating: 3, exclusive: false },
-    { id: 'my-1', name: 'Kuala Vista Residences', location: 'Malaysia', price: 380, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/624148627.jpg?k=f1f6ef6b9ef5a4a1a952ad5d47ad8bfdf0e2dba2c286e028bc1b628968fd6e5c&o=', rating: 5, exclusive: false },
-    { id: 'my-2', name: 'Penang Heritage Hotel', location: 'Malaysia', price: 220, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/326893205.jpg?k=977021538d51e8e7d1ee65fd16d26db58547c263f681d78ad6f3f8bb41837865&o=', rating: 4, exclusive: false },
-    { id: 'bkk-1', name: 'Chao Phraya Riverside', location: 'Bangkok', price: 390, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/593370627.jpg?k=c91650aace08fef98582558db6adb9a1332327278c3727ee89b59fa41cb4dde5&o=', rating: 5, exclusive: false },
-    { id: 'bkk-2', name: 'Sukhumvit Urban Hotel', location: 'Bangkok', price: 240, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/555924063.jpg?k=6b3a9b6d6c3f1d5e2a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f&o=', rating: 4, exclusive: false },
-    { id: 'bkk-3', name: 'Old Town Guesthouse', location: 'Bangkok', price: 120, image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=400&auto=format&fit=crop', rating: 3, exclusive: false },
-    { id: 'seoul-1', name: 'Gangnam Heights', location: 'Seoul', price: 410, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/225664341.jpg?k=0f8d1d1cce6e784a6c9589e46a112f9f2193c96867c2e44dcac670ccd7b7d6c2&o=', rating: 5, exclusive: false },
-    { id: 'seoul-2', name: 'Myeongdong Boutique', location: 'Seoul', price: 260, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/763709548.jpg?k=8f4711a661ffe9156cc27298b7972526f7c2638ec9aab6d4cbc5a2c9fd6390c2&o=', rating: 4, exclusive: false },
-    { id: 'seoul-3', name: 'Hanok House', location: 'Seoul', price: 130, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/409143054.jpg?k=2e65ea2a4bd321768e91741df75162d8ae60256c808a36fd1521c53ebe79ab89&o=', rating: 3, exclusive: false }
-  ]
+  const [regularHotels, setRegularHotels] = useState<any[]>([])
 
   const allHotels = [...exclusiveHotels, ...regularHotels]
 
   useEffect(() => {
     const memberData = localStorage.getItem('member') || localStorage.getItem('memberCheckout')
     if (!memberData) {
-      navigate('/member-login')
+      navigate('/member-login', { replace: true })
       return
-    } else {
-      // Check if we should show hotels section
-      const shouldShowHotels = sessionStorage.getItem('showHotels')
-      if (shouldShowHotels === 'true') {
-        setShowHotels(true)
-        sessionStorage.removeItem('showHotels')
-      }
-      const parsedMember = JSON.parse(memberData)
-      setMember(parsedMember)
-      // Ensure both keys are set
-      localStorage.setItem('member', JSON.stringify(parsedMember))
-      localStorage.setItem('memberCheckout', JSON.stringify(parsedMember))
     }
+    
+    // Check if we should show hotels section
+    const shouldShowHotels = sessionStorage.getItem('showHotels')
+    if (shouldShowHotels === 'true') {
+      setShowHotels(true)
+      sessionStorage.removeItem('showHotels')
+    }
+    
+    const parsedMember = JSON.parse(memberData)
+    setMember(parsedMember)
+    // Ensure both keys are set
+    localStorage.setItem('member', JSON.stringify(parsedMember))
+    localStorage.setItem('memberCheckout', JSON.stringify(parsedMember))
 
-    // Load exclusive hotels from localStorage
-    const savedHotels = localStorage.getItem('exclusiveHotels')
-    if (savedHotels) {
-      setExclusiveHotels(JSON.parse(savedHotels))
-    } else {
-      // Default exclusive hotels if none saved - all 16 original hotels
-      const defaultHotels = [
-        { id: 'exc-1', name: 'Grand Palace Resort', location: 'Maldives', price: 850, image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400', rating: 4.9, exclusive: true },
-        { id: 'exc-2', name: 'Royal Mountain Lodge', location: 'Swiss Alps', price: 720, image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400', rating: 4.8, exclusive: true },
-        { id: 'exc-3', name: 'Ocean View Villa', location: 'Santorini', price: 650, image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400', rating: 4.7, exclusive: true },
-        { id: 'exc-4', name: 'Desert Oasis Hotel', location: 'Dubai', price: 580, image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400', rating: 4.6, exclusive: true },
-        { id: 'exc-5', name: 'Platinum Sky Resort', location: 'Bora Bora', price: 950, image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=400', rating: 5.0, exclusive: true },
-        { id: 'exc-6', name: 'Crystal Bay Sanctuary', location: 'Seychelles', price: 780, image: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400', rating: 4.9, exclusive: true },
-        { id: 'exc-7', name: 'Aurora Ice Hotel', location: 'Iceland', price: 680, image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400', rating: 4.8, exclusive: true },
-        { id: 'exc-8', name: 'Emerald Forest Lodge', location: 'Costa Rica', price: 620, image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400', rating: 4.7, exclusive: true },
-        { id: 'exc-9', name: 'Diamond Crown Palace', location: 'Monaco', price: 1200, image: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400', rating: 5.0, exclusive: true },
-        { id: 'exc-10', name: 'Royal Safari Lodge', location: 'Kenya', price: 890, image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=400', rating: 4.9, exclusive: true },
-        { id: 'exc-11', name: 'Platinum Glacier Resort', location: 'Antarctica', price: 1500, image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400', rating: 5.0, exclusive: true },
-        { id: 'exc-12', name: 'Golden Temple Retreat', location: 'Bhutan', price: 750, image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400', rating: 4.8, exclusive: true },
-        { id: 'exc-13', name: 'Royal Vineyard Estate', location: 'Tuscany', price: 820, image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400', rating: 4.9, exclusive: true },
-        { id: 'exc-14', name: 'Crown Jewel Resort', location: 'Fiji', price: 980, image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=400', rating: 4.9, exclusive: true },
-        { id: 'exc-15', name: 'Imperial Castle Hotel', location: 'Scotland', price: 690, image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400', rating: 4.8, exclusive: true },
-        { id: 'exc-16', name: 'Sovereign Island Resort', location: 'Bahamas', price: 1100, image: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400', rating: 5.0, exclusive: true }
-      ]
-      setExclusiveHotels(defaultHotels)
-      localStorage.setItem('exclusiveHotels', JSON.stringify(defaultHotels))
+    // Load exclusive hotels from database instead of localStorage
+    const fetchExclusiveHotels = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/hotels/exclusive')
+        const data = await response.json()
+        if (data.success && data.hotels.length > 0) {
+          // Convert database format to UI format
+          const convertedHotels = data.hotels.map((hotel: any) => ({
+            id: hotel._id,
+            name: hotel.name,
+            location: hotel.location,
+            price: hotel.price,
+            image: hotel.image,
+            rating: hotel.rating,
+            exclusive: true
+          }))
+          setExclusiveHotels(convertedHotels)
+        } else {
+          // Fallback to default exclusive hotels if none in database
+          const defaultHotels = [
+            { id: 'exc-1', name: 'Grand Palace Resort', location: 'Maldives', price: 850, image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400', rating: 4.9, exclusive: true },
+            { id: 'exc-2', name: 'Royal Mountain Lodge', location: 'Swiss Alps', price: 720, image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400', rating: 4.8, exclusive: true },
+            { id: 'exc-3', name: 'Ocean View Villa', location: 'Santorini', price: 650, image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400', rating: 4.7, exclusive: true },
+            { id: 'exc-4', name: 'Desert Oasis Hotel', location: 'Dubai', price: 580, image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400', rating: 4.6, exclusive: true },
+            { id: 'exc-5', name: 'Platinum Sky Resort', location: 'Bora Bora', price: 950, image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=400', rating: 5.0, exclusive: true },
+            { id: 'exc-6', name: 'Crystal Bay Sanctuary', location: 'Seychelles', price: 780, image: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400', rating: 4.9, exclusive: true }
+          ]
+          setExclusiveHotels(defaultHotels)
+        }
+      } catch (error) {
+        console.error('Error fetching exclusive hotels:', error)
+        // Fallback to default exclusive hotels on error
+        const defaultHotels = [
+          { id: 'exc-1', name: 'Grand Palace Resort', location: 'Maldives', price: 850, image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400', rating: 4.9, exclusive: true },
+          { id: 'exc-2', name: 'Royal Mountain Lodge', location: 'Swiss Alps', price: 720, image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400', rating: 4.8, exclusive: true },
+          { id: 'exc-3', name: 'Ocean View Villa', location: 'Santorini', price: 650, image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400', rating: 4.7, exclusive: true },
+          { id: 'exc-4', name: 'Desert Oasis Hotel', location: 'Dubai', price: 580, image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400', rating: 4.6, exclusive: true },
+          { id: 'exc-5', name: 'Platinum Sky Resort', location: 'Bora Bora', price: 950, image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=400', rating: 5.0, exclusive: true },
+          { id: 'exc-6', name: 'Crystal Bay Sanctuary', location: 'Seychelles', price: 780, image: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400', rating: 4.9, exclusive: true }
+        ]
+        setExclusiveHotels(defaultHotels)
+      }
     }
+    fetchExclusiveHotels()
 
     // Load Hong Kong hotels from API
     getAllHotels().then(setHongKongHotels).catch(() => setHongKongHotels([]))
+
+    // Load regular hotels from database
+    const fetchRegularHotels = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/hotels/normal')
+        const data = await response.json()
+        if (data.success) {
+          // Convert database format to UI format
+          const convertedHotels = data.hotels.map((hotel: any) => ({
+            id: hotel._id,
+            name: hotel.name,
+            location: hotel.location,
+            price: hotel.price,
+            image: hotel.image,
+            rating: hotel.rating,
+            exclusive: false
+          }))
+          setRegularHotels(convertedHotels)
+        }
+      } catch (error) {
+        console.error('Error fetching regular hotels:', error)
+        setRegularHotels([])
+      }
+    }
+    fetchRegularHotels()
   }, [navigate])
 
   const handleLogout = () => {
+    // Clear all authentication and member data
     localStorage.removeItem('member')
+    localStorage.removeItem('memberCheckout')
+    localStorage.removeItem('token')
+    localStorage.removeItem('isAuthenticated')
+    localStorage.removeItem('user')
+    localStorage.removeItem('memberBookings')
+    localStorage.removeItem('spentPoints')
     navigate('/')
   }
 
@@ -144,13 +166,7 @@ export default function MemberDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-cyan-900 pt-20 relative overflow-hidden">
-      {/* Floating Admin Button */}
-      <button
-        onClick={() => navigate('/admin-dashboard')}
-        className="fixed top-4 right-4 z-50 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-4 py-2 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 border-2 border-purple-400/50"
-      >
-        🏨 Admin
-      </button>
+
       {/* Luxury Background Elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full blur-3xl animate-pulse"></div>
@@ -191,12 +207,6 @@ export default function MemberDashboard() {
               </div>
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={() => navigate('/admin-dashboard')}
-                className="bg-gradient-to-r from-purple-500/20 to-indigo-600/20 hover:from-purple-500/30 hover:to-indigo-600/30 border border-purple-500/30 text-purple-300 hover:text-purple-200 px-4 py-2 rounded-xl transition-all duration-300 backdrop-blur-sm text-sm"
-              >
-                🏨 Admin
-              </button>
               <button
                 onClick={handleLogout}
                 className="bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 border border-red-500/30 text-red-300 hover:text-red-200 px-6 py-3 rounded-xl transition-all duration-300 backdrop-blur-sm"
@@ -252,45 +262,32 @@ export default function MemberDashboard() {
         {/* Royal Member Services */}
         <div className="bg-gradient-to-br from-slate-900/60 to-[var(--color-brand-navy)]/60 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-[var(--color-brand-gold)]/20">
           <h2 className="text-3xl font-bold bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-300 bg-clip-text text-transparent mb-8 text-center">Royal Member Services</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <button 
               onClick={() => setShowHotels(!showHotels)}
               className="group p-8 bg-gradient-to-br from-[var(--color-brand-navy)]/80 to-blue-900/80 backdrop-blur-sm text-white rounded-2xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-blue-500/30 hover:border-blue-400/50"
             >
               <div className="relative">
-                <svg className="w-10 h-10 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0h2M7 7h10M7 11h10M7 15h10" />
                 </svg>
-                <div className="absolute -top-2 -right-2 w-4 h-4 bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 rounded-full animate-pulse"></div>
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 rounded-full animate-pulse"></div>
               </div>
-              <h3 className="font-bold mb-2 text-lg">Book Luxury</h3>
-              <p className="text-sm text-blue-200">Exclusive reservations</p>
+              <h3 className="font-bold mb-2 text-base">Hotels Booking</h3>
+              <p className="text-xs text-blue-200">Luxury stays worldwide</p>
             </button>
 
             <button 
               onClick={() => navigate('/my-bookings')}
-              className="group p-8 bg-gradient-to-br from-[var(--color-brand-gold)]/20 to-yellow-600/20 backdrop-blur-sm text-white rounded-2xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-[var(--color-brand-gold)]/30 hover:border-[var(--color-brand-gold)]/50">
+              className="group p-8 bg-gradient-to-br from-emerald-900/40 to-green-800/40 backdrop-blur-sm text-white rounded-2xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-emerald-500/30 hover:border-emerald-400/50"
+            >
               <div className="relative">
-                <svg className="w-10 h-10 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                <svg className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                <div className="absolute -top-2 -right-2 w-4 h-4 bg-gradient-to-r from-emerald-500 to-green-400 rounded-full animate-pulse delay-200"></div>
               </div>
-              <h3 className="font-bold mb-2 text-lg text-[var(--color-brand-gold)]">My Bookings</h3>
-              <p className="text-sm text-gray-300">View & manage reservations</p>
-            </button>
-
-            <button 
-              onClick={() => navigate('/royal-concierge')}
-              className="group p-8 bg-gradient-to-br from-emerald-900/40 to-green-800/40 backdrop-blur-sm text-white rounded-2xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-emerald-500/30 hover:border-emerald-400/50">
-              <div className="relative">
-                <svg className="w-10 h-10 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <div className="absolute -top-2 -right-2 w-4 h-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse delay-400"></div>
-              </div>
-              <h3 className="font-bold mb-2 text-lg">Royal Concierge</h3>
-              <p className="text-sm text-emerald-200">24/7 luxury services</p>
+              <h3 className="font-bold mb-2 text-base">My Bookings</h3>
+              <p className="text-xs text-emerald-200">View your reservations</p>
             </button>
 
             <button 
@@ -298,13 +295,27 @@ export default function MemberDashboard() {
               className="group p-8 bg-gradient-to-br from-purple-900/40 to-indigo-800/40 backdrop-blur-sm text-white rounded-2xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-purple-500/30 hover:border-purple-400/50"
             >
               <div className="relative">
-                <svg className="w-10 h-10 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                 </svg>
-                <div className="absolute -top-2 -right-2 w-4 h-4 bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 rounded-full animate-pulse delay-600"></div>
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 rounded-full animate-pulse delay-500"></div>
               </div>
-              <h3 className="font-bold mb-2 text-lg">Elite Rewards</h3>
-              <p className="text-sm text-purple-200">Luxury points</p>
+              <h3 className="font-bold mb-2 text-base">Rewards</h3>
+              <p className="text-xs text-purple-200">Elite points & benefits</p>
+            </button>
+
+            <button 
+              onClick={() => navigate('/royal-concierge')}
+              className="group p-8 bg-gradient-to-br from-[var(--color-brand-gold)]/20 to-yellow-600/20 backdrop-blur-sm text-white rounded-2xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-[var(--color-brand-gold)]/30 hover:border-[var(--color-brand-gold)]/50"
+            >
+              <div className="relative">
+                <svg className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 rounded-full animate-pulse delay-300"></div>
+              </div>
+              <h3 className="font-bold mb-2 text-base text-[var(--color-brand-gold)]">Royal Service</h3>
+              <p className="text-xs text-gray-300">24/7 concierge</p>
             </button>
           </div>
         </div>

@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import useEmblaCarousel from 'embla-carousel-react'
 import ImageWithFallback from '../components/ImageWithFallback'
-import RoomSelector from '../components/RoomSelector'
+import HotelRoomListing from '../components/HotelRoomListing'
 
 function getAmenityIcon(amenity: string) {
   const iconMap: Record<string, JSX.Element> = {
@@ -19,6 +18,8 @@ export default function HotelDetails() {
   const { id } = useParams<{ id: string }>()
   const location = useLocation()
   const stateHotel = (location as any).state?.hotel as any | undefined
+  const localStorageHotel = typeof window !== 'undefined' ? localStorage.getItem('selectedHotel') : null
+  const parsedLocalHotel = localStorageHotel ? JSON.parse(localStorageHotel) : null
 
   // --- Define all hotel data ---
   const hotels = useMemo(
@@ -38,9 +39,48 @@ export default function HotelDetails() {
         ],
         amenities: ['Free Wi-Fi', 'Pool', 'Gym', 'Restaurant', 'Spa', 'Valet Parking', 'Concierge', 'Room Service'],
         rooms: [
-          { id: 'gp-deluxe', title: 'Deluxe Room', price: 180, guests: 2, beds: 1, image: 'https://images.unsplash.com/photo-1501117716987-c8eecb9767af?q=80&w=2070&auto=format&fit=crop' },
-          { id: 'gp-suite', title: 'Executive Suite', price: 350, guests: 3, beds: 2, image: 'https://images.unsplash.com/photo-1552902865-3930f0ec0a6b?q=80&w=2069&auto=format&fit=crop' },
-          { id: 'gp-royal', title: 'Royal Suite', price: 600, guests: 4, beds: 2, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/677082815.jpg?k=02f67b028a078c447148ec120fc37b81def8ce7baf2040ffce7a303d5d358940&o=' },
+          { 
+            id: 'gp-deluxe', 
+            title: 'Deluxe Room', 
+            price: 180, 
+            guests: 2, 
+            beds: 1, 
+            image: 'https://images.unsplash.com/photo-1501117716987-c8eecb9767af?q=80&w=2070&auto=format&fit=crop',
+            bedInfo: '1 king bed',
+            size: 25,
+            hasBalcony: true,
+            hasCityView: true,
+            amenities: ['Air conditioning', 'Private bathroom', 'Flat-screen TV', 'Free Wi-Fi'],
+            detailedAmenities: ['Free toiletries', 'Shower', 'Safe', 'Towels', 'Linens', 'Socket near the bed', 'Refrigerator', 'Tea/Coffee maker', 'Hairdryer']
+          },
+          { 
+            id: 'gp-suite', 
+            title: 'Executive Suite', 
+            price: 350, 
+            guests: 3, 
+            beds: 2, 
+            image: 'https://images.unsplash.com/photo-1552902865-3930f0ec0a6b?q=80&w=2069&auto=format&fit=crop',
+            bedInfo: '1 king bed and 1 futon bed',
+            size: 45,
+            hasBalcony: true,
+            hasCityView: true,
+            amenities: ['Air conditioning', 'Private bathroom', 'Flat-screen TV', 'Soundproof', 'Free Wi-Fi'],
+            detailedAmenities: ['Free toiletries', 'Shower', 'Safe', 'Sofa', 'Towels', 'Linens', 'Socket near the bed', 'Refrigerator', 'Tea/Coffee maker', 'Hairdryer', 'Extra long beds (>2 meters)', 'Wake-up service', 'Dining area']
+          },
+          { 
+            id: 'gp-royal', 
+            title: 'Royal Suite', 
+            price: 600, 
+            guests: 4, 
+            beds: 2, 
+            image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/677082815.jpg?k=02f67b028a078c447148ec120fc37b81def8ce7baf2040ffce7a303d5d358940&o=',
+            bedInfo: '1 king bed and 1 queen bed',
+            size: 65,
+            hasBalcony: true,
+            hasCityView: true,
+            amenities: ['Air conditioning', 'Private bathroom', 'Flat-screen TV', 'Soundproof', 'Sauna', 'Free Wi-Fi'],
+            detailedAmenities: ['Free toiletries', 'Shower', 'Safe', 'Sofa', 'Towels', 'Linens', 'Socket near the bed', 'Refrigerator', 'Tea/Coffee maker', 'Hairdryer', 'Extra long beds (>2 meters)', 'Wake-up service', 'Dining area', 'Child safety socket covers', 'Baby safety gates', 'Air purifiers', 'Hand sanitizer']
+          }
         ],
       },
       {
@@ -57,8 +97,34 @@ export default function HotelDetails() {
         ],
         amenities: ['Free Wi-Fi', 'Breakfast', 'Concierge', 'Laundry'],
         rooms: [
-          { id: 'ri-standard', title: 'Standard Room', price: 90, guests: 2, beds: 1, image: 'https://images.unsplash.com/photo-1501117716987-c8eecb9767af?q=80&w=2070&auto=format&fit=crop' },
-          { id: 'ri-family', title: 'Family Room', price: 140, guests: 4, beds: 2, image: 'https://images.unsplash.com/photo-1505692794400-1a1f4f54b0d4?q=80&w=2070&auto=format&fit=crop' },
+          { 
+            id: 'ri-standard', 
+            title: 'Standard Room', 
+            price: 90, 
+            guests: 2, 
+            beds: 1, 
+            image: 'https://images.unsplash.com/photo-1501117716987-c8eecb9767af?q=80&w=2070&auto=format&fit=crop',
+            bedInfo: '1 queen bed',
+            size: 20,
+            hasBalcony: false,
+            hasCityView: true,
+            amenities: ['Air conditioning', 'Private bathroom', 'Flat-screen TV', 'Free Wi-Fi'],
+            detailedAmenities: ['Free toiletries', 'Shower', 'Towels', 'Linens', 'Socket near the bed', 'Tea/Coffee maker', 'Hairdryer']
+          },
+          { 
+            id: 'ri-family', 
+            title: 'Family Room', 
+            price: 140, 
+            guests: 4, 
+            beds: 2, 
+            image: 'https://images.unsplash.com/photo-1505692794400-1a1f4f54b0d4?q=80&w=2070&auto=format&fit=crop',
+            bedInfo: '2 queen beds',
+            size: 35,
+            hasBalcony: false,
+            hasCityView: true,
+            amenities: ['Air conditioning', 'Private bathroom', 'Flat-screen TV', 'Free Wi-Fi'],
+            detailedAmenities: ['Free toiletries', 'Shower', 'Safe', 'Towels', 'Linens', 'Socket near the bed', 'Refrigerator', 'Tea/Coffee maker', 'Hairdryer', 'Child safety socket covers']
+          }
         ],
       },
       {
@@ -75,8 +141,34 @@ export default function HotelDetails() {
         ],
         amenities: ['Beach Access', 'Pool', 'Spa', 'Water Sports', 'Free Wi-Fi'],
         rooms: [
-          { id: 'sv-sea-deluxe', title: 'Sea View Deluxe', price: 220, guests: 2, beds: 1, image: 'https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?q=80&w=2070&auto=format&fit=crop' },
-          { id: 'sv-villa', title: 'Beach Villa', price: 480, guests: 6, beds: 3, image: 'https://images.unsplash.com/photo-1505692794400-1a1f4f54b0d4?q=80&w=2070&auto=format&fit=crop' },
+          { 
+            id: 'sv-sea-deluxe', 
+            title: 'Sea View Deluxe', 
+            price: 220, 
+            guests: 2, 
+            beds: 1, 
+            image: 'https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?q=80&w=2070&auto=format&fit=crop',
+            bedInfo: '1 king bed',
+            size: 30,
+            hasBalcony: true,
+            hasCityView: false,
+            amenities: ['Air conditioning', 'Private bathroom', 'Flat-screen TV', 'Free Wi-Fi'],
+            detailedAmenities: ['Free toiletries', 'Shower', 'Safe', 'Towels', 'Linens', 'Socket near the bed', 'Refrigerator', 'Tea/Coffee maker', 'Hairdryer', 'Extra long beds (>2 meters)']
+          },
+          { 
+            id: 'sv-villa', 
+            title: 'Beach Villa', 
+            price: 480, 
+            guests: 6, 
+            beds: 3, 
+            image: 'https://images.unsplash.com/photo-1505692794400-1a1f4f54b0d4?q=80&w=2070&auto=format&fit=crop',
+            bedInfo: '2 king beds and 1 queen bed',
+            size: 80,
+            hasBalcony: true,
+            hasCityView: false,
+            amenities: ['Air conditioning', 'Private bathroom', 'Flat-screen TV', 'Soundproof', 'Free Wi-Fi'],
+            detailedAmenities: ['Free toiletries', 'Shower', 'Safe', 'Sofa', 'Towels', 'Linens', 'Socket near the bed', 'Refrigerator', 'Tea/Coffee maker', 'Hairdryer', 'Extra long beds (>2 meters)', 'Wake-up service', 'Dining area', 'Air purifiers']
+          }
         ],
       },
     ],
@@ -85,121 +177,153 @@ export default function HotelDetails() {
 
   // --- Resolve the display hotel ---
   const matchedById = hotels.find((h) => h.id === id)
-  const hotel = stateHotel
-    ? {
-        // Prefer data from navigation state; fall back to local seed where missing
-        id: stateHotel.id ?? matchedById?.id ?? 'unknown',
-        name: stateHotel.name ?? matchedById?.name ?? 'Hotel',
-        rating: stateHotel.stars ?? matchedById?.rating ?? 4,
-        address: matchedById?.address ?? (stateHotel.city ? String(stateHotel.city) : '—'),
-        description: stateHotel.description ?? matchedById?.description ?? '',
-        images: Array.isArray(stateHotel.images) && stateHotel.images.length
-          ? stateHotel.images
-          : (matchedById?.images ?? []),
-        amenities: stateHotel.amenities ?? matchedById?.amenities ?? [],
-        rooms: matchedById?.rooms ?? [
-          {
-            id: 'single',
-            title: 'Single Bed Room',
-            price: 120,
-            guests: 1,
-            beds: 1,
-            image: (Array.isArray(stateHotel.images) && stateHotel.images[0]) || matchedById?.images?.[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2069&auto=format&fit=crop'
-          },
-          {
-            id: 'double',
-            title: 'Double Bed Room',
-            price: 180,
-            guests: 2,
-            beds: 1,
-            image: (Array.isArray(stateHotel.images) && stateHotel.images[1]) || matchedById?.images?.[1] || 'https://images.unsplash.com/photo-1551776235-dde6d4829808?q=80&w=2069&auto=format&fit=crop'
-          },
-          {
-            id: 'suite',
-            title: 'Suite',
-            price: 260,
-            guests: 3,
-            beds: 2,
-            image: (Array.isArray(stateHotel.images) && stateHotel.images[2]) || matchedById?.images?.[2] || 'https://images.unsplash.com/photo-1552902865-3930f0ec0a6b?q=80&w=2069&auto=format&fit=crop'
-          }
-        ],
+  
+  // Priority: state hotel > localStorage hotel > matched by ID > fallback
+  const sourceHotel = stateHotel || parsedLocalHotel || matchedById
+  
+  // If sourceHotel exists but doesn't have the new room structure, merge with template
+  let hotel
+  if (sourceHotel && sourceHotel.rooms && sourceHotel.rooms.length > 0) {
+    // Check if rooms have the new structure
+    const hasNewStructure = sourceHotel.rooms[0].bedInfo !== undefined
+    if (hasNewStructure) {
+      hotel = sourceHotel
+    } else {
+      // Convert old room structure to new structure
+      hotel = {
+        ...sourceHotel,
+        rooms: sourceHotel.rooms.map((room: any, index: number) => ({
+          ...room,
+          bedInfo: room.beds === 1 ? '1 queen bed' : `${room.beds} beds`,
+          size: 25 + (index * 10),
+          hasBalcony: index > 0,
+          hasCityView: Math.random() > 0.3,
+          amenities: ['Air conditioning', 'Private bathroom', 'Flat-screen TV', 'Free Wi-Fi'],
+          detailedAmenities: ['Free toiletries', 'Shower', 'Towels', 'Linens', 'Socket near the bed', 'Tea/Coffee maker', 'Hairdryer'],
+          image: room.image || 'https://images.unsplash.com/photo-1501117716987-c8eecb9767af?q=80&w=2070&auto=format&fit=crop'
+        }))
       }
-    : (matchedById ?? hotels[0])
+    }
+  } else {
+    hotel = {
+      id: id || 'unknown',
+      name: sourceHotel?.name || 'Hotel',
+      rating: sourceHotel?.rating || 4,
+      address: sourceHotel?.address || '—',
+      description: sourceHotel?.description || 'Luxury accommodation',
+      images: sourceHotel?.images || ['https://via.placeholder.com/800x600?text=Hotel+Image'],
+      amenities: sourceHotel?.amenities || ['Free Wi-Fi', 'Pool', 'Restaurant'],
+      rooms: [
+        {
+          id: 'standard',
+          title: 'Standard Room',
+          price: sourceHotel?.price || 120,
+          guests: 2,
+          beds: 1,
+          image: 'https://images.unsplash.com/photo-1501117716987-c8eecb9767af?q=80&w=2070&auto=format&fit=crop',
+          bedInfo: '1 queen bed',
+          size: 25,
+          hasBalcony: false,
+          hasCityView: true,
+          amenities: ['Air conditioning', 'Private bathroom', 'Free Wi-Fi'],
+          detailedAmenities: ['Free toiletries', 'Shower', 'Towels', 'Linens', 'Socket near the bed']
+        },
+        {
+          id: 'deluxe',
+          title: 'Deluxe Room',
+          price: (sourceHotel?.price || 120) + 50,
+          guests: 3,
+          beds: 1,
+          image: 'https://images.unsplash.com/photo-1552902865-3930f0ec0a6b?q=80&w=2069&auto=format&fit=crop',
+          bedInfo: '1 king bed',
+          size: 35,
+          hasBalcony: true,
+          hasCityView: true,
+          amenities: ['Air conditioning', 'Private bathroom', 'Flat-screen TV', 'Free Wi-Fi'],
+          detailedAmenities: ['Free toiletries', 'Shower', 'Safe', 'Towels', 'Linens', 'Socket near the bed', 'Refrigerator', 'Tea/Coffee maker']
+        },
+        {
+          id: 'suite',
+          title: 'Executive Suite',
+          price: (sourceHotel?.price || 120) + 120,
+          guests: 4,
+          beds: 2,
+          image: 'https://images.unsplash.com/photo-1505692794400-1a1f4f54b0d4?q=80&w=2070&auto=format&fit=crop',
+          bedInfo: '1 king bed and 1 sofa bed',
+          size: 50,
+          hasBalcony: true,
+          hasCityView: true,
+          amenities: ['Air conditioning', 'Private bathroom', 'Flat-screen TV', 'Soundproof', 'Free Wi-Fi'],
+          detailedAmenities: ['Free toiletries', 'Shower', 'Safe', 'Sofa', 'Towels', 'Linens', 'Socket near the bed', 'Refrigerator', 'Tea/Coffee maker', 'Hairdryer', 'Wake-up service', 'Dining area']
+        }
+      ]
+    }
+  }
   const [index, setIndex] = useState(0)
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
 
   // --- UI ---
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
-      {/* Image Gallery */}
-      <div className="relative aspect-[16/9] rounded-2xl overflow-hidden">
-        <div className="overflow-hidden h-full w-full" ref={emblaRef}>
-          <div className="flex h-full">
-            {hotel.images.map((src) => (
-              <div key={src} className="flex-[0_0_100%] relative">
-                <ImageWithFallback src={src} alt={hotel.name} className="h-full w-full object-cover" />
-              </div>
-            ))}
-          </div>
+    <div className="bg-gray-50 min-h-screen">
+      <div className="max-w-[1140px] mx-auto px-4 py-6">
+        {/* Header */}
+        <div className="mb-4">
+          <h1 className="text-[26px] font-bold text-gray-900 mb-1">{hotel.name}</h1>
         </div>
 
-        {/* Gallery controls */}
-        <button
-          onClick={() => emblaApi?.scrollPrev()}
-          className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full w-9 h-9"
-        >
-          ‹
-        </button>
-        <button
-          onClick={() => emblaApi?.scrollNext()}
-          className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full w-9 h-9"
-        >
-          ›
-        </button>
-      </div>
-
-      {/* Thumbnails */}
-      <div className="mt-3 flex gap-2 overflow-x-auto">
-        {hotel.images.map((src, i) => (
-          <button
-            key={i}
-            onClick={() => {
-              setIndex(i)
-              emblaApi?.scrollTo(i)
-            }}
-            className={`h-16 w-24 flex-shrink-0 overflow-hidden rounded-md border ${
-              i === index ? 'border-[var(--color-brand-gold)]' : 'border-gray-200'
-            }`}
-          >
-            <ImageWithFallback src={src} alt={`${hotel.name} thumb`} className="h-full w-full object-cover" />
-          </button>
-        ))}
-      </div>
-
-      {/* Main Details */}
-      <section className="mt-8 grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-10">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">{hotel.name}</h1>
-          <div className="text-yellow-500 mt-1">{'★'.repeat(hotel.rating)}</div>
-          <div className="mt-1 text-sm text-gray-600">{hotel.address}</div>
-          <p className="mt-4 text-gray-700 max-w-prose">{hotel.description}</p>
-
-          {/* Amenities */}
-          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 text-sm">
-            {hotel.amenities.map((label) => (
-              <div key={label} className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2">
-                {getAmenityIcon(label)}
-                <span>{label}</span>
-              </div>
-            ))}
+        {/* Image Gallery Grid */}
+        <div className="relative grid grid-cols-4 gap-1 h-[420px] mb-6">
+          <div className="col-span-2 row-span-2 relative overflow-hidden cursor-pointer">
+            <ImageWithFallback src={hotel.images[0]} alt={hotel.name} className="w-full h-full object-cover hover:opacity-90 transition" />
           </div>
+          {hotel.images.slice(1, 5).map((src, i) => (
+            <div key={i} className="relative overflow-hidden cursor-pointer">
+              <ImageWithFallback src={src} alt={`${hotel.name} ${i+2}`} className="w-full h-full object-cover hover:opacity-90 transition" />
+              {i === 3 && hotel.images.length > 5 && (
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                  <span className="text-white font-semibold">+{hotel.images.length - 5} photos</span>
+                </div>
+              )}
+            </div>
+          ))}
+          {hotel.images.length > 5 && (
+            <button className="absolute bottom-4 right-4 bg-white hover:bg-gray-100 px-4 py-2 rounded shadow-lg text-sm font-semibold transition">
+              Show all photos
+            </button>
+          )}
         </div>
 
-        {/* Room Selector */}
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <RoomSelector rooms={hotel.rooms} hotelName={hotel.name} />
-        </aside>
-      </section>
+        {/* Main Content */}
+        <div className="grid grid-cols-1 gap-6">
+          {/* Content */}
+          <div className="space-y-6">
+            {/* Popular Facilities */}
+            <div className="bg-white rounded p-6 shadow-sm">
+              <h2 className="text-lg font-bold mb-4">Most popular facilities</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {hotel.amenities.slice(0, 6).map((amenity) => (
+                  <div key={amenity} className="flex items-center gap-2 text-sm text-gray-700">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <span>{amenity}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="bg-white rounded p-6 shadow-sm">
+              <p className="text-sm text-gray-700 leading-relaxed">{hotel.description}</p>
+            </div>
+
+            {/* Availability */}
+            <div id="rooms" className="bg-white rounded p-6 shadow-sm">
+              <h2 className="text-xl font-bold mb-4">Availability</h2>
+              <HotelRoomListing rooms={hotel.rooms} hotelName={hotel.name} />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

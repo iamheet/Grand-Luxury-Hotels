@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { addNotification } from '../utils/notificationCenter'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
@@ -10,15 +11,53 @@ export default function AdminLogin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError('')
     
-    // Simulate loading for better UX
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    if (credentials.username.trim().toLowerCase() === 'admin' && credentials.password.trim() === 'luxury2024') {
-      localStorage.setItem('adminAuth', 'true')
-      navigate('/admin-dashboard')
-    } else {
-      setError('Invalid credentials')
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: credentials.username.trim(),
+          password: credentials.password.trim()
+        })
+      })
+      
+      const data = await response.json()
+      
+      console.log('Login response:', data) // Debug log
+      
+      if (data.success) {
+        // Store JWT token and admin info
+        localStorage.setItem('adminToken', data.token)
+        localStorage.setItem('adminAuth', 'true')
+        
+        // ONLY admin/luxury2024 gets main admin access
+        if (data.admin.type === 'super') {
+          localStorage.setItem('adminType', 'super')
+          localStorage.removeItem('currentHotel')
+          localStorage.removeItem('subAdminData')
+          navigate('/admin-dashboard')
+        } else {
+          // ALL others go to sub-admin dashboard
+          localStorage.setItem('adminType', 'subadmin')
+          const subAdminData = data.subAdminData || data.hotelData || { name: data.admin.username || 'Admin' }
+          localStorage.setItem('subAdminData', JSON.stringify(subAdminData))
+          navigate('/subadmin-dashboard')
+        }
+        return
+      } else {
+        const errorMsg = data.message || 'Invalid credentials'
+        setError(errorMsg)
+        addNotification(errorMsg, 'error')
+      }
+    } catch (error) {
+      const errorMsg = 'Server connection failed. Admin access requires server authentication.'
+      setError(errorMsg)
+      addNotification(errorMsg, 'error')
+    } finally {
       setIsLoading(false)
     }
   }
@@ -136,6 +175,7 @@ export default function AdminLogin() {
               placeholder="Administrator Username"
               value={credentials.username}
               onChange={(e) => setCredentials({...credentials, username: e.target.value})}
+              autoComplete="off"
               style={{
                 width: '100%',
                 padding: '18px 18px 18px 50px',
@@ -174,6 +214,7 @@ export default function AdminLogin() {
               placeholder="Secure Password"
               value={credentials.password}
               onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+              autoComplete="new-password"
               style={{
                 width: '100%',
                 padding: '18px 18px 18px 50px',
@@ -229,19 +270,19 @@ export default function AdminLogin() {
               fontWeight: '700',
               cursor: isLoading ? 'not-allowed' : 'pointer',
               transition: 'all 0.3s ease',
-              boxShadow: '0 10px 30px rgba(251, 191, 36, 0.3)',
-              letterSpacing: '1px',
-              textTransform: 'uppercase'
+              transform: isLoading ? 'scale(0.98)' : 'scale(1)',
+              boxShadow: isLoading ? 'none' : '0 10px 30px rgba(251, 191, 36, 0.3)',
+              marginBottom: '15px'
             }}
-            onMouseOver={(e) => {
+            onMouseEnter={(e) => {
               if (!isLoading) {
-                e.target.style.transform = 'translateY(-2px)'
+                e.target.style.transform = 'scale(1.02)'
                 e.target.style.boxShadow = '0 15px 40px rgba(251, 191, 36, 0.4)'
               }
             }}
-            onMouseOut={(e) => {
+            onMouseLeave={(e) => {
               if (!isLoading) {
-                e.target.style.transform = 'translateY(0)'
+                e.target.style.transform = 'scale(1)'
                 e.target.style.boxShadow = '0 10px 30px rgba(251, 191, 36, 0.3)'
               }
             }}
@@ -259,55 +300,27 @@ export default function AdminLogin() {
                 Authenticating...
               </div>
             ) : (
-              '🚀 Access Control Center'
+              <>🚀 ACCESS ADMIN PORTAL</>
             )}
           </button>
+
+          <button
+            type="button"
+            onClick={() => navigate('/forgot-password')}
+            style={{
+              width: '100%',
+              background: 'transparent',
+              color: 'rgba(251, 191, 36, 0.8)',
+              padding: '12px',
+              border: 'none',
+              fontSize: '14px',
+              cursor: 'pointer',
+              textDecoration: 'underline'
+            }}
+          >
+            Forgot Password?
+          </button>
         </form>
-
-        <div style={{ 
-          textAlign: 'center', 
-          marginTop: '30px', 
-          padding: '15px',
-          background: 'rgba(251, 191, 36, 0.05)',
-          borderRadius: '10px',
-          border: '1px solid rgba(251, 191, 36, 0.1)'
-        }}>
-          <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', marginBottom: '5px' }}>
-            🔐 Demo Credentials
-          </div>
-          <div style={{ fontSize: '14px', color: '#fbbf24', fontFamily: 'monospace' }}>
-            admin / luxury2024
-          </div>
-        </div>
-
-        <button
-          onClick={() => navigate('/member-dashboard')}
-          style={{
-            width: '100%',
-            marginTop: '20px',
-            background: 'rgba(255,255,255,0.05)',
-            color: 'rgba(255, 255, 255, 0.7)',
-            padding: '15px',
-            border: '2px solid rgba(255, 255, 255, 0.2)',
-            borderRadius: '15px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
-            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)'
-            e.currentTarget.style.color = 'white'
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
-            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)'
-            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'
-          }}
-        >
-          ← Back to Dashboard
-        </button>
       </div>
       
       <style>{`

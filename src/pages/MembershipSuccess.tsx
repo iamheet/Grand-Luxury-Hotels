@@ -5,15 +5,110 @@ export default function MembershipSuccess() {
   const location = useLocation()
   const navigate = useNavigate()
   const [memberData, setMemberData] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const data = location.state?.memberData
-    if (!data) {
-      navigate('/membership')
+    // Check for PayPal return parameters
+    const urlParams = new URLSearchParams(window.location.search)
+    const paypalOrderId = urlParams.get('token') || urlParams.get('paymentId')
+    const payerId = urlParams.get('PayerID')
+    
+    if (paypalOrderId && payerId && !memberData) {
+      // Handle PayPal return for membership
+      handlePayPalMembershipReturn(paypalOrderId, payerId)
     } else {
-      setMemberData(data)
+      const data = location.state?.memberData
+      if (data) {
+        setMemberData(data)
+      }
+      // Don't redirect if no data - let PayPal processing complete
     }
-  }, [location.state, navigate])
+  }, [location.state, memberData])
+
+  const handlePayPalMembershipReturn = async (orderId: string, payerId: string) => {
+    setLoading(true)
+    try {
+      // Add 5 second delay like Razorpay
+      await new Promise(resolve => setTimeout(resolve, 5000))
+      
+      // Get membership data from localStorage (saved during checkout)
+      const pendingMembership = localStorage.getItem('pendingMembershipPayment')
+      if (!pendingMembership) {
+        throw new Error('No pending membership data found')
+      }
+      
+      const membershipData = JSON.parse(pendingMembership)
+
+      // Create membership after PayPal payment (skip existence check)
+      const memberResponse = await fetch('http://localhost:5000/api/members/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: membershipData.name,
+          email: membershipData.email,
+          password: membershipData.password, // Use stored password
+          phone: membershipData.phone || '',
+          tier: membershipData.tier || 'Bronze',
+          paymentMethod: 'paypal'
+        })
+      })
+
+      if (memberResponse.ok) {
+        const memberResult = await memberResponse.json()
+        const finalMemberData = {
+          email: membershipData.email,
+          name: membershipData.name,
+          membershipId: memberResult.member.membershipId,
+          tier: memberResult.member.tier,
+          joinDate: new Date().toISOString().split('T')[0],
+          paymentAmount: membershipData.amount,
+          paymentId: orderId,
+          password: membershipData.password // Use password from localStorage
+        }
+        
+        setMemberData(finalMemberData)
+        localStorage.setItem('member', JSON.stringify(finalMemberData))
+        localStorage.removeItem('pendingMembershipPayment')
+      } else {
+        const errorData = await memberResponse.json()
+        console.error('Membership creation failed:', errorData)
+        throw new Error(errorData.message || 'Membership creation failed')
+      }
+    } catch (error) {
+      console.error('PayPal membership return error:', error)
+      // Don't redirect on error, show fallback message
+      const membershipData = JSON.parse(localStorage.getItem('pendingMembershipPayment') || '{}')
+      const fallbackData = {
+        email: membershipData.email || 'your-email@example.com',
+        name: membershipData.name || 'Member',
+        membershipId: 'PENDING',
+        tier: membershipData.tier || 'Bronze',
+        joinDate: new Date().toISOString().split('T')[0],
+        paymentAmount: membershipData.amount || 0,
+        paymentId: orderId
+      }
+      setMemberData(fallbackData)
+      localStorage.removeItem('pendingMembershipPayment')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
+            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Processing Membership</h1>
+          <p className="text-gray-600 mb-6">Please wait while we activate your membership...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!memberData) return null
 
@@ -79,15 +174,31 @@ export default function MembershipSuccess() {
             </svg>
             <div>
               <h3 className="font-semibold text-yellow-800 mb-2">Important: Save Your Login Credentials</h3>
-              <p className="text-yellow-700 text-sm mb-2">
-                <strong>Membership ID:</strong> {memberData.membershipId}
-              </p>
-              <p className="text-yellow-700 text-sm">
-                <strong>Temporary Password:</strong> {memberData.password}
-              </p>
-              <p className="text-yellow-700 text-sm mt-2">
-                Please save these credentials. Use them to login to your exclusive member portal.
-              </p>
+              {memberData.password ? (
+                <>
+                  <p className="text-yellow-700 text-sm mb-2">
+                    <strong>Membership ID:</strong> {memberData.membershipId}
+                  </p>
+                  <p className="text-yellow-700 text-sm">
+                    <strong>Temporary Password:</strong> {memberData.password}
+                  </p>
+                  <p className="text-yellow-700 text-sm mt-2">
+                    Please save these credentials. Use them to login to your exclusive member portal.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-yellow-700 text-sm mb-2">
+                    <strong>Membership ID:</strong> {memberData.membershipId}
+                  </p>
+                  <p className="text-yellow-700 text-sm">
+                    Your membership credentials have been sent to <strong>{memberData.email}</strong>
+                  </p>
+                  <p className="text-yellow-700 text-sm mt-2">
+                    Please check your email for login details. If you don't receive it within 10 minutes, contact support.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>

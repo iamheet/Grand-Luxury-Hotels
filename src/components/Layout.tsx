@@ -102,9 +102,24 @@ export default function Layout() {
             {isLoggedIn ? (
               <button
                 onClick={async () => {
+                  const wasExclusive = localStorage.getItem('isExclusiveMember') === 'true'
                   await signOut(auth)
+                  // Clear all user and member data
                   localStorage.removeItem('user')
-                  navigate('/')
+                  localStorage.removeItem('member')
+                  localStorage.removeItem('memberCheckout')
+                  localStorage.removeItem('token')
+                  localStorage.removeItem('isAuthenticated')
+                  localStorage.removeItem('memberBookings')
+                  localStorage.removeItem('spentPoints')
+                  localStorage.removeItem('isExclusiveMember')
+                  
+                  // Redirect to exclusive member login if was exclusive member
+                  if (wasExclusive) {
+                    navigate('/login')
+                  } else {
+                    navigate('/')
+                  }
                   window.location.reload()
                 }}
                 className="group flex items-center gap-2 rounded-lg border border-slate-500/30 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 px-4 py-2 text-white font-medium shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
@@ -138,10 +153,25 @@ export default function Layout() {
               {isLoggedIn ? (
                 <button
                   onClick={async () => {
+                    const wasExclusive = localStorage.getItem('isExclusiveMember') === 'true'
                     await signOut(auth)
+                    // Clear all user and member data
                     localStorage.removeItem('user')
+                    localStorage.removeItem('member')
+                    localStorage.removeItem('memberCheckout')
+                    localStorage.removeItem('token')
+                    localStorage.removeItem('isAuthenticated')
+                    localStorage.removeItem('memberBookings')
+                    localStorage.removeItem('spentPoints')
+                    localStorage.removeItem('isExclusiveMember')
                     setMobileMenuOpen(false)
-                    navigate('/')
+                    
+                    // Redirect to exclusive member login if was exclusive member
+                    if (wasExclusive) {
+                      navigate('/login')
+                    } else {
+                      navigate('/')
+                    }
                     window.location.reload()
                   }}
                   className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-slate-600 to-slate-700 text-white font-medium text-center"

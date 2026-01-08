@@ -1,139 +1,176 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 export default function ForgotPassword() {
-  const [resetType, setResetType] = useState<'email' | 'membership'>('email')
   const [email, setEmail] = useState('')
-  const [membershipId, setMembershipId] = useState('')
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setStatus('loading')
+    setLoading(true)
     setMessage('')
+    setError('')
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/forgot-password', {
-        ...(resetType === 'email' 
-          ? { email: email.trim() } 
-          : { membershipId: membershipId.trim(), isExclusive: true }
-        )
+      const response = await fetch('http://localhost:5000/api/password/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
       })
 
-      setStatus('success')
-      setMessage(response.data.message || 'Password reset instructions have been sent.')
-    } catch (err: any) {
-      console.error('Forgot password error:', err)
-      setStatus('error')
-      setMessage(err.response?.data?.message || 'Something went wrong. Please try again.')
+      const data = await response.json()
+
+      if (data.success) {
+        setMessage('✅ Password reset email sent! Check your inbox.')
+        setEmail('')
+      } else {
+        setError(data.message || 'Failed to send reset email')
+      }
+    } catch (error) {
+      setError('Server error. Please try again.')
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center px-6 py-16">
-      <div
-        className="absolute inset-0 -z-10 bg-center bg-cover"
-        style={{
-          backgroundImage:
-            "url('https://cf.bstatic.com/xdata/images/hotel/max1024x768/763590431.jpg?k=f87898a89d4364be4a52fdadf9c8775f801ac2cca5e74c536c21aea1bf61ee83&o=')",
-        }}
-      />
-      <div className="absolute inset-0 -z-10 bg-black/50" />
-
-      <div className="w-full max-w-md">
-        <div className="backdrop-blur-md bg-white/90 rounded-2xl shadow-2xl border border-white/40 p-6 md:p-7">
-          <h2 className="text-xl font-semibold text-center mb-4 text-[var(--color-brand-navy)]">
-            Reset Password
-          </h2>
-
-          {status === 'success' ? (
-            <div className="text-center">
-              <div className="text-green-600 mb-4">{message}</div>
-              <Link
-                to="/login"
-                className="inline-block w-full text-center bg-[var(--color-brand-gold)] text-[var(--color-brand-navy)] font-medium rounded-lg py-2 hover:brightness-95 transition shadow-md"
-              >
-                Return to Login
-              </Link>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex bg-gray-100 rounded-lg p-1 mb-4">
-                <button
-                  type="button"
-                  onClick={() => setResetType('email')}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                    resetType === 'email'
-                      ? 'bg-white text-[var(--color-brand-navy)] shadow-sm'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                >
-                  Email
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setResetType('membership')}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                    resetType === 'membership'
-                      ? 'bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 text-[var(--color-brand-navy)] shadow-sm'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                >
-                  ✨ Membership ID
-                </button>
-              </div>
-
-              {resetType === 'email' ? (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)]"
-                    placeholder="you@example.com"
-                  />
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Membership ID
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={membershipId}
-                    onChange={(e) => setMembershipId(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)]"
-                    placeholder="Enter your membership ID"
-                  />
-                </div>
-              )}
-
-              {status === 'error' && <div className="text-red-600 text-sm">{message}</div>}
-
-              <button
-                type="submit"
-                disabled={status === 'loading'}
-                className="w-full bg-[var(--color-brand-gold)] text-[var(--color-brand-navy)] font-medium rounded-lg py-2 hover:brightness-95 transition shadow-md disabled:opacity-50"
-              >
-                {status === 'loading' ? 'Sending...' : 'Send Reset Link'}
-              </button>
-
-              <div className="text-center">
-                <Link to="/login" className="text-sm text-[var(--color-brand-gold)] hover:underline">
-                  Back to Login
-                </Link>
-              </div>
-            </form>
-          )}
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #0f0f23, #1a1a2e, #16213e, #0f3460)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px'
+    }}>
+      <div style={{
+        background: 'rgba(0,0,0,0.9)',
+        backdropFilter: 'blur(20px)',
+        padding: '50px',
+        borderRadius: '30px',
+        border: '1px solid rgba(251, 191, 36, 0.3)',
+        boxShadow: '0 25px 80px rgba(0, 0, 0, 0.5)',
+        width: '100%',
+        maxWidth: '450px'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <div style={{
+            width: '80px',
+            height: '80px',
+            background: 'linear-gradient(135deg, #fbbf24, #f59e0b, #d97706)',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 20px',
+            fontSize: '32px'
+          }}>
+            🔐
+          </div>
+          <h1 style={{
+            fontSize: '32px',
+            background: 'linear-gradient(135deg, #fbbf24, #f59e0b, #d97706)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            marginBottom: '10px',
+            fontWeight: '700'
+          }}>
+            Forgot Password
+          </h1>
+          <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px' }}>
+            Enter your email to receive a password reset link
+          </p>
         </div>
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '25px' }}>
+            <input
+              type="email"
+              placeholder="Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '18px',
+                background: 'rgba(255,255,255,0.05)',
+                border: '2px solid rgba(251, 191, 36, 0.3)',
+                borderRadius: '15px',
+                color: 'white',
+                fontSize: '16px',
+                outline: 'none'
+              }}
+            />
+          </div>
+
+          {message && (
+            <div style={{
+              color: '#10b981',
+              marginBottom: '20px',
+              padding: '12px',
+              background: 'rgba(16, 185, 129, 0.1)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              borderRadius: '10px',
+              fontSize: '14px',
+              textAlign: 'center'
+            }}>
+              {message}
+            </div>
+          )}
+
+          {error && (
+            <div style={{
+              color: '#ef4444',
+              marginBottom: '20px',
+              padding: '12px',
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: '10px',
+              fontSize: '14px',
+              textAlign: 'center'
+            }}>
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              background: loading ? 'rgba(251, 191, 36, 0.5)' : 'linear-gradient(135deg, #fbbf24, #f59e0b, #d97706)',
+              color: '#1a1a2e',
+              padding: '18px',
+              border: 'none',
+              borderRadius: '15px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              marginBottom: '15px'
+            }}
+          >
+            {loading ? 'Sending...' : 'Send Reset Link'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            style={{
+              width: '100%',
+              background: 'transparent',
+              color: 'rgba(255, 255, 255, 0.7)',
+              padding: '12px',
+              border: 'none',
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}
+          >
+            ← Back to Login
+          </button>
+        </form>
       </div>
-    </section>
+    </div>
   )
 }

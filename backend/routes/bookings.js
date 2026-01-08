@@ -36,13 +36,23 @@ router.get('/', auth, async (req, res) => {
 // Get all bookings (Admin only)
 router.get('/admin/all', async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    
+    const total = await Booking.countDocuments();
     const bookings = await Booking.find()
       .populate('userId', 'name email phone')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
     
     res.json({
       success: true,
       count: bookings.length,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
       bookings
     });
   } catch (error) {
@@ -63,6 +73,21 @@ router.post('/', auth, async (req, res) => {
     
     const booking = new Booking(bookingData);
     await booking.save();
+    
+    // Emit real-time notification to all connected admins
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('newBooking', {
+        message: 'New booking created',
+        booking: {
+          id: booking._id,
+          hotelName: booking.hotelName,
+          customerName: req.body.guest?.name || req.body.member?.name || 'Guest',
+          amount: booking.total || booking.totalPrice || booking.price,
+          createdAt: booking.createdAt
+        }
+      });
+    }
     
     res.status(201).json({
       success: true,

@@ -8,6 +8,7 @@ const memberSchema = new mongoose.Schema({
   tier: { type: String, enum: ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'], default: 'Bronze' },
   membershipId: { type: String, unique: true },
   points: { type: Number, default: 0 },
+  paymentMethod: { type: String, enum: ['razorpay', 'paypal'], default: 'razorpay' },
   resetToken: String,
   resetTokenExpiry: Date,
   createdAt: { type: Date, default: Date.now }

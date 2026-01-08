@@ -10,6 +10,7 @@ const bookingSchema = new mongoose.Schema({
   travel: mongoose.Schema.Types.Mixed,
   hotelId: String,
   hotelName: String,
+  roomTitle: String,
   location: String,
   checkIn: Date,
   checkOut: Date,
@@ -36,6 +37,11 @@ const bookingSchema = new mongoose.Schema({
   bookingType: { type: String, enum: ['Regular User', 'Exclusive Member'], default: 'Regular User' },
   memberTier: { type: String, enum: ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'] },
   status: { type: String, default: 'confirmed' },
+  paymentId: String,
+  orderId: String,
+  paymentMethod: { type: String, enum: ['razorpay', 'paypal', 'stripe'], default: 'razorpay' },
+  paymentStatus: { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending' },
+  failureReason: String,
   bookingDate: Date,
   createdAt: { type: Date, default: Date.now }
 });

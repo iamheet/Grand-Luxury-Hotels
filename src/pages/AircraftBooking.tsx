@@ -86,6 +86,10 @@ export default function AircraftBooking() {
   const allAircraft = [...privateJets, ...helicopters]
 
   const handleBookAircraft = (aircraft: any) => {
+    // Check if returning to checkout with existing cart
+    const returnToCheckout = localStorage.getItem('returnToCheckout')
+    const existingCart = localStorage.getItem('memberCart')
+    
     // Convert aircraft to room-like object for checkout compatibility
     const aircraftAsRoom = {
       id: aircraft.id,
@@ -98,8 +102,17 @@ export default function AircraftBooking() {
       aircraft: aircraft
     }
     
-    // Navigate to member checkout with aircraft data
-    navigate('/member-checkout', { state: { room: aircraftAsRoom } })
+    if (returnToCheckout && existingCart) {
+      // Add to existing cart and return to checkout
+      const cart = JSON.parse(existingCart)
+      cart.push(aircraftAsRoom)
+      localStorage.setItem('memberCart', JSON.stringify(cart))
+      localStorage.removeItem('returnToCheckout')
+      navigate('/member-checkout', { state: { room: cart[0] } })
+    } else {
+      // New booking - navigate to checkout with aircraft
+      navigate('/member-checkout', { state: { room: aircraftAsRoom } })
+    }
   }
 
   if (!member) return null

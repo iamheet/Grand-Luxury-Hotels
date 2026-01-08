@@ -5,10 +5,17 @@ const jwt = require('jsonwebtoken');
 const Member = require('../models/Member');
 const auth = require('../middleware/auth');
 
-// Get all members (for admin)
+// Get all members (for admin) or check by email
 router.get('/', async (req, res) => {
   try {
-    const members = await Member.find().select('-password').sort({ createdAt: -1 });
+    const { email } = req.query;
+    
+    let query = {};
+    if (email) {
+      query = { email: email };
+    }
+    
+    const members = await Member.find(query).select('-password').sort({ createdAt: -1 });
     res.json({
       success: true,
       count: members.length,
@@ -52,18 +59,44 @@ router.get('/profile', auth, async (req, res) => {
 // Register new member (admin only - can be enabled/disabled)
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, phone, tier, membershipId } = req.body;
+    console.log('📝 Member registration request:', req.body);
+    
+    const { name, email, password, phone, tier, membershipId, paymentMethod } = req.body;
+
+    // Validate required fields
+    if (!name || !email) {
+      console.log('❌ Missing required fields:', { name: !!name, email: !!email });
+      return res.status(400).json({ 
+        success: false,
+        message: 'Name and email are required' 
+      });
+    }
+
+    // Generate temporary password if not provided (for payment-based registration)
+    const tempPassword = password || `temp${Date.now()}`;
+    console.log('🔑 Using password:', password ? 'provided' : 'generated');
 
     // Check if member already exists
     const existingMember = await Member.findOne({ $or: [{ email }, { membershipId }] });
     if (existingMember) {
-      return res.status(400).json({ message: 'Member already exists with this email or membership ID' });
+      console.log('⚠️ Member already exists, returning existing member:', { email, membershipId });
+      return res.status(200).json({ 
+        success: true,
+        message: 'Member already exists', 
+        member: {
+          id: existingMember._id,
+          name: existingMember.name,
+          email: existingMember.email,
+          membershipId: existingMember.membershipId,
+          tier: existingMember.tier
+        }
+      });
     }
 
     // Generate membershipId if not provided
     const finalMembershipId = membershipId || `GS${Date.now()}${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
     const member = new Member({ 
       name, 
       email, 
@@ -71,11 +104,37 @@ router.post('/register', async (req, res) => {
       phone, 
       tier: tier || 'Bronze',
       membershipId: finalMembershipId,
-      points: 0 
+      points: 0,
+      paymentMethod: paymentMethod || 'razorpay'
     });
     
-    await member.save();
+    console.log('💾 Saving member:', { name, email, tier: tier || 'Bronze', membershipId: finalMembershipId, paymentMethod: paymentMethod || 'razorpay' });
     
+    try {
+      await member.save();
+      console.log('✅ Member created successfully:', member._id);
+    } catch (saveError) {
+      // Handle duplicate key error
+      if (saveError.code === 11000) {
+        console.log('⚠️ Duplicate key error during save, fetching existing member');
+        const existingMember = await Member.findOne({ email });
+        if (existingMember) {
+          return res.status(200).json({ 
+            success: true,
+            message: 'Member already exists', 
+            member: {
+              id: existingMember._id,
+              name: existingMember.name,
+              email: existingMember.email,
+              membershipId: existingMember.membershipId,
+              tier: existingMember.tier,
+              paymentMethod: existingMember.paymentMethod
+            }
+          });
+        }
+      }
+      throw saveError;
+    }
     res.status(201).json({ 
       success: true,
       message: 'Exclusive member registered successfully', 
@@ -84,11 +143,18 @@ router.post('/register', async (req, res) => {
         name: member.name,
         email: member.email,
         membershipId: finalMembershipId,
-        tier: member.tier
+        tier: member.tier,
+        paymentMethod: member.paymentMethod,
+        password: tempPassword
       }
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('❌ Member registration error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error', 
+      error: error.message 
+    });
   }
 });
 

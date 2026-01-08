@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 interface Hotel {
-  id: string
+  _id: string
   name: string
   location: string
   price: number
   image: string
   rating: number
   exclusive: boolean
+  email?: string
+  password?: string
 }
 
 export default function NormalHotelsDashboard() {
@@ -21,9 +23,12 @@ export default function NormalHotelsDashboard() {
     location: '',
     price: '',
     image: '',
-    rating: ''
+    rating: '',
+    email: '',
+    password: ''
   })
   const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -33,51 +38,83 @@ export default function NormalHotelsDashboard() {
       return
     }
 
+    fetchHotels()
+  }, [navigate])
+
+  const fetchHotels = async () => {
+    setLoading(true)
     try {
-      const saved = localStorage.getItem('normalHotels')
-      if (saved) {
-        setHotels(JSON.parse(saved))
+      const response = await fetch('http://localhost:5000/api/hotels')
+      const data = await response.json()
+      if (data.success) {
+        setHotels(data.hotels)
       } else {
-        const defaultHotels = [
-          { id: 'paris-1', name: 'Hôtel Étoile Royale', location: 'Paris', price: 520, image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=400&auto=format&fit=crop', rating: 5, exclusive: false },
-          { id: 'paris-2', name: 'Le Jardin Suites', location: 'Paris', price: 360, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/549415122.jpg?k=6aa38e1d6d970b5756c6e0bd4297a603ce8618ffec17a5e8c2332ac20ab1bc2e&o=', rating: 4, exclusive: false },
-          { id: 'nyc-1', name: 'The Skyline Tower', location: 'New York', price: 480, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/763346606.jpg?k=6ec8469c977fbd5e6867bd1da4f454db5914ccf5c962cd9b9ae74a5c2c766ca4&o=', rating: 5, exclusive: false },
-          { id: 'tokyo-1', name: 'Shinjuku Imperial', location: 'Tokyo', price: 450, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/677082763.jpg?k=1e0efd2d22e212697c98ff09502775672c39f4b38dc54b729c3a76f800173d12&o=', rating: 5, exclusive: false },
-          { id: 'dubai-1', name: 'Palm Marina Resort', location: 'Dubai', price: 530, image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/727476358.jpg?k=aec126bb04f23b6b833361fd74d87bd9512216d5bc27827f96554dbe59602a31&o=', rating: 5, exclusive: false },
-          { id: 'rome-1', name: 'Palazzo Aurelia', location: 'Rome', price: 400, image: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?q=80&w=400&auto=format&fit=crop', rating: 5, exclusive: false }
-        ]
-        setHotels(defaultHotels)
-        localStorage.setItem('normalHotels', JSON.stringify(defaultHotels))
+        // If no hotels in database, seed with defaults
+        await seedDefaultHotels()
       }
+    } catch (error) {
+      console.error('Error fetching hotels:', error)
     } finally {
       setLoading(false)
     }
-  }, [navigate])
-
-  const saveHotels = (updatedHotels: Hotel[]) => {
-    setHotels(updatedHotels)
-    localStorage.setItem('normalHotels', JSON.stringify(updatedHotels))
   }
 
-  const handleAddHotel = () => {
-    if (!formData.name || !formData.location || !formData.price || !formData.image || !formData.rating) {
-      alert('Please fill all fields')
+  const seedDefaultHotels = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/hotels/seed', {
+        method: 'POST'
+      })
+      const data = await response.json()
+      if (data.success) {
+        fetchHotels()
+      }
+    } catch (error) {
+      console.error('Error seeding hotels:', error)
+    }
+  }
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 3000)
+  }
+
+  const handleAddHotel = async () => {
+    if (!formData.name || !formData.location || !formData.price || !formData.image || !formData.rating || !formData.email || !formData.password) {
+      showToast('Please fill all fields including email and password', 'error')
       return
     }
 
-    const newHotel: Hotel = {
-      id: `hotel-${Date.now()}`,
-      name: formData.name.trim(),
-      location: formData.location.trim(),
-      price: parseFloat(formData.price),
-      image: formData.image.trim(),
-      rating: parseFloat(formData.rating),
-      exclusive: false
-    }
+    try {
+      const response = await fetch('http://localhost:5000/api/hotels', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          location: formData.location.trim(),
+          price: parseFloat(formData.price),
+          image: formData.image.trim(),
+          rating: parseFloat(formData.rating),
+          exclusive: false,
+          email: formData.email.trim(),
+          password: formData.password.trim()
+        })
+      })
 
-    saveHotels([...hotels, newHotel])
-    setFormData({ name: '', location: '', price: '', image: '', rating: '' })
-    setShowAddForm(false)
+      const data = await response.json()
+      if (data.success) {
+        fetchHotels()
+        setFormData({ name: '', location: '', price: '', image: '', rating: '', email: '', password: '' })
+        setShowAddForm(false)
+        showToast('Hotel added successfully!', 'success')
+      } else {
+        showToast(data.message || 'Error adding hotel', 'error')
+      }
+    } catch (error) {
+      console.error('Error adding hotel:', error)
+      showToast('Error adding hotel', 'error')
+    }
   }
 
   const handleEditHotel = (hotel: Hotel) => {
@@ -87,32 +124,72 @@ export default function NormalHotelsDashboard() {
       location: hotel.location,
       price: hotel.price.toString(),
       image: hotel.image,
-      rating: hotel.rating.toString()
+      rating: hotel.rating.toString(),
+      email: '',
+      password: ''
     })
     setShowAddForm(true)
   }
 
-  const handleUpdateHotel = () => {
+  const handleUpdateHotel = async () => {
     if (!editingHotel) return
 
-    const updatedHotel: Hotel = {
-      ...editingHotel,
-      name: formData.name.trim(),
-      location: formData.location.trim(),
-      price: parseFloat(formData.price),
-      image: formData.image.trim(),
-      rating: parseFloat(formData.rating)
+    if (!formData.name || !formData.location || !formData.price || !formData.image || !formData.rating || !formData.email || !formData.password) {
+      showToast('Please fill all fields including email and password', 'error')
+      return
     }
 
-    saveHotels(hotels.map(h => h.id === editingHotel.id ? updatedHotel : h))
-    setFormData({ name: '', location: '', price: '', image: '', rating: '' })
-    setShowAddForm(false)
-    setEditingHotel(null)
+    try {
+      const response = await fetch(`http://localhost:5000/api/hotels/${editingHotel._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          location: formData.location.trim(),
+          price: parseFloat(formData.price),
+          image: formData.image.trim(),
+          rating: parseFloat(formData.rating),
+          email: formData.email.trim(),
+          password: formData.password.trim()
+        })
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        fetchHotels()
+        setFormData({ name: '', location: '', price: '', image: '', rating: '', email: '', password: '' })
+        setShowAddForm(false)
+        setEditingHotel(null)
+        showToast('Hotel updated successfully!', 'success')
+      } else {
+        showToast(data.message || 'Error updating hotel', 'error')
+      }
+    } catch (error) {
+      console.error('Error updating hotel:', error)
+      showToast('Error updating hotel', 'error')
+    }
   }
 
-  const handleDeleteHotel = (id: string) => {
+  const handleDeleteHotel = async (id: string) => {
     if (confirm('Are you sure you want to delete this hotel?')) {
-      saveHotels(hotels.filter(h => h.id !== id))
+      try {
+        const response = await fetch(`http://localhost:5000/api/hotels/${id}`, {
+          method: 'DELETE'
+        })
+        
+        const data = await response.json()
+        if (data.success) {
+          fetchHotels()
+          showToast('Hotel deleted successfully!', 'success')
+        } else {
+          showToast(data.message || 'Error deleting hotel', 'error')
+        }
+      } catch (error) {
+        console.error('Error deleting hotel:', error)
+        showToast('Error deleting hotel', 'error')
+      }
     }
   }
 
@@ -258,12 +335,20 @@ export default function NormalHotelsDashboard() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
                   <input type="url" value={formData.image} onChange={(e) => setFormData({...formData, image: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter image URL" />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Hotel Email *</label>
+                  <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter hotel email" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Hotel Password *</label>
+                  <input type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter hotel password" required />
+                </div>
               </div>
               <div className="flex gap-3 mt-4">
                 <button onClick={editingHotel ? handleUpdateHotel : handleAddHotel} className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200">
                   {editingHotel ? '✔️ Update' : '✨ Add'}
                 </button>
-                <button onClick={() => { setShowAddForm(false); setEditingHotel(null); setFormData({ name: '', location: '', price: '', image: '', rating: '' }); }} className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-200">
+                <button onClick={() => { setShowAddForm(false); setEditingHotel(null); setFormData({ name: '', location: '', price: '', image: '', rating: '', email: '', password: '' }); }} className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-200">
                   ❌ Cancel
                 </button>
               </div>
@@ -273,7 +358,7 @@ export default function NormalHotelsDashboard() {
           {/* Hotels Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {hotels.map((hotel) => (
-              <div key={hotel.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 group">
+              <div key={hotel._id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 group">
                 <div className="relative overflow-hidden h-48">
                   <img src={hotel.image} alt={hotel.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1">
@@ -300,7 +385,7 @@ export default function NormalHotelsDashboard() {
                     <button onClick={() => handleEditHotel(hotel)} className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white py-2 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200">
                       ✏️ Edit
                     </button>
-                    <button onClick={() => handleDeleteHotel(hotel.id)} className="flex-1 bg-gradient-to-r from-red-600 to-red-500 text-white py-2 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                    <button onClick={() => handleDeleteHotel(hotel._id)} className="flex-1 bg-gradient-to-r from-red-600 to-red-500 text-white py-2 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200">
                       🗑️ Delete
                     </button>
                   </div>
@@ -321,6 +406,28 @@ export default function NormalHotelsDashboard() {
           )}
         </main>
       </div>
+      
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${
+          toast.type === 'success' 
+            ? 'bg-green-500 text-white' 
+            : 'bg-red-500 text-white'
+        }`}>
+          <div className="flex items-center gap-2">
+            {toast.type === 'success' ? (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            )}
+            <span className="font-medium">{toast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

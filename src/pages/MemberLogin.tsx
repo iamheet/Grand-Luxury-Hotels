@@ -14,19 +14,38 @@ export default function MemberLogin() {
     setError('')
     setLoading(true)
 
-    // Simulate member validation
-    if (membershipId === 'GRAND2024' && email && password === '1234') {
+    // Clear any existing member data first
+    localStorage.removeItem('member')
+    localStorage.removeItem('memberCheckout')
+    localStorage.removeItem('token')
+    localStorage.removeItem('isAuthenticated')
+
+    // Simulate member validation - more flexible validation
+    if (membershipId.toUpperCase() === 'GRAND2024' && email.trim() && password === '1234') {
       const memberData = {
-        email,
-        name: 'Premium Member',
-        membershipId,
+        email: email.trim(),
+        name: email.split('@')[0] || 'Premium Member',
+        membershipId: membershipId.toUpperCase(),
         tier: 'Platinum',
         joinDate: '2024-01-01'
       }
+      
+      console.log('Setting member data:', memberData)
+      
+      // Set authentication tokens
+      localStorage.setItem('token', 'demo-token-' + Date.now())
+      localStorage.setItem('isAuthenticated', 'true')
       localStorage.setItem('member', JSON.stringify(memberData))
+      localStorage.setItem('memberCheckout', JSON.stringify(memberData))
+      localStorage.setItem('isExclusiveMember', 'true')
+      
+      console.log('Login successful, navigating to dashboard')
       navigate('/member-dashboard')
     } else {
-      setError('Invalid membership credentials. Please check your membership ID and login details.')
+      console.log('Login failed - Invalid credentials')
+      console.log('Expected: ID=GRAND2024, Password=1234')
+      console.log('Received:', { membershipId: membershipId.toUpperCase(), email, password })
+      setError('Invalid credentials. Use ID: GRAND2024, Password: 1234')
     }
     setLoading(false)
   }

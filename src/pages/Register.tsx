@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { auth, googleProvider } from '../firebase'
@@ -9,6 +10,7 @@ export default function Register() {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [confirmPassword, setConfirmPassword] = useState('')
+	const [phone, setPhone] = useState('')
 	const [showPassword, setShowPassword] = useState(false)
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 	const [error, setError] = useState<string | null>(null)
@@ -17,21 +19,44 @@ export default function Register() {
 		try {
 			const result = await signInWithPopup(auth, googleProvider)
 			const user = result.user
-			const newUser = {
-				id: Date.now(),
-				name: user.displayName || '',
-				email: user.email || '',
-				provider: 'google'
+			
+			// Sync user to backend database
+			const response = await axios.post('http://localhost:5000/api/auth/sync-firebase-user', {
+				firebaseUid: user.uid,
+				email: user.email,
+				name: user.displayName,
+				phone: user.phoneNumber || ''
+			})
+			
+			if (response.data.token) {
+				localStorage.setItem('token', response.data.token)
+				localStorage.setItem('user', JSON.stringify(response.data.user))
+				navigate('/')
 			}
-			localStorage.setItem('user', JSON.stringify(newUser))
-			navigate('/')
 		} catch (error: any) {
-			setError(error.message || 'Google sign-in failed')
+			console.error('Google sign-in error:', error)
+			setError(error.response?.data?.message || error.message || 'Google sign-in failed')
 		}
 	}
 
-	const handleAppleSignIn = () => {
-		setError('Apple Sign-In coming soon!')
+	const registerUser = async () => {
+		try {
+			const response = await axios.post('http://localhost:5000/api/auth/register', {
+				name: name.trim(),
+				email: email.trim().toLowerCase(),
+				password,
+				phone: phone.trim()
+			})
+
+			if (response.data.success) {
+				localStorage.setItem('token', response.data.token)
+				localStorage.setItem('user', JSON.stringify(response.data.user))
+				navigate('/')
+			}
+		} catch (error: any) {
+			console.error('Registration error:', error)
+			setError(error.response?.data?.message || 'Registration failed. Please try again.')
+		}
 	}
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -54,49 +79,13 @@ export default function Register() {
 			return
 		}
 
-		if (password.includes(' ')) {
-			setError('Password cannot contain spaces.')
-			return
-		}
-
-		const alphanumericRegex = /^[a-zA-Z0-9]+$/
-		if (!alphanumericRegex.test(password)) {
-			setError('Password must contain only letters and numbers (no special characters).')
-			return
-		}
-
-		const hasLetter = /[a-zA-Z]/.test(password)
-		const hasNumber = /[0-9]/.test(password)
-		if (!hasLetter || !hasNumber) {
-			setError('Password must contain both letters and numbers.')
-			return
-		}
-
 		if (password !== confirmPassword) {
 			setError('Passwords do not match.')
 			return
 		}
 
-		const users = JSON.parse(localStorage.getItem('users') || '[]')
-		const normalizedEmail = email.trim().toLowerCase()
-		
-		if (users.some((user: any) => user.email.toLowerCase() === normalizedEmail)) {
-			setError('This email is already registered.')
-			return
-		}
-
-		const newUser = { 
-			id: Date.now(),
-			name: name.trim(), 
-			email: normalizedEmail, 
-			password 
-		}
-		
-		users.push(newUser)
-		localStorage.setItem('users', JSON.stringify(users))
-		localStorage.setItem('user', JSON.stringify(newUser))
-		
-		navigate('/')
+		// Register user via backend API
+		registerUser()
 	}
 
 	return (
@@ -139,17 +128,6 @@ export default function Register() {
 									<path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
 								</svg>
 								Continue with Google
-							</button>
-
-							<button
-								type="button"
-								onClick={handleAppleSignIn}
-								className="w-full flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-black text-white px-4 py-2.5 font-medium hover:bg-gray-900 transition-colors"
-							>
-								<svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-									<path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-								</svg>
-								Sign up with Apple
 							</button>
 						</div>
 
@@ -194,6 +172,18 @@ export default function Register() {
 								/>
 							</div>
 							<div>
+								<label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone (Optional)</label>
+								<input
+									id="phone"
+									type="tel"
+									value={phone}
+									onChange={(e) => setPhone(e.target.value)}
+									className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)]"
+									placeholder="+1 (555) 123-4567"
+									autoComplete="tel"
+								/>
+							</div>
+							<div>
 								<label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
 								<div className="relative">
 									<input
@@ -223,7 +213,7 @@ export default function Register() {
 									</button>
 								</div>
 								<div className="text-xs text-gray-500 mt-1">
-									Minimum 8 characters, letters and numbers only, no spaces
+									Minimum 8 characters
 								</div>
 							</div>
 							{confirmPassword && (

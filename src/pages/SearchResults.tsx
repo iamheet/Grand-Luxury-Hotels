@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import HotelCard from '../components/HotelCard'
 import HotelSkeleton from '../components/HotelSkeleton'
+import Pagination from '../components/Pagination'
 import { hotelsByCity, type Hotel } from '../data/hotels'
 
 export default function SearchResults() {
@@ -19,6 +20,25 @@ export default function SearchResults() {
   const [tiers, setTiers] = useState<string[]>(params.get('tiers')?.split(',').filter(Boolean) || [])
   const [categories, setCategories] = useState<string[]>(params.get('categories')?.split(',').filter(Boolean) || [])
   const [hotelIds, setHotelIds] = useState<string[]>(params.get('hotels')?.split(',').filter(Boolean) || [])
+  const [dbHotels, setDbHotels] = useState<any[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const hotelsPerPage = 6
+
+  // Fetch database hotels
+  useEffect(() => {
+    const fetchDbHotels = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/hotels/normal')
+        const data = await response.json()
+        if (data.success) {
+          setDbHotels(data.hotels)
+        }
+      } catch (error) {
+        console.error('Error fetching hotels:', error)
+      }
+    }
+    fetchDbHotels()
+  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,7 +66,43 @@ export default function SearchResults() {
     }
     return Array.from(map.values())
   }
-  const allHotels = uniqueById(Object.values(hotelsByCity).flat())
+  
+  // Convert database hotels to UI format and combine with static hotels
+  const convertDbHotels = (): Hotel[] => {
+    return dbHotels.map(hotel => ({
+      id: `db-${hotel._id}`, // Prefix with 'db-' to avoid ID conflicts
+      name: hotel.name,
+      stars: hotel.rating,
+      price: hotel.price,
+      description: `Luxury accommodation in ${hotel.location}`,
+      images: [hotel.image],
+      city: hotel.location,
+      tier: hotel.price > 400 ? 'premium' : hotel.price > 200 ? 'standard' : 'budget',
+      category: hotel.exclusive ? 'presidential suite' : 'deluxe suite',
+      amenities: ['Free Wi‑Fi', 'Pool', 'Spa', 'Restaurant', 'Gym']
+    }))
+  }
+  
+  // Remove duplicate hotels by name and location
+  const removeDuplicateHotels = (hotels: Hotel[]): Hotel[] => {
+    const seen = new Set<string>()
+    return hotels.filter(hotel => {
+      const key = `${hotel.name.toLowerCase()}-${hotel.city.toLowerCase()}`
+      if (seen.has(key)) {
+        return false
+      }
+      seen.add(key)
+      return true
+    })
+  }
+  
+  // Check if user is a member to show exclusive hotels
+  const isMember = localStorage.getItem('member') || localStorage.getItem('memberCheckout')
+  const exclusiveHotels = [] // Disable exclusive hotels - they're now in database
+  
+  const staticHotels = [] // Remove static hotels
+  const dynamicHotels = convertDbHotels()
+  const allHotels = removeDuplicateHotels([...exclusiveHotels, ...dynamicHotels])
 
   const destinationResolved = useMemo(() => {
     const input = (destination || '').trim().toLowerCase()
@@ -84,8 +140,10 @@ export default function SearchResults() {
     return undefined
   }, [destination])
 
-  const hotelsSource: Hotel[] = uniqueById((destinationResolved ? hotelsByCity[destinationResolved] : allHotels))
-  const hotelOptions = useMemo(() => hotelsSource.map(h => ({ id: h.id, name: h.name })), [hotelsSource])
+  const hotelsSource: Hotel[] = destinationResolved 
+    ? removeDuplicateHotels([...exclusiveHotels.filter(h => h.city.toLowerCase().includes(destinationResolved.toLowerCase())), ...dynamicHotels.filter(h => h.city.toLowerCase().includes(destinationResolved.toLowerCase()))])
+    : allHotels
+  const hotelOptions = useMemo(() => allHotels.map(h => ({ id: h.id, name: h.name })), [allHotels, dbHotels])
   const hotels: Hotel[] = hotelsSource
 
   const [sort, setSort] = useState<string>(params.get('sort') || 'relevance')
@@ -108,11 +166,23 @@ export default function SearchResults() {
 
   const [loading, setLoading] = useState(false)
 
+  // Pagination logic
+  const totalPages = Math.ceil(filtered.length / hotelsPerPage)
+  const startIndex = (currentPage - 1) * hotelsPerPage
+  const endIndex = startIndex + hotelsPerPage
+  const currentHotels = filtered.slice(startIndex, endIndex)
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   useEffect(() => {
     setLoading(true)
+    setCurrentPage(1) // Reset to first page when filters change
     const t = setTimeout(() => setLoading(false), 500)
     return () => clearTimeout(t)
-  }, [destination, checkIn, checkOut])
+  }, [destination, checkIn, checkOut, price, stars, roomTypes, amenities, tiers, categories, hotelIds])
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
@@ -210,7 +280,9 @@ export default function SearchResults() {
 
         <section className="space-y-6">
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600">{filtered.length} properties</div>
+            <div className="text-sm text-gray-600">
+              {filtered.length} properties • Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length}
+            </div>
             <div className="flex items-center gap-2 text-sm">
               <span className="text-gray-700">Sort by</span>
               <select value={sort} onChange={(e) => setSort(e.target.value)} className="rounded-md border border-gray-300 px-2 py-1 text-gray-900">
@@ -228,9 +300,19 @@ export default function SearchResults() {
               ))}
             </div>
           ) : (
-            filtered.map((h) => (
-              <HotelCard key={h.id} hotel={h} />
-            ))
+            <>
+              <div className="space-y-6">
+                {currentHotels.map((h) => (
+                  <HotelCard key={h.id} hotel={h} />
+                ))}
+              </div>
+              
+              <Pagination 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </>
           )}
         </section>
       </div>

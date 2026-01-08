@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { auth, googleProvider } from '../firebase'
 import { signInWithPopup } from 'firebase/auth'
+import { checkExclusiveMembership } from '../utils/membershipCheck'
 
 export default function Login() {
 	const navigate = useNavigate()
@@ -24,6 +25,25 @@ export default function Login() {
 		try {
 			const result = await signInWithPopup(auth, googleProvider)
 			const user = result.user
+			
+			// Check if user is exclusive member
+			const isExclusive = await checkExclusiveMembership(user.email || '')
+			
+			if (isExclusive) {
+				// Automatically login as exclusive member
+				const memberResponse = await axios.post('http://localhost:5000/api/auth/get-member-by-email', {
+					email: user.email
+				})
+				
+				if (memberResponse.data.member) {
+					localStorage.setItem('member', JSON.stringify(memberResponse.data.member))
+					localStorage.setItem('memberCheckout', JSON.stringify(memberResponse.data.member))
+					localStorage.setItem('token', memberResponse.data.token)
+					localStorage.setItem('isExclusiveMember', 'true')
+					navigate('/member-dashboard')
+					return
+				}
+			}
 			
 			// Sync user to backend database
 			const response = await axios.post('http://localhost:5000/api/auth/sync-firebase-user', {
@@ -64,6 +84,14 @@ export default function Login() {
 				setError('Please enter a valid email address.')
 				return
 			}
+
+			// Check if user is exclusive member before proceeding with regular login
+			const isExclusive = await checkExclusiveMembership(email)
+			
+			if (isExclusive) {
+				setError('🌟 You are an exclusive member! Please use the "Exclusive Member" login tab above.')
+				return
+			}
 		}
 
 		try {
@@ -78,6 +106,7 @@ export default function Login() {
 					localStorage.setItem('member', JSON.stringify(response.data.member));
 					localStorage.setItem('memberCheckout', JSON.stringify(response.data.member));
 					localStorage.setItem('token', response.data.token);
+					localStorage.setItem('isExclusiveMember', 'true');
 					navigate('/member-dashboard');
 				} else if (response.data.user) {
 					localStorage.setItem('user', JSON.stringify(response.data.user));

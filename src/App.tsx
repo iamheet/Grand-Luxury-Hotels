@@ -8,6 +8,7 @@ import NotFound from './pages/NotFound'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import Checkout from './pages/Checkout'
 import BookingSuccess from './pages/BookingSuccess'
 import Membership from './pages/Membership'
@@ -52,7 +53,9 @@ import ExecutiveMeetingRooms from './pages/ExecutiveMeetingRooms'
 import BusinessTravelConcierge from './pages/BusinessTravelConcierge'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminLogin from './pages/AdminLogin'
+import SubAdminDashboard from './pages/SubAdminDashboard'
 import NormalHotelsDashboard from './pages/NormalHotelsDashboard'
+import HotelsList from './pages/HotelsList'
 import Games from './pages/Games'
 
 export default function App() {
@@ -63,6 +66,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/member-login" element={<MemberLogin />} />
         <Route path="/member-dashboard" element={<MemberDashboard />} />
         <Route path="/member-checkout" element={<MemberCheckout />} />
@@ -101,11 +105,13 @@ export default function App() {
         <Route path="/business-travel-concierge" element={<BusinessTravelConcierge />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/subadmin-dashboard" element={<SubAdminDashboard />} />
         <Route path="/normal-hotels-dashboard" element={<NormalHotelsDashboard />} />
         <Route path="/games" element={<Games />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="search" element={<SearchResults />} />
+          <Route path="hotels" element={<HotelsList />} />
           <Route path="hotel/:id" element={<HotelDetails />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="booking-success" element={<BookingSuccess />} />

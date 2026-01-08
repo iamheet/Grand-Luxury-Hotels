@@ -2,6 +2,14 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { API_ENDPOINTS } from '../config/api'
 
+// Razorpay types
+declare global {
+  interface Window {
+    Razorpay: any;
+    Stripe: any;
+  }
+}
+
 export default function MemberCheckout() {
   const navigate = useNavigate()
   const { state } = useLocation()
@@ -16,20 +24,49 @@ export default function MemberCheckout() {
   const [guestPhone, setGuestPhone] = useState('')
   const [selectedServices, setSelectedServices] = useState<any[]>([])
   const [showAddServices, setShowAddServices] = useState(false)
+  const [paymentGateway, setPaymentGateway] = useState<'razorpay' | 'stripe'>('razorpay')
 
   useEffect(() => {
-    if (!room) navigate('/member-dashboard', { replace: true })
-    const memberData = localStorage.getItem('memberCheckout')
-    if (memberData) {
-      const parsedMember = JSON.parse(memberData)
-      setMember(parsedMember)
-      setGuestEmail(parsedMember.email || '')
-      setGuestPhone(parsedMember.phone || '')
+    // Check if member data exists first
+    const memberData = localStorage.getItem('memberCheckout') || localStorage.getItem('member')
+    if (!memberData) {
+      navigate('/member-login', { replace: true })
+      return
     }
+    
+    const parsedMember = JSON.parse(memberData)
+    
+    // Validate member data structure
+    if (!parsedMember.name || !parsedMember.membershipId || !parsedMember.tier) {
+      localStorage.removeItem('member')
+      localStorage.removeItem('memberCheckout')
+      navigate('/member-login', { replace: true })
+      return
+    }
+    
+    if (!room) {
+      navigate('/member-dashboard', { replace: true })
+      return
+    }
+    
+    // Load Razorpay script
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.async = true
+    document.body.appendChild(script)
+    
+    setMember(parsedMember)
+    setGuestEmail(parsedMember.email || '')
+    setGuestPhone(parsedMember.phone || '')
 
-    // Add initial service to booking
-    if (room) {
-      setSelectedServices([room])
+    // Load cart from localStorage or initialize with room
+    const savedCart = localStorage.getItem('memberCart')
+    if (savedCart) {
+      setSelectedServices(JSON.parse(savedCart))
+    } else if (room) {
+      const initialCart = [room]
+      setSelectedServices(initialCart)
+      localStorage.setItem('memberCart', JSON.stringify(initialCart))
     }
 
     // Set default dates
@@ -88,7 +125,12 @@ export default function MemberCheckout() {
     }
 
     window.addEventListener('beforeunload', handleBeforeUnload)
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      if (script.parentNode) {
+        document.body.removeChild(script)
+      }
+    }
   }, [room, navigate])
 
   useEffect(() => {
@@ -105,205 +147,326 @@ export default function MemberCheckout() {
     setLoading(true)
 
     try {
-      const hasHotel = selectedServices.some(s => s.type !== 'aircraft' && s.type !== 'car' && s.type !== 'travel' && s.type !== 'dining' && s.type !== 'entertainment' && s.type !== 'chef')
-      const hasAircraft = selectedServices.some(s => s.type === 'aircraft')
-      const hasCar = selectedServices.some(s => s.type === 'car')
-      const hasTravel = selectedServices.some(s => s.type === 'travel')
-      const hasDining = selectedServices.some(s => s.type === 'dining')
-      const hasEntertainment = selectedServices.some(s => s.type === 'entertainment')
-      const hasChef = selectedServices.some(s => s.type === 'chef')
+      if (paymentGateway === 'stripe') {
+        // Handle Stripe payment
+        await handleStripePayment()
+      } else {
+        // Handle Razorpay payment
+        await handleRazorpayPayment()
+      }
+    } catch (error) {
+      console.error('Payment initialization error:', error)
+      alert('Payment initialization failed. Please try again.')
+      setLoading(false)
+    }
+  }
 
-      const hotelTotal = selectedServices
-        .filter(s => s.type !== 'aircraft' && s.type !== 'car' && s.type !== 'travel' && s.type !== 'dining' && s.type !== 'entertainment' && s.type !== 'chef')
-        .reduce((sum, s) => sum + (s.price * nights), 0)
+  async function handleRazorpayPayment() {
+    try {
+      // Get auth token
+      const userToken = localStorage.getItem('token')
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      if (userToken) {
+        headers['Authorization'] = `Bearer ${userToken}`
+      }
 
-      const aircraftTotal = selectedServices
-        .filter(s => s.type === 'aircraft')
-        .reduce((sum, s) => sum + s.aircraft.price, 0)
+      // Create Razorpay order first
+      const orderResponse = await fetch('http://localhost:5000/api/payment/create-order', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          amount: total * 100,
+          currency: 'INR',
+          bookingData: {
+            hotelName: selectedServices[0]?.hotelName || selectedServices[0]?.name || 'Service',
+            roomTitle: selectedServices[0]?.title || selectedServices[0]?.name,
+            customerName: member.name,
+            customerEmail: guestEmail || member.email,
+            customerPhone: guestPhone || member.phone
+          }
+        })
+      })
+      
+      if (!orderResponse.ok) {
+        throw new Error(`Payment order creation failed: ${orderResponse.status}`)
+      }
+      
+      const orderData = await orderResponse.json()
+      
+      if (!orderData.success) {
+        throw new Error('Failed to create payment order')
+      }
 
-      const carTotal = selectedServices
-        .filter(s => s.type === 'car')
-        .reduce((sum, s) => sum + s.car.price, 0)
-
-      const travelTotal = selectedServices
-        .filter(s => s.type === 'travel')
-        .reduce((sum, s) => sum + s.travel.price, 0)
-
-      const diningTotal = selectedServices
-        .filter(s => s.type === 'dining')
-        .reduce((sum, s) => {
-          const price = s.dining?.price || s.price || 0
-          return sum + (isNaN(price) ? 0 : Number(price))
-        }, 0)
-
-      const entertainmentTotal = selectedServices
-        .filter(s => s.type === 'entertainment')
-        .reduce((sum, s) => sum + (s.entertainment?.price || 0), 0)
-
-      const chefTotal = selectedServices
-        .filter(s => s.type === 'chef')
-        .reduce((sum, s) => sum + (s.chef?.price || 0), 0)
-
-      const backendData = {
-        hotelName: selectedServices[0]?.hotelName || 'Service',
-        checkIn: checkInDate,
-        checkOut: checkOutDate,
-        guests: guests,
-        nights: nights,
-        room: {
-          ...selectedServices[0],
-          customerName: member.name,
-          customerEmail: guestEmail || member.email,
-          customerPhone: guestPhone || member.phone,
-          guestName: member.name,
-          guestEmail: guestEmail || member.email,
-          guestPhone: guestPhone || member.phone
+      // Initialize Razorpay
+      const options = {
+        key: 'rzp_test_S0tJBd3NSaEud8',
+        amount: total * 100,
+        currency: 'INR',
+        name: 'The Grand Stay - Exclusive Member',
+        description: `Exclusive booking for ${selectedServices[0]?.name || 'services'}`,
+        order_id: orderData.orderId,
+        handler: async function (response: any) {
+          await verifyPaymentAndCreateBooking(response)
         },
-        customerName: member.name,
-        customerEmail: guestEmail || member.email,
-        customerPhone: guestPhone || member.phone,
-        guestName: member.name,
-        guestEmail: guestEmail || member.email,
-        guestPhone: guestPhone || member.phone,
-        name: member.name,
-        email: guestEmail || member.email,
-        phone: guestPhone || member.phone,
-        member: member,
+        prefill: {
+          name: member.name,
+          email: guestEmail || member.email,
+          contact: guestPhone || member.phone
+        },
+        theme: {
+          color: '#D4AF37'
+        },
+        modal: {
+          ondismiss: function() {
+            recordFailedPayment(orderData.orderId, null, 'Payment cancelled by user')
+            setLoading(false)
+          }
+        }
+      }
+
+      const rzp = new window.Razorpay(options)
+      rzp.on('payment.failed', function (response: any) {
+        recordFailedPayment(orderData.orderId, response.error.metadata.payment_id, response.error.description)
+        alert(`Payment failed: ${response.error.description}. Please try again.`)
+        setLoading(false)
+      })
+      rzp.open()
+      
+    } catch (error) {
+      console.error('Razorpay initialization error:', error)
+      alert('Razorpay initialization failed. Please try again.')
+      setLoading(false)
+    }
+  }
+
+  async function handleStripePayment() {
+    try {
+      // Load Stripe script if not already loaded
+      if (!window.Stripe) {
+        const script = document.createElement('script')
+        script.src = 'https://js.stripe.com/v3/'
+        script.async = true
+        document.head.appendChild(script)
+        
+        await new Promise((resolve) => {
+          script.onload = resolve
+        })
+      }
+
+      const stripe = window.Stripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
+      
+      // Create payment intent on backend
+      const userToken = localStorage.getItem('token')
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      if (userToken) {
+        headers['Authorization'] = `Bearer ${userToken}`
+      }
+
+      const response = await fetch('http://localhost:5000/api/payment/create-stripe-session', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          amount: total * 100, // Convert to cents
+          currency: 'usd',
+          bookingData: {
+            hotelName: selectedServices[0]?.hotelName || selectedServices[0]?.name || 'Service',
+            roomTitle: selectedServices[0]?.title || selectedServices[0]?.name,
+            customerName: member.name,
+            customerEmail: guestEmail || member.email,
+            customerPhone: guestPhone || member.phone,
+            checkIn: checkInDate,
+            checkOut: checkOutDate,
+            guests: guests,
+            nights: nights,
+            total: total
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      
+      if (!data.success || !data.sessionId) {
+        throw new Error('Failed to create Stripe session')
+      }
+
+      // Redirect to Stripe Checkout
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: data.sessionId
+      })
+
+      if (error) {
+        alert(error.message || 'Stripe payment failed')
+        setLoading(false)
+      }
+      
+    } catch (err: any) {
+      console.error('Stripe payment error:', err)
+      alert('Stripe payment initialization failed')
+      setLoading(false)
+    }
+  }
+
+  async function recordFailedPayment(orderId: string, paymentId: string | null, errorReason: string) {
+    try {
+      const userToken = localStorage.getItem('token')
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      if (userToken) {
+        headers['Authorization'] = `Bearer ${userToken}`
+      }
+
+      await fetch('http://localhost:5000/api/payment/payment-failed', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          razorpay_order_id: orderId,
+          razorpay_payment_id: paymentId,
+          error: errorReason,
+          bookingData: {
+            hotelName: selectedServices[0]?.hotelName || selectedServices[0]?.name || 'Service',
+            roomTitle: selectedServices[0]?.title || selectedServices[0]?.name,
+            customerName: member.name,
+            customerEmail: guestEmail || member.email,
+            customerPhone: guestPhone || member.phone,
+            total: total,
+            member: member,
+            guest: {
+              name: member.name,
+              email: guestEmail || member.email,
+              phone: guestPhone || member.phone
+            }
+          }
+        })
+      })
+    } catch (error) {
+      console.error('Failed to record payment failure:', error)
+    }
+  }
+
+  async function verifyPaymentAndCreateBooking(paymentResponse: any) {
+    try {
+      const userToken = localStorage.getItem('token')
+      const authHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      if (userToken) {
+        authHeaders['Authorization'] = `Bearer ${userToken}`
+      }
+
+      // Verify payment
+      const verifyResponse = await fetch('http://localhost:5000/api/payment/verify-payment', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          razorpay_order_id: paymentResponse.razorpay_order_id,
+          razorpay_payment_id: paymentResponse.razorpay_payment_id,
+          razorpay_signature: paymentResponse.razorpay_signature,
+          bookingData: {
+            hotelName: selectedServices[0]?.hotelName || selectedServices[0]?.name || 'Service',
+            roomTitle: selectedServices[0]?.title || selectedServices[0]?.name,
+            customerName: member.name,
+            customerEmail: guestEmail || member.email,
+            customerPhone: guestPhone || member.phone,
+            checkIn: checkInDate,
+            checkOut: checkOutDate,
+            guests: guests,
+            nights: nights,
+            total: total,
+            services: selectedServices,
+            member: member,
+            room: {
+              title: selectedServices[0]?.title || selectedServices[0]?.name,
+              ...selectedServices[0]
+            },
+            guest: {
+              name: member.name,
+              email: guestEmail || member.email,
+              phone: guestPhone || member.phone
+            }
+          }
+        })
+      })
+      
+      if (!verifyResponse.ok) {
+        throw new Error(`Payment verification failed: ${verifyResponse.status}`)
+      }
+      
+      const verifyData = await verifyResponse.json()
+      
+      if (!verifyData.success) {
+        throw new Error('Payment verification failed')
+      }
+
+      // Clear cart after successful booking
+      localStorage.removeItem('memberCart')
+      
+      const booking = {
+        id: verifyData.booking._id,
+        hotelName: selectedServices[0]?.hotelName || selectedServices[0]?.name,
+        roomTitle: selectedServices[0]?.title || selectedServices[0]?.name,
+        roomImage: selectedServices[0]?.image,
         guest: {
           name: member.name,
           email: guestEmail || member.email,
           phone: guestPhone || member.phone
         },
-        total: total,
-        status: 'confirmed'
-      }
-
-      console.log('MemberCheckout - Sending to backend:', backendData)
-      console.log('MemberCheckout - Member name:', member.name)
-      console.log('MemberCheckout - Guest email:', guestEmail)
-      console.log('MemberCheckout - Member email:', member.email)
-
-      const fullData = {
-        type: [hasHotel, hasAircraft, hasCar, hasTravel, hasDining, hasEntertainment, hasChef].filter(Boolean).length > 1 ? 'combined' : hasAircraft ? 'aircraft' : hasCar ? 'car' : hasTravel ? 'travel' : hasDining ? 'dining' : hasEntertainment ? 'entertainment' : hasChef ? 'chef' : 'hotel',
-        services: selectedServices,
-        room: selectedServices.find(s => s.type !== 'aircraft' && s.type !== 'car' && s.type !== 'travel') || selectedServices[0],
-        aircraft: selectedServices.find(s => s.type === 'aircraft')?.aircraft,
-        car: selectedServices.find(s => s.type === 'car')?.car,
-        travel: selectedServices.find(s => s.type === 'travel')?.travel,
         member: member,
-        guest: {
-          name: member.name,
-          email: guestEmail,
-          phone: guestPhone
-        },
-        ...(hasHotel && {
-          checkIn: checkInDate,
-          checkOut: checkOutDate,
-          guests: guests,
-          nights: nights
-        }),
-        total: hotelTotal + aircraftTotal + carTotal + travelTotal + diningTotal + entertainmentTotal + chefTotal,
-        hotelTotal,
-        aircraftTotal,
-        carTotal,
-        travelTotal,
-        diningTotal,
-        entertainmentTotal,
-        chefTotal,
-        bookingDate: new Date().toISOString(),
-        status: 'confirmed'
+        total: total,
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        guests: guests,
+        nights: nights,
+        status: 'confirmed',
+        paymentId: paymentResponse.razorpay_payment_id
       }
+      
+      // Also save to localStorage for backward compatibility
+      const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
+      existingBookings.push(booking)
+      localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
 
-      // Save to backend
-      const token = localStorage.getItem('token')
-      if (token) {
-        const response = await fetch(API_ENDPOINTS.bookings, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(backendData)
-        })
-
-        if (response.ok) {
-          const result = await response.json()
-          
-          console.log('MemberCheckout - Backend result:', result)
-          console.log('MemberCheckout - result.booking.room:', result.booking.room)
-          
-          const booking = { 
-            id: result.booking._id,
-            hotelName: result.booking.hotelName || result.booking.room?.hotelName,
-            roomTitle: result.booking.room?.title,
-            roomImage: result.booking.room?.image,
-            guest: {
-              name: member.name,
-              email: guestEmail || member.email,
-              phone: guestPhone || member.phone
-            },
-            member: member,
-            total: result.booking.total || total,
-            checkIn: result.booking.checkIn,
-            checkOut: result.booking.checkOut,
-            guests: result.booking.guests,
-            nights: result.booking.nights,
-            status: result.booking.status
-          }
-          
-          console.log('MemberCheckout - Final booking object:', booking)
-          
-          // Also save to localStorage for backward compatibility
-          const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
-          existingBookings.push(booking)
-          localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
-
-          navigate('/booking-success', { state: { booking } })
-        } else {
-          throw new Error('Failed to save booking')
-        }
-      } else {
-        const booking = { 
-          id: Date.now().toString(),
-          hotelName: selectedServices[0]?.hotelName || selectedServices[0]?.name,
-          roomTitle: selectedServices[0]?.title || selectedServices[0]?.name,
-          roomImage: selectedServices[0]?.image,
-          guest: {
-            name: member.name,
-            email: guestEmail || member.email,
-            phone: guestPhone || member.phone
-          },
-          member: member,
-          total: total,
-          checkIn: checkInDate,
-          checkOut: checkOutDate,
-          guests: guests,
-          nights: nights,
-          status: 'confirmed'
-        }
-        const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
-        existingBookings.push(booking)
-        localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
-        navigate('/booking-success', { state: { booking } })
-      }
-    } catch (error) {
-      console.error('Booking error:', error)
-      alert('Failed to create booking. Please try again.')
+      navigate('/booking-success', { state: { booking } })
+      
+    } catch (err: any) {
+      console.error('Booking creation error:', err)
+      alert(err?.message || 'Booking failed after payment')
     } finally {
       setLoading(false)
     }
   }
 
   const addService = (service: any) => {
-    setSelectedServices(prev => [...prev, service])
+    const updated = [...selectedServices, service]
+    setSelectedServices(updated)
+    localStorage.setItem('memberCart', JSON.stringify(updated))
     setShowAddServices(false)
   }
 
   const removeService = (index: number) => {
-    setSelectedServices(prev => prev.filter((_, i) => i !== index))
+    const updated = selectedServices.filter((_, i) => i !== index)
+    setSelectedServices(updated)
+    localStorage.setItem('memberCart', JSON.stringify(updated))
   }
 
-  if (!room || !member) return null
+  if (!room || !member) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-[var(--color-brand-navy)] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--color-brand-gold)] mx-auto mb-4"></div>
+          <p className="text-white">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   const hotelServices = selectedServices.filter(s => s.type !== 'aircraft' && s.type !== 'car' && s.type !== 'travel' && s.type !== 'dining' && s.type !== 'entertainment' && s.type !== 'chef' && s.type !== 'wine' && s.type !== 'ticket' && s.type !== 'event')
   const aircraftServices = selectedServices.filter(s => s.type === 'aircraft')
@@ -340,13 +503,6 @@ export default function MemberCheckout() {
         <div className="flex items-center justify-between mb-8">
           <button
             onClick={() => {
-              // Ensure member data is available
-              const memberData = localStorage.getItem('memberCheckout') || localStorage.getItem('member')
-              if (memberData) {
-                const parsedMember = JSON.parse(memberData)
-                localStorage.setItem('member', JSON.stringify(parsedMember))
-                localStorage.setItem('memberCheckout', JSON.stringify(parsedMember))
-              }
               navigate('/member-dashboard', { replace: true })
             }}
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
@@ -391,6 +547,61 @@ export default function MemberCheckout() {
                     <span className="text-[var(--color-brand-gold)]">{member.tier} Member</span> • ID: {member.membershipId}
                   </p>
                 </div>
+              </div>
+            </div>
+
+            {/* Payment Method Selection */}
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
+              <h3 className="text-xl font-semibold text-white mb-6">Payment Method</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-colors ${
+                  paymentGateway === 'razorpay' ? 'border-[var(--color-brand-gold)] bg-[var(--color-brand-gold)]/10' : 'border-white/20 hover:border-white/30'
+                }`}>
+                  <input
+                    type="radio"
+                    name="paymentGateway"
+                    value="razorpay"
+                    checked={paymentGateway === 'razorpay'}
+                    onChange={(e) => setPaymentGateway(e.target.value as 'razorpay')}
+                    className="sr-only"
+                  />
+                  <div className="flex items-center gap-3">
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      paymentGateway === 'razorpay' ? 'border-[var(--color-brand-gold)]' : 'border-white/40'
+                    }`}>
+                      {paymentGateway === 'razorpay' && <div className="w-2 h-2 bg-[var(--color-brand-gold)] rounded-full"></div>}
+                    </div>
+                    <div>
+                      <div className="font-medium text-white">Razorpay</div>
+                      <div className="text-sm text-gray-300">UPI, Cards, Wallets & More</div>
+                    </div>
+                  </div>
+                </label>
+
+                <label className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-colors ${
+                  paymentGateway === 'stripe' ? 'border-[var(--color-brand-gold)] bg-[var(--color-brand-gold)]/10' : 'border-white/20 hover:border-white/30'
+                }`}>
+                  <input
+                    type="radio"
+                    name="paymentGateway"
+                    value="stripe"
+                    checked={paymentGateway === 'stripe'}
+                    onChange={(e) => setPaymentGateway(e.target.value as 'stripe')}
+                    className="sr-only"
+                  />
+                  <div className="flex items-center gap-3">
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      paymentGateway === 'stripe' ? 'border-[var(--color-brand-gold)]' : 'border-white/40'
+                    }`}>
+                      {paymentGateway === 'stripe' && <div className="w-2 h-2 bg-[var(--color-brand-gold)] rounded-full"></div>}
+                    </div>
+                    <div>
+                      <div className="font-medium text-white">Stripe</div>
+                      <div className="text-sm text-gray-300">International Cards & Payments</div>
+                    </div>
+                  </div>
+                </label>
               </div>
             </div>
 
@@ -482,10 +693,10 @@ export default function MemberCheckout() {
               {loading ? (
                 <div className="flex items-center justify-center gap-3">
                   <div className="w-5 h-5 border-2 border-[var(--color-brand-navy)]/30 border-t-[var(--color-brand-navy)] rounded-full animate-spin"></div>
-                  Processing Reservation...
+                  Processing Payment...
                 </div>
               ) : (
-                `Confirm Luxury Reservation • $${total}`
+                `Pay with ${paymentGateway === 'razorpay' ? 'Razorpay' : 'Stripe'} • ₹${total}`
               )}
             </button>
           </div>
@@ -541,46 +752,44 @@ export default function MemberCheckout() {
                   <h3 className="text-xl font-bold text-white mb-4">Add Service</h3>
                   <div className="space-y-3">
                     <button
-                      onClick={() => navigate('/member-dashboard')}
+                      onClick={() => {
+                        localStorage.setItem('returnToCheckout', 'true')
+                        navigate('/member-dashboard')
+                      }}
                       className="w-full text-left p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
                     >
                       <div className="text-white font-medium">🏨 Add Hotel</div>
                       <div className="text-gray-400 text-sm">Browse exclusive hotels</div>
                     </button>
                     <button
-                      onClick={() => navigate('/aircraft-booking')}
+                      onClick={() => {
+                        localStorage.setItem('returnToCheckout', 'true')
+                        navigate('/aircraft-booking')
+                      }}
                       className="w-full text-left p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
                     >
                       <div className="text-white font-medium">✈️ Add Aircraft</div>
                       <div className="text-gray-400 text-sm">Private jets & helicopters</div>
                     </button>
                     <button
-                      onClick={() => navigate('/car-rental')}
+                      onClick={() => {
+                        localStorage.setItem('returnToCheckout', 'true')
+                        navigate('/car-rental')
+                      }}
                       className="w-full text-left p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
                     >
                       <div className="text-white font-medium">🚗 Add Car Rental</div>
                       <div className="text-gray-400 text-sm">Luxury vehicles & chauffeurs</div>
                     </button>
                     <button
-                      onClick={() => navigate('/airport-vip')}
+                      onClick={() => {
+                        localStorage.setItem('returnToCheckout', 'true')
+                        navigate('/royal-concierge')
+                      }}
                       className="w-full text-left p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
                     >
-                      <div className="text-white font-medium">✈️ Add Airport VIP</div>
-                      <div className="text-gray-400 text-sm">Lounge access & fast-track</div>
-                    </button>
-                    <button
-                      onClick={() => navigate('/yacht-charter')}
-                      className="w-full text-left p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
-                    >
-                      <div className="text-white font-medium">🚥 Add Yacht Charter</div>
-                      <div className="text-gray-400 text-sm">Luxury boats & maritime</div>
-                    </button>
-                    <button
-                      onClick={() => navigate('/travel-planning')}
-                      className="w-full text-left p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
-                    >
-                      <div className="text-white font-medium">🗺️ Add Travel Planning</div>
-                      <div className="text-gray-400 text-sm">Custom itineraries & experiences</div>
+                      <div className="text-white font-medium">👑 Add Concierge Service</div>
+                      <div className="text-gray-400 text-sm">Personal assistance & planning</div>
                     </button>
                   </div>
                   <button
