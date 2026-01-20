@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import ImageWithFallback from '../components/ImageWithFallback'
 import { API_ENDPOINTS } from '../config/api'
+import { WhatsAppService } from '../utils/whatsappService'
+import { EmailService } from '../utils/emailService'
 
 // Razorpay types
 declare global {
@@ -258,7 +260,7 @@ export default function Checkout() {
 
       // Initialize Razorpay
       const options = {
-        key: 'rzp_test_S0tJBd3NSaEud8', // Replace with your actual Razorpay test key
+        key: 'rzp_test_S4XQEjfZfBmeYM', // Replace with your actual Razorpay test key
         amount: total * 100,
         currency: 'INR',
         name: 'The Grand Stay',
@@ -439,6 +441,7 @@ export default function Checkout() {
           razorpay_payment_id: paymentResponse.razorpay_payment_id,
           razorpay_signature: paymentResponse.razorpay_signature,
           bookingData: {
+            userId: userToken ? 'authenticated_user' : 'guest_user',
             hotelName: room.hotelName || room.hotel || room.title || room.name,
             roomTitle: room.title || room.name,
             customerName: name.trim(),
@@ -515,6 +518,53 @@ export default function Checkout() {
 
       // NOTE: Booking is already created by verify-payment endpoint
       // No need to create another booking here
+      
+      // Send WhatsApp notifications
+      try {
+        const formattedPhone = WhatsAppService.formatPhoneNumber(phone.trim())
+        
+        // Send booking confirmation with all required fields
+        await WhatsAppService.sendBookingConfirmation(formattedPhone, {
+          hotelName: room.hotelName || room.hotel || room.title || room.name,
+          roomType: room.title || room.name,
+          checkIn: new Date(checkIn).toLocaleDateString(),
+          checkOut: new Date(checkOut).toLocaleDateString(),
+          guestName: name.trim(),
+          bookingId: verifyData.booking._id,
+          nights: nights,
+          total: total
+        })
+        
+        // Send payment confirmation
+        await WhatsAppService.sendPaymentConfirmation(formattedPhone, {
+          amount: total,
+          paymentId: paymentResponse.razorpay_payment_id,
+          guestName: name.trim()
+        })
+      } catch (whatsappError) {
+        console.error('WhatsApp notification failed:', whatsappError)
+        // Don't fail the booking if WhatsApp fails
+      }
+
+      // Send Email confirmation
+      try {
+        await EmailService.sendBookingConfirmation({
+          guestName: name.trim(),
+          guestEmail: email.trim().toLowerCase(),
+          hotelName: room.hotelName || room.hotel || room.title || room.name,
+          roomType: room.title || room.name,
+          checkIn: new Date(checkIn).toLocaleDateString(),
+          checkOut: new Date(checkOut).toLocaleDateString(),
+          nights: nights,
+          guests: guests,
+          total: total,
+          bookingId: verifyData.booking._id,
+          paymentId: paymentResponse.razorpay_payment_id
+        })
+      } catch (emailError) {
+        console.error('Email notification failed:', emailError)
+        // Don't fail the booking if Email fails
+      }
       
       const booking = {
         id: verifyData.booking._id,

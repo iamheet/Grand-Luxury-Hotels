@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { auth, googleProvider } from '../firebase'
 import { signInWithPopup } from 'firebase/auth'
+import RegistrationOTPVerification from '../components/RegistrationOTPVerification'
 
 export default function Register() {
 	const navigate = useNavigate()
@@ -14,6 +15,8 @@ export default function Register() {
 	const [showPassword, setShowPassword] = useState(false)
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 	const [error, setError] = useState<string | null>(null)
+	const [showOTPVerification, setShowOTPVerification] = useState(false)
+	const [formSubmitted, setFormSubmitted] = useState(false)
 
 	const handleGoogleSignIn = async () => {
 		try {
@@ -39,13 +42,45 @@ export default function Register() {
 		}
 	}
 
-	const registerUser = async () => {
+	const handleExistingUser = async () => {
+		try {
+			const loginResponse = await axios.post('http://localhost:5000/api/auth/login', {
+				email: email.trim().toLowerCase(),
+				password
+			})
+			
+			if (loginResponse.data.user) {
+				localStorage.setItem('user', JSON.stringify(loginResponse.data.user))
+				localStorage.setItem('token', loginResponse.data.token)
+				navigate('/')
+				return true
+			}
+		} catch (error) {
+			console.error('Login failed:', error)
+		}
+		return false
+	}
+
+	const checkUserExists = async (email: string) => {
+		try {
+			const response = await axios.post('http://localhost:5000/api/auth/check-user', {
+				email: email.trim().toLowerCase()
+			})
+			return response.data.exists
+		} catch (error) {
+			return false
+		}
+	}
+
+	const registerUser = async (emailVerified: boolean, phoneVerified: boolean) => {
 		try {
 			const response = await axios.post('http://localhost:5000/api/auth/register', {
 				name: name.trim(),
 				email: email.trim().toLowerCase(),
 				password,
-				phone: phone.trim()
+				phone: phone.trim(),
+				emailVerified,
+				phoneVerified
 			})
 
 			if (response.data.success) {
@@ -55,22 +90,45 @@ export default function Register() {
 			}
 		} catch (error: any) {
 			console.error('Registration error:', error)
+			// If user already exists, try to login instead
+			if (error.response?.data?.message?.includes('already exists') || error.response?.status === 409) {
+				try {
+					const loginResponse = await axios.post('http://localhost:5000/api/auth/login', {
+						email: email.trim().toLowerCase(),
+						password
+					})
+					
+					if (loginResponse.data.user) {
+						localStorage.setItem('user', JSON.stringify(loginResponse.data.user))
+						localStorage.setItem('token', loginResponse.data.token)
+						navigate('/')
+						return
+					}
+				} catch (loginError) {
+					console.error('Auto-login failed:', loginError)
+				}
+			}
 			setError(error.response?.data?.message || 'Registration failed. Please try again.')
 		}
 	}
 
-	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault()
 		setError(null)
 
-		if (!name || !email || !password || !confirmPassword) {
-			setError('Please fill in all fields.')
+		if (!name || !email || !password || !confirmPassword || !phone) {
+			setError('Please fill in all fields including phone number.')
 			return
 		}
 
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 		if (!emailRegex.test(email.trim())) {
 			setError('Please enter a valid email address.')
+			return
+		}
+
+		if (phone.length < 10) {
+			setError('Please enter a valid phone number.')
 			return
 		}
 
@@ -84,8 +142,21 @@ export default function Register() {
 			return
 		}
 
-		// Register user via backend API
-		registerUser()
+		// Check if user already exists
+		const exists = await checkUserExists(email)
+		if (exists) {
+			// Try to login existing user
+			const loginSuccess = await handleExistingUser()
+			if (loginSuccess) {
+				return // Successfully logged in
+			}
+			setError('Account exists but login failed. Please check your password or use the login page.')
+			return
+		}
+
+		// Show OTP verification for new users
+		setFormSubmitted(true)
+		setShowOTPVerification(true)
 	}
 
 	return (
@@ -172,16 +243,20 @@ export default function Register() {
 								/>
 							</div>
 							<div>
-								<label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone (Optional)</label>
+								<label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
 								<input
 									id="phone"
 									type="tel"
 									value={phone}
 									onChange={(e) => setPhone(e.target.value)}
 									className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)]"
-									placeholder="+1 (555) 123-4567"
+									placeholder="Enter your phone number"
 									autoComplete="tel"
+									required
 								/>
+								<div className="text-xs text-gray-500 mt-1">
+									Required for account verification
+								</div>
 							</div>
 							<div>
 								<label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
@@ -259,7 +334,7 @@ export default function Register() {
 								type="submit"
 								className="w-full rounded-lg bg-[var(--color-brand-gold)] px-4 py-2.5 font-semibold text-white hover:bg-[var(--color-brand-gold)]/90 transition-colors"
 							>
-								Create Account
+								{formSubmitted ? 'Verify Account' : 'Verify & Create Account'}
 							</button>
 						</form>
 
@@ -272,6 +347,22 @@ export default function Register() {
 					</div>
 				</div>
 			</div>
+
+			{showOTPVerification && (
+				<RegistrationOTPVerification
+					email={email}
+					phone={phone}
+					onVerified={(emailVerified, phoneVerified) => {
+						setShowOTPVerification(false)
+						registerUser(emailVerified, phoneVerified)
+					}}
+					onCancel={() => {
+						setShowOTPVerification(false)
+						setFormSubmitted(false)
+					}}
+					requirePhoneVerification={true}
+				/>
+			)}
 		</section>
 	)
 }

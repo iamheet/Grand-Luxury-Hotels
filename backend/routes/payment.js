@@ -440,7 +440,7 @@ const optionalAuth = (req, res, next) => {
   next();
 };
 
-router.post('/create-order', optionalAuth, async (req, res) => {
+router.post('/create-order', auth, async (req, res) => {
   try {
     const { amount, currency = 'INR', bookingData } = req.body;
     
@@ -471,7 +471,7 @@ router.post('/create-order', optionalAuth, async (req, res) => {
 });
 
 // Verify payment and create booking (supports Razorpay only - PayPal handled separately)
-router.post('/verify-payment', optionalAuth, async (req, res) => {
+router.post('/verify-payment', auth, async (req, res) => {
   try {
     const {
       razorpay_order_id,
@@ -499,7 +499,7 @@ router.post('/verify-payment', optionalAuth, async (req, res) => {
     // Payment verified, create booking
     const booking = new Booking({
       ...bookingData,
-      userId: req.userId || null, // Allow null for guest users
+      userId: req.userId, // Now required since we use auth middleware
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
       paymentMethod: 'razorpay',

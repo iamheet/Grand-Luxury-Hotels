@@ -19,6 +19,7 @@
     "@react-oauth/google": "^0.13.4",
     "axios": "^1.13.2",
     "embla-carousel-react": "^8.6.0",
+    "firebase": "^12.8.0",
     "jwt-decode": "^4.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+</head>
+<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #ffffff; color: #000000; font-size: 18px; line-height: 1.6;">
+    
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 2px solid #cccccc; padding: 30px;">
+        
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 30px; padding: 20px; background-color: #ffffff; color: #000000; border: 2px solid #cccccc;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: bold;">🏨 BOOKING CONFIRMED</h1>
+            <p style="margin: 10px 0 0 0; font-size: 18px;">{{hotelName}}</p>
+        </div>
+        
+        <!-- Content -->
+        <div style="color: #000000;">
+            <p style="font-size: 20px; font-weight: bold; margin-bottom: 20px; color: #000000;">Dear {{guestName}},</p>
+            
+            <p style="font-size: 18px; margin-bottom: 25px; color: #000000;">Your booking has been confirmed! Here are your details:</p>
+            
+            <!-- Booking ID -->
+            <div style="background-color: #ffffff; color: #000000; padding: 15px; text-align: center; margin: 20px 0; font-size: 18px; font-weight: bold; border: 2px solid #cccccc;">
+                BOOKING ID: {{bookingId}}
+            </div>
+            
+            <!-- Details Table -->
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 18px;">
+                <tr style="border-bottom: 2px solid #cccccc;">
+                    <td style="padding: 15px 0; font-weight: bold; color: #000000;">🏨 Hotel:</td>
+                    <td style="padding: 15px 0; text-align: right; font-weight: bold; color: #000000;">{{hotelName}}</td>
+                </tr>
+                <tr style="border-bottom: 2px solid #cccccc;">
+                    <td style="padding: 15px 0; font-weight: bold; color: #000000;">🛏️ Room:</td>
+                    <td style="padding: 15px 0; text-align: right; font-weight: bold; color: #000000;">{{roomType}}</td>
+                </tr>
+                <tr style="border-bottom: 2px solid #cccccc;">
+                    <td style="padding: 15px 0; font-weight: bold; color: #000000;">📅 Check-in:</td>
+                    <td style="padding: 15px 0; text-align: right; font-weight: bold; color: #000000;">{{checkIn}}</td>
+                </tr>
+                <tr style="border-bottom: 2px solid #cccccc;">
+                    <td style="padding: 15px 0; font-weight: bold; color: #000000;">📅 Check-out:</td>
+                    <td style="padding: 15px 0; text-align: right; font-weight: bold; color: #000000;">{{checkOut}}</td>
+                </tr>
+                <tr style="border-bottom: 2px solid #cccccc;">
+                    <td style="padding: 15px 0; font-weight: bold; color: #000000;">🌙 Nights:</td>
+                    <td style="padding: 15px 0; text-align: right; font-weight: bold; color: #000000;">{{nights}}</td>
+                </tr>
+                <tr style="border-bottom: 2px solid #cccccc;">
+                    <td style="padding: 15px 0; font-weight: bold; color: #000000;">👥 Guests:</td>
+                    <td style="padding: 15px 0; text-align: right; font-weight: bold; color: #000000;">{{guests}}</td>
+                </tr>
+                <tr style="background-color: #ffffff; color: #000000; border: 2px solid #cccccc;">
+                    <td style="padding: 20px 15px; font-weight: bold; font-size: 20px;">💰 TOTAL AMOUNT:</td>
+                    <td style="padding: 20px 15px; text-align: right; font-weight: bold; font-size: 24px;">₹{{total}}</td>
+                </tr>
+            </table>
+            
+            <p style="font-size: 18px; margin: 25px 0; color: #000000; font-weight: bold;">
+                Save this email for check-in.
+            </p>
+            
+            <p style="font-size: 18px; margin: 25px 0; color: #000000; font-weight: bold;">
+                Thank you for choosing us! 🎉
+            </p>
+        </div>
+        
+        <!-- Footer -->
+        <div style="border-top: 2px solid #cccccc; padding-top: 20px; margin-top: 30px; text-align: center;">
+            <p style="font-size: 16px; font-weight: bold; color: #000000; margin: 10px 0;">CONTACT US</p>
+            <p style="font-size: 16px; color: #000000; margin: 5px 0;">📧 support@grandluxuryhotels.com</p>
+            <p style="font-size: 16px; color: #000000; margin: 5px 0;">📞 +91 98251 23456</p>
+        </div>
+    </div>
+    
+</body>
+</html>

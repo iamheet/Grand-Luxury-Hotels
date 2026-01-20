@@ -36,8 +36,12 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Routes
 const passwordResetRoutes = require('./routes/passwordReset');
 const paymentRoutes = require('./routes/payment');
+const emailRoutes = require('./routes/email');
+const otpRoutes = require('./routes/otp');
 app.use('/api/password', passwordResetRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/email', emailRoutes);
+app.use('/api/otp', otpRoutes);
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/hotels', require('./routes/hotels'));
