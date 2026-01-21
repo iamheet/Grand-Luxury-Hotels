@@ -9,10 +9,10 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// Initialize Razorpay
+// Initialize Razorpay with your existing keys
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_SECRET_KEY
+  key_id: process.env.RAZORPAY_KEY_ID, // rzp_test_S4XQEjfZfBmeYM
+  key_secret: process.env.RAZORPAY_SECRET_KEY // 4QF4Y2D5xflavcXJC9dRnjcm
 });
 
 // Helper function for HTTP requests with timeout
@@ -462,7 +462,7 @@ router.post('/create-order', auth, async (req, res) => {
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      key: process.env.RAZORPAY_KEY_ID
+      key: process.env.RAZORPAY_KEY_ID // rzp_test_S4XQEjfZfBmeYM
     });
   } catch (error) {
     console.error('❌ Payment order error:', error);

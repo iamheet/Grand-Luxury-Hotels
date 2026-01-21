@@ -47,13 +47,30 @@ router.get('/admin/all', async (req, res) => {
       .skip(skip)
       .limit(limit);
     
+    // Transform bookings to show proper customer names
+    const transformedBookings = bookings.map(booking => {
+      const bookingObj = booking.toObject();
+      // Use guest name first, then member name, then user name as fallback
+      const customerName = bookingObj.guest?.name || 
+                          bookingObj.member?.name || 
+                          bookingObj.userId?.name || 
+                          'Unknown Guest';
+      
+      return {
+        ...bookingObj,
+        customerName,
+        customerEmail: bookingObj.guest?.email || bookingObj.member?.email || bookingObj.userId?.email,
+        customerPhone: bookingObj.guest?.phone || bookingObj.member?.phone || bookingObj.userId?.phone
+      };
+    });
+    
     res.json({
       success: true,
-      count: bookings.length,
+      count: transformedBookings.length,
       total,
       page,
       totalPages: Math.ceil(total / limit),
-      bookings
+      bookings: transformedBookings
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -77,12 +94,17 @@ router.post('/', auth, async (req, res) => {
     // Emit real-time notification to all connected admins
     const io = req.app.get('io');
     if (io) {
+      const customerName = req.body.guest?.name || 
+                          req.body.member?.name || 
+                          req.body.customerName || 
+                          'Guest';
+      
       io.emit('newBooking', {
         message: 'New booking created',
         booking: {
           id: booking._id,
           hotelName: booking.hotelName,
-          customerName: req.body.guest?.name || req.body.member?.name || 'Guest',
+          customerName: customerName,
           amount: booking.total || booking.totalPrice || booking.price,
           createdAt: booking.createdAt
         }

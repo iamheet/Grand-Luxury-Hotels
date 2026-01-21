@@ -12,6 +12,7 @@ const router = express.Router()
 // Login endpoint - handles admin, user, and member login
 router.post('/login', async (req, res) => {
   try {
+    console.log('🔑 Login request received:', req.body)
     const { username, password, email, membershipId, isExclusive } = req.body
 
     // Admin login (existing logic)
@@ -21,7 +22,7 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign(
           { id: 'super-admin', type: 'super', username: 'admin' },
           JWT_SECRET,
-          { expiresIn: '15m' }
+          { expiresIn: '1h' }
         )
         
         return res.json({
@@ -37,7 +38,7 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign(
           { id: subAdmin._id, type: 'subadmin', username: subAdmin.username },
           JWT_SECRET,
-          { expiresIn: '15m' }
+          { expiresIn: '1h' }
         )
         
         return res.json({
@@ -59,7 +60,7 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign(
           { id: hotel._id, type: 'hotel', hotel: hotel.name, location: hotel.location },
           JWT_SECRET,
-          { expiresIn: '15m' }
+          { expiresIn: '1h' }
         )
         
         return res.json({
@@ -86,7 +87,7 @@ router.post('/login', async (req, res) => {
           const token = jwt.sign(
             { id: member._id, type: 'member', membershipId: member.membershipId },
             JWT_SECRET,
-            { expiresIn: '15m' }
+            { expiresIn: '1h' }
           )
           
           return res.json({
@@ -113,7 +114,7 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign(
           { id: user._id, type: 'user', email: user.email },
           JWT_SECRET,
-          { expiresIn: '15m' }
+          { expiresIn: '1h' }
         )
         
         return res.json({
@@ -138,15 +139,47 @@ router.post('/login', async (req, res) => {
   }
 })
 
+// Check if user exists with caching
+router.post('/check-user', async (req, res) => {
+  try {
+    const { email } = req.body
+    const existingUser = await User.findOne({ email })
+    
+    // Set cache headers for better performance
+    res.set({
+      'Cache-Control': 'public, max-age=60', // Cache for 1 minute
+      'ETag': `"${Buffer.from(email).toString('base64')}"`
+    })
+    
+    if (existingUser) {
+      return res.status(200).json({
+        success: true,
+        exists: true,
+        message: 'User exists'
+      })
+    }
+    
+    res.status(200).json({
+      success: true,
+      exists: false,
+      message: 'User does not exist'
+    })
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+})
+
 // Register new user
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, phone } = req.body
+    console.log('📝 Registration request received:', req.body)
+    const { name, email, password, phone, emailVerified, phoneVerified } = req.body
 
     // Check if user already exists
     const existingUser = await User.findOne({ email })
     if (existingUser) {
-      return res.status(400).json({ success: false, message: 'User already exists with this email' })
+      console.log('❌ User already exists:', email)
+      return res.status(409).json({ success: false, message: 'User already exists with this email' })
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)
@@ -154,15 +187,18 @@ router.post('/register', async (req, res) => {
       name, 
       email, 
       password: hashedPassword, 
-      phone 
+      phone,
+      emailVerified: emailVerified || false,
+      phoneVerified: phoneVerified || false
     })
     
     await user.save()
+    console.log('✅ User registered successfully:', email)
     
     const token = jwt.sign(
       { id: user._id, type: 'user', email: user.email },
       JWT_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: '1h' }
     )
     
     res.status(201).json({ 
@@ -173,10 +209,13 @@ router.post('/register', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone
+        phone: user.phone,
+        emailVerified: user.emailVerified,
+        phoneVerified: user.phoneVerified
       }
     })
   } catch (error) {
+    console.error('❌ Registration error:', error.message)
     res.status(500).json({ success: false, message: error.message })
   }
 })
@@ -210,7 +249,7 @@ router.post('/sync-firebase-user', async (req, res) => {
     const token = jwt.sign(
       { id: user._id, type: 'user', email: user.email },
       JWT_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: '1h' }
     )
 
     res.json({
@@ -226,6 +265,40 @@ router.post('/sync-firebase-user', async (req, res) => {
         points: user.points
       }
     })
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+})
+
+// Check if exclusive member exists
+router.post('/check-exclusive-member', async (req, res) => {
+  try {
+    const { membershipId } = req.body
+    
+    if (!membershipId) {
+      return res.status(400).json({ success: false, message: 'Membership ID is required' })
+    }
+
+    const member = await Member.findOne({ membershipId })
+    
+    if (member) {
+      res.json({
+        success: true,
+        exists: true,
+        member: {
+          name: member.name,
+          email: member.email,
+          membershipId: member.membershipId,
+          tier: member.tier
+        }
+      })
+    } else {
+      res.json({
+        success: true,
+        exists: false,
+        message: 'Member not found'
+      })
+    }
   } catch (error) {
     res.status(500).json({ success: false, message: error.message })
   }

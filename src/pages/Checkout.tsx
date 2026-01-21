@@ -4,6 +4,7 @@ import ImageWithFallback from '../components/ImageWithFallback'
 import { API_ENDPOINTS } from '../config/api'
 import { WhatsAppService } from '../utils/whatsappService'
 import { EmailService } from '../utils/emailService'
+import { getRazorpayOptions } from '../config/payment'
 
 // Razorpay types
 declare global {
@@ -258,39 +259,29 @@ export default function Checkout() {
         throw new Error('Failed to create payment order')
       }
 
-      // Initialize Razorpay
-      const options = {
-        key: 'rzp_test_S4XQEjfZfBmeYM', // Replace with your actual Razorpay test key
-        amount: total * 100,
-        currency: 'INR',
-        name: 'The Grand Stay',
-        description: `Booking for ${room.title || room.name} (${nights} night${nights > 1 ? 's' : ''})`,
-        order_id: orderData.orderId,
-        handler: async function (response: any) {
-          // Payment successful, verify and create booking
-          await verifyPaymentAndCreateBooking(response)
-        },
-        prefill: {
-          name: name.trim(),
-          email: email.trim().toLowerCase(),
-          contact: phone.trim()
-        },
-        theme: {
-          color: '#3B82F6'
-        },
-        modal: {
-          ondismiss: function() {
-            // Payment was dismissed/cancelled - record as failed
-            recordFailedPayment(orderData.orderId, null, 'Payment cancelled by user')
-            setLoading(false)
-            // Stay on checkout page for retry
+      // Initialize Razorpay with centralized config
+      const options = getRazorpayOptions(
+        {
+          amount: total * 100,
+          currency: 'INR',
+          orderId: orderData.orderId,
+          description: `Booking for ${room.title || room.name} (${nights} night${nights > 1 ? 's' : ''})`,
+          prefill: {
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            contact: phone.trim()
           }
         },
-        handler: async function (response: any) {
-          // Payment successful, verify and create booking
-          await verifyPaymentAndCreateBooking(response)
+        {
+          onSuccess: async (response: any) => {
+            await verifyPaymentAndCreateBooking(response)
+          },
+          onCancel: () => {
+            recordFailedPayment(orderData.orderId, null, 'Payment cancelled by user')
+            setLoading(false)
+          }
         }
-      }
+      )
 
       const rzp = new window.Razorpay(options)
       rzp.on('payment.failed', function (response: any) {

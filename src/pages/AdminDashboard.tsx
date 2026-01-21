@@ -93,7 +93,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false)
   const [pageViews, setPageViews] = useState(() => {
     const saved = localStorage.getItem('adminPageViews')
-    return saved ? parseInt(saved) : 45678
+    return saved ? parseInt(saved) : 45
   })
   const [currentPage, setCurrentPage] = useState(1)
   const [ordersPage, setOrdersPage] = useState(1)

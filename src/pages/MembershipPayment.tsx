@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { getRazorpayOptions } from '../config/payment'
 
 // Razorpay types
 declare global {
@@ -235,32 +236,28 @@ export default function MembershipPayment() {
         throw new Error('Payment order creation failed')
       }
 
-      // Initialize Razorpay
-      const options = {
-        key: 'rzp_test_S0tJBd3NSaEud8', // Replace with your actual Razorpay key
-        amount: (currentPlan.price + 9) * 100,
-        currency: 'INR',
-        name: 'The Grand Stay',
-        description: `${currentPlan.name} Membership`,
-        order_id: orderData.orderId,
-        handler: async function (response: any) {
-          // Payment successful, verify and create membership
-          await verifyPaymentAndCreateMembership(response)
+      // Initialize Razorpay with centralized config
+      const options = getRazorpayOptions(
+        {
+          amount: (currentPlan.price + 9) * 100,
+          currency: 'INR',
+          orderId: orderData.orderId,
+          description: `${currentPlan.name} Membership`,
+          prefill: {
+            name: formData.name,
+            email: formData.email,
+            contact: formData.phone
+          }
         },
-        prefill: {
-          name: formData.name,
-          email: formData.email,
-          contact: formData.phone
-        },
-        theme: {
-          color: '#3B82F6'
-        },
-        modal: {
-          ondismiss: function() {
+        {
+          onSuccess: async (response: any) => {
+            await verifyPaymentAndCreateMembership(response)
+          },
+          onCancel: () => {
             setProcessing(false)
           }
         }
-      }
+      )
 
       const rzp = new window.Razorpay(options)
       rzp.on('payment.failed', function (response: any) {
