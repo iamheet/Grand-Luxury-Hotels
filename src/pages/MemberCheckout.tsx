@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { API_ENDPOINTS } from '../config/api'
+import { getRazorpayOptions } from '../config/payment'
 
 // Razorpay types
 declare global {
@@ -199,32 +200,29 @@ export default function MemberCheckout() {
         throw new Error('Failed to create payment order')
       }
 
-      // Initialize Razorpay
-      const options = {
-        key: 'rzp_test_S0tJBd3NSaEud8',
-        amount: total * 100,
-        currency: 'INR',
-        name: 'The Grand Stay - Exclusive Member',
-        description: `Exclusive booking for ${selectedServices[0]?.name || 'services'}`,
-        order_id: orderData.orderId,
-        handler: async function (response: any) {
-          await verifyPaymentAndCreateBooking(response)
+      // Initialize Razorpay with centralized config
+      const options = getRazorpayOptions(
+        {
+          amount: total * 100,
+          currency: 'INR',
+          orderId: orderData.orderId,
+          description: `Exclusive booking for ${selectedServices[0]?.name || 'services'}`,
+          prefill: {
+            name: member.name,
+            email: guestEmail || member.email,
+            contact: guestPhone || member.phone
+          }
         },
-        prefill: {
-          name: member.name,
-          email: guestEmail || member.email,
-          contact: guestPhone || member.phone
-        },
-        theme: {
-          color: '#D4AF37'
-        },
-        modal: {
-          ondismiss: function() {
+        {
+          onSuccess: async (response: any) => {
+            await verifyPaymentAndCreateBooking(response)
+          },
+          onCancel: () => {
             recordFailedPayment(orderData.orderId, null, 'Payment cancelled by user')
             setLoading(false)
           }
         }
-      }
+      )
 
       const rzp = new window.Razorpay(options)
       rzp.on('payment.failed', function (response: any) {

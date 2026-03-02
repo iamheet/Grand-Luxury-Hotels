@@ -6,6 +6,9 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   phone: { type: String },
   firebaseUid: { type: String, unique: true, sparse: true },
+  // Verification fields
+  emailVerified: { type: Boolean, default: false },
+  phoneVerified: { type: Boolean, default: false },
   // Membership fields
   isMember: { type: Boolean, default: false },
   membershipTier: { type: String, enum: ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'], default: null },

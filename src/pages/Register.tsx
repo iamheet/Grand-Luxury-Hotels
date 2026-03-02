@@ -1,8 +1,9 @@
 import axios from 'axios'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { auth, googleProvider } from '../firebase'
 import { signInWithPopup } from 'firebase/auth'
+import RegistrationOTPVerification from '../components/RegistrationOTPVerification'
 
 export default function Register() {
 	const navigate = useNavigate()
@@ -14,6 +15,44 @@ export default function Register() {
 	const [showPassword, setShowPassword] = useState(false)
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 	const [error, setError] = useState<string | null>(null)
+	const [showOTPVerification, setShowOTPVerification] = useState(false)
+	const [formSubmitted, setFormSubmitted] = useState(false)
+	const [showExistingAccountPopup, setShowExistingAccountPopup] = useState(false)
+	const [emailCheckLoading, setEmailCheckLoading] = useState(false)
+
+	// Real-time email check on every keystroke
+	useEffect(() => {
+		if (!email || email.length < 5) {
+			setShowExistingAccountPopup(false)
+			return
+		}
+		
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+		if (!emailRegex.test(email.trim())) {
+			setShowExistingAccountPopup(false)
+			return
+		}
+		
+		// Hit API immediately on every keystroke
+		const checkEmail = async () => {
+			setEmailCheckLoading(true)
+			try {
+				const exists = await checkUserExists(email)
+				if (exists) {
+					setShowExistingAccountPopup(true)
+				} else {
+					setShowExistingAccountPopup(false)
+				}
+			} catch (error) {
+				console.error('Email check failed:', error)
+				setShowExistingAccountPopup(false)
+			} finally {
+				setEmailCheckLoading(false)
+			}
+		}
+		
+		checkEmail()
+	}, [email])
 
 	const handleGoogleSignIn = async () => {
 		try {
@@ -39,13 +78,50 @@ export default function Register() {
 		}
 	}
 
-	const registerUser = async () => {
+	const handleExistingUser = async () => {
+		try {
+			const loginResponse = await axios.post('http://localhost:5000/api/auth/login', {
+				email: email.trim().toLowerCase(),
+				password
+			})
+			
+			if (loginResponse.data.user) {
+				localStorage.setItem('user', JSON.stringify(loginResponse.data.user))
+				localStorage.setItem('token', loginResponse.data.token)
+				navigate('/')
+				return true
+			}
+		} catch (error) {
+			console.error('Login failed:', error)
+		}
+		return false
+	}
+
+	const checkUserExists = async (email: string) => {
+		try {
+			const response = await axios.post('http://localhost:5000/api/auth/check-user', {
+				email: email.trim().toLowerCase()
+			}, {
+				headers: {
+					'Cache-Control': 'no-cache'
+				}
+			})
+			return response.data.exists
+		} catch (error) {
+			console.error('Email check error:', error)
+			return false
+		}
+	}
+
+	const registerUser = async (emailVerified: boolean, phoneVerified: boolean) => {
 		try {
 			const response = await axios.post('http://localhost:5000/api/auth/register', {
 				name: name.trim(),
 				email: email.trim().toLowerCase(),
 				password,
-				phone: phone.trim()
+				phone: phone.trim(),
+				emailVerified,
+				phoneVerified
 			})
 
 			if (response.data.success) {
@@ -56,21 +132,28 @@ export default function Register() {
 		} catch (error: any) {
 			console.error('Registration error:', error)
 			setError(error.response?.data?.message || 'Registration failed. Please try again.')
+			setShowOTPVerification(false)
+			setFormSubmitted(false)
 		}
 	}
 
-	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault()
 		setError(null)
 
-		if (!name || !email || !password || !confirmPassword) {
-			setError('Please fill in all fields.')
+		if (!name || !email || !password || !confirmPassword || !phone) {
+			setError('Please fill in all fields including phone number.')
 			return
 		}
 
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 		if (!emailRegex.test(email.trim())) {
 			setError('Please enter a valid email address.')
+			return
+		}
+
+		if (phone.length < 10) {
+			setError('Please enter a valid phone number.')
 			return
 		}
 
@@ -84,8 +167,16 @@ export default function Register() {
 			return
 		}
 
-		// Register user via backend API
-		registerUser()
+		// Check if user already exists
+		const exists = await checkUserExists(email)
+		if (exists) {
+			setError('Account already exists with this email. Please use the login page instead.')
+			return
+		}
+
+		// Show OTP verification for new users
+		setFormSubmitted(true)
+		setShowOTPVerification(true)
 	}
 
 	return (
@@ -161,27 +252,41 @@ export default function Register() {
 							</div>
 							<div>
 								<label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-								<input
-									id="email"
-									type="email"
-									value={email}
-									onChange={(e) => setEmail(e.target.value)}
-									className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)]"
-									placeholder="you@example.com"
-									autoComplete="off"
-								/>
+								<div className="relative">
+									<input
+										id="email"
+										type="email"
+										value={email}
+										onChange={(e) => {
+											setEmail(e.target.value)
+											setShowExistingAccountPopup(false)
+										}}
+										className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)]"
+										placeholder="you@example.com"
+										autoComplete="off"
+									/>
+									{emailCheckLoading && (
+										<div className="absolute inset-y-0 right-0 flex items-center pr-3">
+											<div className="w-4 h-4 border-2 border-gray-300 border-t-[var(--color-brand-gold)] rounded-full animate-spin"></div>
+										</div>
+									)}
+								</div>
 							</div>
 							<div>
-								<label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone (Optional)</label>
+								<label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
 								<input
 									id="phone"
 									type="tel"
 									value={phone}
 									onChange={(e) => setPhone(e.target.value)}
 									className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-gold)]"
-									placeholder="+1 (555) 123-4567"
+									placeholder="Enter your phone number"
 									autoComplete="tel"
+									required
 								/>
+								<div className="text-xs text-gray-500 mt-1">
+									Required for account verification
+								</div>
 							</div>
 							<div>
 								<label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
@@ -259,7 +364,7 @@ export default function Register() {
 								type="submit"
 								className="w-full rounded-lg bg-[var(--color-brand-gold)] px-4 py-2.5 font-semibold text-white hover:bg-[var(--color-brand-gold)]/90 transition-colors"
 							>
-								Create Account
+								{formSubmitted ? 'Verify Account' : 'Verify & Create Account'}
 							</button>
 						</form>
 
@@ -272,6 +377,53 @@ export default function Register() {
 					</div>
 				</div>
 			</div>
+
+			{showOTPVerification && (
+				<RegistrationOTPVerification
+					email={email}
+					phone={phone}
+					onVerified={(emailVerified, phoneVerified) => {
+						setShowOTPVerification(false)
+						registerUser(emailVerified, phoneVerified)
+					}}
+					onCancel={() => {
+						setShowOTPVerification(false)
+						setFormSubmitted(false)
+					}}
+					requirePhoneVerification={true}
+				/>
+			)}
+
+			{/* Existing Account Popup */}
+			{showExistingAccountPopup && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+					<div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform animate-pulse">
+						<div className="text-center">
+							<div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+								<svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+									<path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+								</svg>
+							</div>
+							<h3 className="text-xl font-bold text-gray-900 mb-2">Account Already Exists! 🎉</h3>
+							<p className="text-gray-600 mb-6">Great news! You already have an account with <strong>{email}</strong>. Please sign in to continue your luxury experience.</p>
+							<div className="flex gap-3">
+								<button
+									onClick={() => navigate('/login')}
+									className="flex-1 bg-gradient-to-r from-[var(--color-brand-gold)] to-yellow-400 text-[var(--color-brand-navy)] px-4 py-2.5 rounded-lg font-semibold hover:brightness-95 transition-all"
+								>
+									Sign In
+								</button>
+								<button
+									onClick={() => setShowExistingAccountPopup(false)}
+									className="px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+								>
+									Continue Here
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
 		</section>
 	)
 }

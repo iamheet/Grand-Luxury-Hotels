@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { auth, googleProvider } from '../firebase'
 import { signInWithPopup } from 'firebase/auth'
 import { checkExclusiveMembership } from '../utils/membershipCheck'
+import OTPVerification from '../components/OTPVerification'
 
 export default function Login() {
 	const navigate = useNavigate()
@@ -13,6 +14,7 @@ export default function Login() {
 	const [showPassword, setShowPassword] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 	const [isExclusiveLogin, setIsExclusiveLogin] = useState(false)
+	const [showOTP, setShowOTP] = useState(false)
 
 	useEffect(() => {
 		const existing = localStorage.getItem('user')
@@ -288,9 +290,31 @@ export default function Login() {
 							</svg>
 							Continue with Google
 						</button>
+
+						<button
+							type="button"
+							onClick={() => setShowOTP(true)}
+							className="w-full flex items-center justify-center gap-3 rounded-lg border border-blue-300 bg-blue-50 px-4 py-2.5 font-medium hover:bg-blue-100 transition-colors text-blue-700"
+						>
+							<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+								<path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+							</svg>
+							Login with Phone OTP
+						</button>
 					</div>
 				</div>
 			</div>
+
+			{showOTP && (
+				<OTPVerification
+					onVerified={(phoneNumber, token) => {
+						localStorage.setItem('authToken', token)
+						localStorage.setItem('user', JSON.stringify({ phone: phoneNumber, verified: true }))
+						navigate('/')
+					}}
+					onCancel={() => setShowOTP(false)}
+				/>
+			)}
 		</section>
 	)
 }
