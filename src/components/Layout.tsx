@@ -161,16 +161,10 @@ export default function Layout() {
         {mobileMenuOpen && (
           <div className="md:hidden bg-transparent backdrop-blur-md">
             <nav className="px-6 py-4 space-y-3">
-<<<<<<< HEAD
               <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium text-center">Home</Link>
               <Link to="/membership" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium text-center">Join Membership</Link>
               <Link to="/help" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 text-white font-medium text-center">Help</Link>
-=======
-              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-medium text-center">Home</Link>
-              <Link to="/membership" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-medium text-center">Join Membership</Link>
-              <Link to="/help" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-violet-600 to-pink-600 text-white font-medium text-center">Help</Link>
               <Link to="/admin-login" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-red-700 text-white font-medium text-center">Admin</Link>
->>>>>>> 709ff62fa3665af35ec422783af9b98502508b5d
               {isLoggedIn ? (
                 <button
                   onClick={async () => {
