@@ -569,11 +569,11 @@ router.get('/transaction/:bookingId', async (req, res) => {
     }
 
     // Allow access if user owns booking OR if admin
-    const isOwner = booking.userId.toString() === decoded.id
+    const isOwner = booking.userId && booking.userId.toString() === decoded.id
     const isAdmin = decoded.username || decoded.type === 'admin' // Admin tokens have username field
     
     console.log('Token decoded:', { id: decoded.id, username: decoded.username, type: decoded.type })
-    console.log('Booking userId:', booking.userId.toString())
+    console.log('Booking userId:', booking.userId ? booking.userId.toString() : 'null')
     console.log('Access check:', { isOwner, isAdmin })
     
     if (!isOwner && !isAdmin) {

@@ -29,6 +29,14 @@ export default function Layout() {
     } catch {}
   }
   const transparent = pathname === '/'
+  const isAdminPage = pathname.includes('/admin') || pathname.includes('/subadmin')
+  const isMemberPage = pathname.includes('/member')
+  const isHelpPage = pathname === '/help'
+  const isLoginPage = pathname === '/login' || pathname === '/register'
+  
+  const getHeaderStyle = () => {
+    return 'absolute top-0 left-0 right-0 bg-transparent'
+  }
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,9 +61,9 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-gray-900">
-      <header className={`${transparent ? 'absolute top-0 left-0 right-0 bg-transparent' : 'sticky top-0 bg-[var(--color-brand-navy)]'} z-30 text-white/95`}>
-        <div className={`mx-auto max-w-7xl px-6 py-4 flex items-center justify-between ${transparent ? 'mix-blend-normal' : ''}`}>
-          <Link to="/" className="font-semibold tracking-wide text-lg">
+      <header className={`${getHeaderStyle()} z-30 text-white/95`}>
+        <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between w-full">
+          <Link to="/" className="font-semibold tracking-wide text-lg whitespace-nowrap text-white/95 flex-shrink-0" style={{minWidth: '140px'}}>
             The <span className="text-[var(--color-brand-gold)]">Grand</span> Stay
           </Link>
           
@@ -72,32 +80,29 @@ export default function Layout() {
           </button>
 
           <nav className="hidden md:flex items-center gap-8 text-sm">
-            <Link to="/" className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 hover:from-yellow-600 hover:via-amber-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+            <Link to="/" className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
               <span className="flex items-center gap-2 text-white font-medium">
                 <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                 </svg>
                 Home
               </span>
-              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-yellow-300 via-amber-300 to-orange-300 opacity-0 group-hover:opacity-25 transition-opacity duration-300"></div>
             </Link>
-            <Link to="/membership" className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+            <Link to="/membership" className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
               <span className="flex items-center gap-2 text-white font-medium">
                 <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 Join Membership
               </span>
-              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300 opacity-0 group-hover:opacity-25 transition-opacity duration-300"></div>
             </Link>
-            <Link to="/help" className="group relative px-4 py-2 rounded-full bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-violet-700 hover:via-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+            <Link to="/help" className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
               <span className="flex items-center gap-2 text-white font-medium">
                 <svg className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Help
               </span>
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
             </Link>
             {isLoggedIn ? (
               <button
@@ -122,7 +127,7 @@ export default function Layout() {
                   }
                   window.location.reload()
                 }}
-                className="group flex items-center gap-2 rounded-lg border border-slate-500/30 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 px-4 py-2 text-white font-medium shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                className="group flex items-center gap-2 rounded-lg bg-red-600 hover:bg-red-700 px-4 py-2 text-white font-medium shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
               >
                 <svg className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -130,14 +135,13 @@ export default function Layout() {
                 Logout
               </button>
             ) : (
-              <Link to="/login" className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+              <Link to="/login" className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                 <span className="flex items-center gap-2 text-white font-medium">
                   <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                   </svg>
                   Login
                 </span>
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-300 via-indigo-300 to-purple-300 opacity-0 group-hover:opacity-25 transition-opacity duration-300"></div>
               </Link>
             )}
           </nav>
@@ -145,17 +149,16 @@ export default function Layout() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-[var(--color-brand-navy)] border-t border-white/10">
+          <div className="md:hidden bg-transparent backdrop-blur-md">
             <nav className="px-6 py-4 space-y-3">
-              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-medium text-center">Home</Link>
-              <Link to="/membership" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-medium text-center">Join Membership</Link>
-              <Link to="/help" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-violet-600 to-pink-600 text-white font-medium text-center">Help</Link>
+              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium text-center">Home</Link>
+              <Link to="/membership" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium text-center">Join Membership</Link>
+              <Link to="/help" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 text-white font-medium text-center">Help</Link>
               {isLoggedIn ? (
                 <button
                   onClick={async () => {
                     const wasExclusive = localStorage.getItem('isExclusiveMember') === 'true'
                     await signOut(auth)
-                    // Clear all user and member data
                     localStorage.removeItem('user')
                     localStorage.removeItem('member')
                     localStorage.removeItem('memberCheckout')
@@ -166,7 +169,6 @@ export default function Layout() {
                     localStorage.removeItem('isExclusiveMember')
                     setMobileMenuOpen(false)
                     
-                    // Redirect to exclusive member login if was exclusive member
                     if (wasExclusive) {
                       navigate('/login')
                     } else {
@@ -174,12 +176,12 @@ export default function Layout() {
                     }
                     window.location.reload()
                   }}
-                  className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-slate-600 to-slate-700 text-white font-medium text-center"
+                  className="w-full px-4 py-2 rounded-lg bg-red-600 text-white font-medium text-center"
                 >
                   Logout
                 </button>
               ) : (
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium text-center">Login</Link>
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium text-center">Login</Link>
               )}
             </nav>
           </div>

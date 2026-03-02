@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const bookingSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
   type: { type: String, enum: ['hotel', 'aircraft', 'car', 'travel', 'dining', 'entertainment', 'chef', 'wine', 'ticket', 'event', 'business', 'combined'], default: 'hotel' },
   services: [mongoose.Schema.Types.Mixed],
   room: mongoose.Schema.Types.Mixed,

@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import Layout from './components/Layout'
 import ScrollToTop from './components/ScrollToTop'
+import SessionExpiredManager from './components/SessionExpiredModal'
+import { setupAxiosInterceptors, checkTokenExpiry } from './utils/auth'
 import Home from './pages/Home'
 import SearchResults from './pages/SearchResults'
 import HotelDetails from './pages/HotelDetails'
@@ -59,9 +62,44 @@ import HotelsList from './pages/HotelsList'
 import Games from './pages/Games'
 
 export default function App() {
+  useEffect(() => {
+    // Setup axios interceptors for session management
+    setupAxiosInterceptors()
+
+    // Check token expiry every 30 seconds
+    const interval = setInterval(() => {
+      if (checkTokenExpiry()) {
+        window.triggerSessionExpired?.()
+      }
+    }, 30000)
+
+    // Check session when user returns to tab (like Razorpay)
+    const handleVisibilityChange = () => {
+      if (!document.hidden && checkTokenExpiry()) {
+        window.triggerSessionExpired?.()
+      }
+    }
+
+    const handleFocus = () => {
+      if (checkTokenExpiry()) {
+        window.triggerSessionExpired?.()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [])
+
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <SessionExpiredManager />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

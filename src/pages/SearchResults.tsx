@@ -185,8 +185,8 @@ export default function SearchResults() {
   }, [destination, checkIn, checkOut, price, stars, roomTypes, amenities, tiers, categories, hotelIds])
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
-      <div className="mb-8 animate-slideDown">
+    <div className="max-w-7xl mx-auto px-6 py-10 pt-24">
+      <div className="mb-8 animate-slideDown mt-4">
         <form onSubmit={handleSearch} className="flex items-center gap-3 max-w-2xl">
           <input
             type="text"

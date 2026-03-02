@@ -8,17 +8,31 @@ const auth = require('../middleware/auth');
 // Get all members (for admin) or check by email
 router.get('/', async (req, res) => {
   try {
-    const { email } = req.query;
+    const { email, page = 1, limit = 10 } = req.query;
     
     let query = {};
     if (email) {
       query = { email: email };
     }
     
-    const members = await Member.find(query).select('-password').sort({ createdAt: -1 });
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+    
+    const members = await Member.find(query)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
+      
+    const total = await Member.countDocuments(query);
+    
     res.json({
       success: true,
       count: members.length,
+      total,
+      page: pageNum,
+      totalPages: Math.ceil(total / limitNum),
       members
     });
   } catch (error) {

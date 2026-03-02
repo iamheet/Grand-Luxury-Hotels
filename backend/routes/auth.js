@@ -86,7 +86,7 @@ router.post('/login', async (req, res) => {
           const token = jwt.sign(
             { id: member._id, type: 'member', membershipId: member.membershipId },
             JWT_SECRET,
-            { expiresIn: '15m' }
+            { expiresIn: '30m' }
           )
           
           return res.json({
@@ -228,6 +228,27 @@ router.post('/sync-firebase-user', async (req, res) => {
     })
   } catch (error) {
     res.status(500).json({ success: false, message: error.message })
+  }
+})
+
+// Validate token endpoint
+router.get('/validate-token', (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1]
+    
+    if (!token) {
+      return res.status(401).json({ valid: false, message: 'No token provided' })
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ valid: false, message: 'Invalid or expired token' })
+      }
+      
+      res.json({ valid: true, decoded })
+    })
+  } catch (error) {
+    res.status(500).json({ valid: false, message: error.message })
   }
 })
 

@@ -39,9 +39,24 @@ router.get('/admin/all', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
+    const search = req.query.search || '';
     
-    const total = await Booking.countDocuments();
-    const bookings = await Booking.find()
+    // Build search query
+    let query = {};
+    if (search) {
+      query = {
+        $or: [
+          { hotelName: { $regex: search, $options: 'i' } },
+          { 'guest.name': { $regex: search, $options: 'i' } },
+          { 'guest.email': { $regex: search, $options: 'i' } },
+          { 'member.name': { $regex: search, $options: 'i' } },
+          { 'member.email': { $regex: search, $options: 'i' } }
+        ]
+      };
+    }
+    
+    const total = await Booking.countDocuments(query);
+    const bookings = await Booking.find(query)
       .populate('userId', 'name email phone')
       .sort({ createdAt: -1 })
       .skip(skip)

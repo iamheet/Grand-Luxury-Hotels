@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import toast, { Toaster } from 'react-hot-toast'
@@ -83,12 +83,19 @@ export default function AdminDashboard() {
   const [adminAvatar, setAdminAvatar] = useState(localStorage.getItem('adminAvatar') || 'A')
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [users, setUsers] = useState<User[]>([])
+  const [usersPage, setUsersPage] = useState(1)
+  const [totalUsers, setTotalUsers] = useState(0)
+  const [userSearch, setUserSearch] = useState('')
+  const usersPerPage = 10
   const [paidMembers, setPaidMembers] = useState<any[]>([])
-  const [bookings, setBookings] = useState<Booking[]>([])
-  const [totalBookings, setTotalBookings] = useState(0)
+  const [paidMembersPage, setPaidMembersPage] = useState(1)
+  const [totalPaidMembers, setTotalPaidMembers] = useState(0)
+  const membersPerPage = 10
   const [subAdmins, setSubAdmins] = useState<SubAdmin[]>([])
   const [hotels, setHotels] = useState<any[]>([])
   const [filteredHotels, setFilteredHotels] = useState<any[]>([])
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [totalBookings, setTotalBookings] = useState(0)
   const [locationFilter, setLocationFilter] = useState<string>('all')
   const [loading, setLoading] = useState(false)
   const [pageViews, setPageViews] = useState(() => {
@@ -99,6 +106,7 @@ export default function AdminDashboard() {
   const [ordersPage, setOrdersPage] = useState(1)
   const [totalOrders, setTotalOrders] = useState(0)
   const [paginatedOrders, setPaginatedOrders] = useState<any[]>([])
+  const [transactionSearch, setTransactionSearch] = useState('')
   const itemsPerPage = 10
   const ordersPerPage = 10
   const [dailyViews, setDailyViews] = useState(() => {
@@ -123,6 +131,27 @@ export default function AdminDashboard() {
   const [showTransactionModal, setShowTransactionModal] = useState(false)
   const [transactionLoading, setTransactionLoading] = useState(false)
 
+  // Debounced search functions
+  const debouncedUserSearch = useCallback(
+    (searchTerm: string, page: number = 1) => {
+      const timeoutId = setTimeout(() => {
+        fetchUsers(page, searchTerm)
+      }, 500)
+      return () => clearTimeout(timeoutId)
+    },
+    []
+  )
+
+  const debouncedTransactionSearch = useCallback(
+    (searchTerm: string, page: number = 1) => {
+      const timeoutId = setTimeout(() => {
+        fetchBookings(page, searchTerm)
+      }, 500)
+      return () => clearTimeout(timeoutId)
+    },
+    []
+  )
+
   // Update unread notification count
   useEffect(() => {
     const updateUnreadCount = () => {
@@ -139,14 +168,42 @@ export default function AdminDashboard() {
   // Helper function for authenticated API requests
   const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
     const token = localStorage.getItem('adminToken')
-    return fetch(url, {
-      ...options,
-      headers: {
-        ...options.headers,
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+    if (!token) {
+      // No admin token, redirect to admin login
+      localStorage.removeItem('adminAuth')
+      localStorage.removeItem('adminType')
+      localStorage.removeItem('currentHotel')
+      localStorage.removeItem('subAdminData')
+      navigate('/admin-login')
+      return
+    }
+    
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      if (response.status === 401) {
+        // Token expired or invalid - redirect to admin login
+        localStorage.removeItem('adminAuth')
+        localStorage.removeItem('adminToken')
+        localStorage.removeItem('adminType')
+        localStorage.removeItem('currentHotel')
+        localStorage.removeItem('subAdminData')
+        navigate('/admin-login')
+        return
       }
-    })
+      
+      return response
+    } catch (error) {
+      console.error('API request failed:', error)
+      throw error
+    }
   }
 
   useEffect(() => {
@@ -175,20 +232,22 @@ export default function AdminDashboard() {
         })
         
         if (!response.ok) {
-          // Token is invalid or expired
+          // Token is invalid or expired - redirect to admin login
           localStorage.removeItem('adminAuth')
           localStorage.removeItem('adminToken')
           localStorage.removeItem('adminType')
           localStorage.removeItem('currentHotel')
+          localStorage.removeItem('subAdminData')
           navigate('/admin-login')
           return
         }
       } catch (error) {
-        // Network error or token validation failed
+        // Network error or token validation failed - redirect to admin login
         localStorage.removeItem('adminAuth')
         localStorage.removeItem('adminToken')
         localStorage.removeItem('adminType')
         localStorage.removeItem('currentHotel')
+        localStorage.removeItem('subAdminData')
         navigate('/admin-login')
         return
       }
@@ -270,13 +329,15 @@ export default function AdminDashboard() {
     }
   }, [navigate])
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (page = 1, search = '') => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:5000/api/users')
+      const searchParam = search ? `&search=${encodeURIComponent(search)}` : ''
+      const response = await fetch(`http://localhost:5000/api/users?page=${page}&limit=${usersPerPage}${searchParam}`)
       const data = await response.json()
       if (data.success) {
         setUsers(data.users)
+        setTotalUsers(data.total || data.users.length)
       }
     } catch (error) {
       console.error('Error fetching users:', error)
@@ -285,13 +346,14 @@ export default function AdminDashboard() {
     }
   }
 
-  const fetchPaidMembers = async () => {
+  const fetchPaidMembers = async (page = 1) => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:5000/api/members')
+      const response = await fetch(`http://localhost:5000/api/members?page=${page}&limit=${membersPerPage}`)
       const data = await response.json()
       if (data.success) {
         setPaidMembers(data.members)
+        setTotalPaidMembers(data.total || data.members.length)
       }
     } catch (error) {
       console.error('Error fetching paid members:', error)
@@ -330,10 +392,11 @@ export default function AdminDashboard() {
     return ['all', ...Array.from(new Set(locations))]
   }
 
-  const fetchBookings = async (page = 1) => {
+  const fetchBookings = async (page = 1, search = '') => {
     setLoading(true)
     try {
-      const response = await fetch(`http://localhost:5000/api/bookings/admin/all?page=${page}&limit=${itemsPerPage}`)
+      const searchParam = search ? `&search=${encodeURIComponent(search)}` : ''
+      const response = await fetch(`http://localhost:5000/api/bookings/admin/all?page=${page}&limit=${itemsPerPage}${searchParam}`)
       const data = await response.json()
       if (data.success) {
         console.log('Bookings data:', data.bookings)
@@ -978,10 +1041,51 @@ export default function AdminDashboard() {
           {activeSection === 'users' && (
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">User Management</h2>
-                <button onClick={fetchUsers} className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-                  🔄 Refresh
-                </button>
+                <div>
+                  <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">User Management</h2>
+                  <p className={`text-sm mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Manage all registered users</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search by name or email..."
+                      value={userSearch}
+                      onChange={(e) => {
+                        setUserSearch(e.target.value)
+                        setUsersPage(1)
+                        const cleanup = debouncedUserSearch(e.target.value, 1)
+                        return cleanup
+                      }}
+                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 w-64"
+                    />
+                    <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <div className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
+                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Total: </span>
+                    <span className={`text-lg font-bold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>{totalUsers}</span>
+                  </div>
+                  {totalUsers > usersPerPage && (
+                    <select 
+                      value={usersPage}
+                      onChange={(e) => { setUsersPage(Number(e.target.value)); fetchUsers(Number(e.target.value), userSearch); }}
+                      className="px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      {Array.from({ length: Math.ceil(totalUsers / usersPerPage) }, (_, i) => i + 1).map(page => {
+                        const start = (page - 1) * usersPerPage + 1
+                        const end = Math.min(page * usersPerPage, totalUsers)
+                        return (
+                          <option key={page} value={page}>{start}-{end}</option>
+                        )
+                      })}
+                    </select>
+                  )}
+                  <button onClick={() => fetchUsers(usersPage, userSearch)} className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                    🔄 Refresh
+                  </button>
+                </div>
               </div>
 
               {loading ? (
@@ -1051,9 +1155,24 @@ export default function AdminDashboard() {
                 <div className="flex items-center gap-3">
                   <div className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
                     <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Total: </span>
-                    <span className={`text-lg font-bold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>{paidMembers.length}</span>
+                    <span className={`text-lg font-bold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>{totalPaidMembers}</span>
                   </div>
-                  <button onClick={fetchPaidMembers} className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                  {totalPaidMembers > membersPerPage && (
+                    <select 
+                      value={paidMembersPage}
+                      onChange={(e) => { setPaidMembersPage(Number(e.target.value)); fetchPaidMembers(Number(e.target.value)); }}
+                      className="px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      {Array.from({ length: Math.ceil(totalPaidMembers / membersPerPage) }, (_, i) => i + 1).map(page => {
+                        const start = (page - 1) * membersPerPage + 1
+                        const end = Math.min(page * membersPerPage, totalPaidMembers)
+                        return (
+                          <option key={page} value={page}>{start}-{end}</option>
+                        )
+                      })}
+                    </select>
+                  )}
+                  <button onClick={() => fetchPaidMembers(paidMembersPage)} className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200">
                     🔄 Refresh
                   </button>
                 </div>
@@ -1102,14 +1221,49 @@ export default function AdminDashboard() {
                               <td className={`px-6 py-4 text-sm transition-colors duration-300 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{member.email}</td>
                               <td className={`px-6 py-4 text-sm transition-colors duration-300 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{member.phone || 'N/A'}</td>
                               <td className="px-6 py-4">
-                                <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                                  member.tier === 'Diamond' ? 'bg-purple-100 text-purple-700' :
-                                  member.tier === 'Platinum' ? 'bg-gray-100 text-gray-700' :
-                                  member.tier === 'Gold' ? 'bg-yellow-100 text-yellow-700' :
-                                  member.tier === 'Silver' ? 'bg-gray-100 text-gray-600' :
-                                  'bg-orange-100 text-orange-700'
+                                <span className={`px-3 py-1 text-xs font-medium rounded-full flex items-center gap-2 w-fit ${
+                                  member.tier === 'Diamond' ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-800 border border-purple-200' :
+                                  member.tier === 'Platinum' ? 'bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800 border border-gray-300' :
+                                  member.tier === 'Gold' ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border border-yellow-300' :
+                                  member.tier === 'Silver' ? 'bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 border border-gray-200' :
+                                  'bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 border border-orange-200'
                                 }`}>
-                                  💎 {member.tier}
+                                  {member.tier === 'Diamond' ? (
+                                    <>
+                                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M6 3h12l4 6-10 12L2 9l4-6z" />
+                                      </svg>
+                                      Diamond
+                                    </>
+                                  ) : member.tier === 'Platinum' ? (
+                                    <>
+                                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                      </svg>
+                                      Platinum
+                                    </>
+                                  ) : member.tier === 'Gold' ? (
+                                    <>
+                                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2l2.09 4.26 4.91.71-3.5 3.41.83 4.83L12 13.27l-4.33 2.27.83-4.83L5 7.3l4.91-.71L12 2z" />
+                                      </svg>
+                                      Gold
+                                    </>
+                                  ) : member.tier === 'Silver' ? (
+                                    <>
+                                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 15.39l-3.76 2.27.99-4.28L6.24 11l4.38-.38L12 6.09l1.38 4.53L17.76 11l-2.99 2.38.99 4.28L12 15.39z" />
+                                      </svg>
+                                      Silver
+                                    </>
+                                  ) : (
+                                    <>
+                                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                                      </svg>
+                                      {member.tier || 'Bronze'}
+                                    </>
+                                  )}
                                 </span>
                               </td>
                               <td className={`px-6 py-4 text-sm font-medium transition-colors duration-300 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>{member.points || 0}</td>
@@ -1590,10 +1744,27 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Transactions & Bookings</h2>
                 <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search by hotel, customer name or email..."
+                      value={transactionSearch}
+                      onChange={(e) => {
+                        setTransactionSearch(e.target.value)
+                        setCurrentPage(1)
+                        const cleanup = debouncedTransactionSearch(e.target.value, 1)
+                        return cleanup
+                      }}
+                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 w-80"
+                    />
+                    <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
                   {totalBookings > itemsPerPage && (
                     <select 
                       value={currentPage}
-                      onChange={(e) => { setCurrentPage(Number(e.target.value)); fetchBookings(Number(e.target.value)); }}
+                      onChange={(e) => { setCurrentPage(Number(e.target.value)); fetchBookings(Number(e.target.value), transactionSearch); }}
                       className="px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
                       {Array.from({ length: Math.ceil(totalBookings / itemsPerPage) }, (_, i) => i + 1).map(page => {
@@ -1605,7 +1776,7 @@ export default function AdminDashboard() {
                       })}
                     </select>
                   )}
-                  <button onClick={() => fetchBookings(currentPage)} className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                  <button onClick={() => fetchBookings(currentPage, transactionSearch)} className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200">
                     🔄 Refresh
                   </button>
                 </div>
@@ -1681,7 +1852,10 @@ export default function AdminDashboard() {
                               <td className={`px-6 py-4 text-sm transition-colors duration-300 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{new Date(booking.checkOut).toLocaleDateString()}</td>
                               <td className={`px-6 py-4 text-sm transition-colors duration-300 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{booking.guests}</td>
                               <td className={`px-6 py-4 text-sm font-medium transition-colors duration-300 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
-                                ${(booking as any).total || booking.totalPrice || booking.price || (booking as any).amount || 'N/A'}
+                                ${(() => {
+                                  const amount = (booking as any).total || booking.totalPrice || booking.price || (booking as any).amount
+                                  return amount ? amount.toString() : 'N/A'
+                                })()}
                               </td>
                               <td className="px-6 py-4">
                                 <span className={`px-2 py-1 text-xs font-medium rounded-full flex items-center gap-1 w-fit ${
@@ -1722,9 +1896,7 @@ export default function AdminDashboard() {
                                   )}
                                 </span>
                               </td>
-                              <td className={`px-6 py-4 text-sm transition-colors duration-300 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                                {formatDateTime(booking.createdAt)}
-                              </td>
+                              <td className={`px-6 py-4 text-sm transition-colors duration-300 whitespace-nowrap ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{new Date(booking.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }).replace(',', '') + ' ' + new Date(booking.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase()}</td>
                               <td className="px-6 py-4">
                                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                                   (booking as any).paymentStatus === 'completed' ? 'bg-green-100 text-green-700' :
