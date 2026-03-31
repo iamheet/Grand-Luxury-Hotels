@@ -1,123 +1,233 @@
-# 🏨 GrandStay – Luxury Hotel Booking Platform
+# GrandStay 🏨
+### Full-Stack Luxury Hotel Booking Platform
 
-GrandStay is a full-stack hotel booking platform designed to provide a seamless experience for users to explore, book, and manage hotel stays. The system includes secure authentication, booking management, admin controls, and scalable backend architecture.
+> A complete, production-inspired hotel booking system — built end-to-end with secure authentication, role-based access control, payment integration, and a scalable REST API architecture.
 
----
-
-## 🚀 Features
-
-### 👤 User Features
-
-* User registration & login (JWT Authentication)
-* Secure password hashing and authentication flow
-* Browse hotel listings and availability
-* Book rooms with dynamic data handling
-* View and manage bookings
-
-### 🛠️ Admin / Sub-Admin Features
-
-* Admin dashboard to manage users and bookings
-* Sub-admin roles with controlled access (RBAC)
-* Manage hotel listings and room availability
-* Monitor platform activity and user interactions
-
-### 📧 Email & Notification System
-
-* Password reset email flow
-* Mobile-friendly email templates
-* User communication system
-
-### 💳 Payment Integration
-
-* Razorpay integration for secure transactions
-* Handles booking payments efficiently
+GrandStay is a full-stack MVP that covers the entire hotel booking lifecycle — from user registration and room browsing to secure payments and admin management. Built solo with Node.js, Express, MongoDB, and React, it demonstrates real-world backend architecture, clean API design, and third-party service integration.
 
 ---
 
-## 🧠 Tech Stack
+## 🚀 Live Demo
 
-### 🔙 Backend
+Currently not deployed. Available locally — can provide a live demo on request.
 
-* Node.js
-* Express.js
-* MongoDB
-* JWT Authentication
-* RESTful APIs
+---
 
-### 🎨 Frontend
+## ✨ Features
 
-* React.js
-* HTML, CSS
-* Tailwind CSS
+### 👤 User Experience
+- Secure registration & login with JWT-based authentication
+- Browse hotel listings and check room availability
+- Book rooms with real-time data handling
+- View, manage, and track personal bookings
+- Password reset via email flow
 
-### ⚙️ Tools & Services
+### 🛡️ Admin & Sub-Admin Controls
+- Full admin dashboard for managing users, bookings, and hotels
+- Sub-admin roles with granular, permission-based access (RBAC)
+- Manage room listings, availability, and platform activity
+- Monitor and control all user interactions from a single interface
 
-* Git & GitHub
-* Postman (API Testing)
-* Railway (Deployment-ready setup)
-* Razorpay (Payment Gateway)
+### 💳 Payments
+- Razorpay integration for secure, reliable payment processing
+- End-to-end booking payment flow with proper error handling
+
+### 📧 Email & Notifications
+- Automated password reset email flow
+- Mobile-friendly email templates
+- User communication system built for scale
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Node.js, Express.js |
+| Database | MongoDB |
+| Authentication | JWT, bcrypt |
+| Frontend | React.js, Tailwind CSS, HTML/CSS |
+| Payment Gateway | Razorpay |
+| Deployment | Railway |
+| Dev Tools | Git, GitHub, Postman, VS Code |
 
 ---
 
 ## 🔐 Authentication Flow
 
-* User registers with email and password
-* Password is securely hashed using bcrypt
-* JWT token is generated upon login
-* Protected routes are secured using middleware
+```
+User Register / Login
+        │
+        ▼
+Password hashed with bcrypt
+        │
+        ▼
+JWT Token generated on login
+        │
+        ▼
+Token stored client-side
+        │
+        ▼
+Protected routes validated via middleware
+        │
+        ▼
+Access granted / denied based on role (User / Admin / Sub-Admin)
+```
 
 ---
 
-## ⚡ API Highlights
+## 🔄 Booking Flow
 
-* User Authentication APIs (Login / Register)
-* Booking Management APIs
-* Admin Control APIs
-* Secure password reset endpoints
+```
+User browses hotels & selects room
+            │
+            ▼
+Booking request sent to API
+            │
+            ▼
+Availability validated on backend
+            │
+            ▼
+Razorpay payment initiated
+            │
+            ▼
+Payment confirmed → Booking created in DB
+            │
+            ▼
+Confirmation shown to user
+```
+
+---
+
+## ⚡ API Overview
+
+| Module | Endpoints |
+|---|---|
+| Auth | Register, Login, Logout, Password Reset |
+| Hotels | List, Details, Availability |
+| Bookings | Create, View, Cancel, Manage |
+| Admin | User Management, Booking Control, Role Assignment |
+| Payments | Initiate, Verify, Handle Webhooks |
 
 ---
 
 ## 🗄️ Database Design
 
-* MongoDB for flexible and scalable data storage
-* Optimized schemas for users, bookings, and hotels
-* Efficient query handling and data validation
+- **Users** — profile, credentials, role, booking history
+- **Hotels** — listings, room types, availability, pricing
+- **Bookings** — user-hotel mapping, dates, status, payment info
+- **Admins** — role-based access, permissions, activity logs
+
+All schemas are optimised for query performance with proper indexing and validation layers.
 
 ---
 
-## 📂 Project Structure
+## 📁 Project Structure
 
-* `/backend` → Server-side logic and APIs
-* `/src` → Core application logic
-* `/public` → Static assets
-* `.env.example` → Environment configuration
-
----
-
-## 🧪 Key Learning Outcomes
-
-* Built scalable REST APIs using Node.js & Express
-* Implemented secure authentication using JWT
-* Designed database schemas and optimized queries
-* Integrated third-party payment gateway (Razorpay)
-* Applied clean architecture and error handling practices
-
----
-
-## 📌 Future Improvements
-
-* Real-time room availability updates
-* Advanced filtering and search features
-* Notifications system (email/SMS)
-* Full frontend upgrade with advanced UI/UX
+```
+GrandStay/
+├── backend/
+│   ├── controllers/       # Route logic & business rules
+│   ├── models/            # MongoDB schemas
+│   ├── routes/            # API route definitions
+│   ├── middleware/        # Auth, RBAC, error handling
+│   └── utils/             # Email, payment helpers
+├── src/
+│   ├── components/        # Reusable React components
+│   ├── pages/             # Page-level views
+│   └── services/          # API call handlers
+├── public/                # Static assets
+├── .env.example           # Environment variable template
+└── README.md
+```
 
 ---
 
+## 🏃 Getting Started
 
-## 🙌 Author
+### Prerequisites
+- Node.js v18+
+- MongoDB (local or Atlas)
+- Razorpay account (for payment testing)
 
-**Heet Chokshi**
-Full Stack Developer (Backend Focus)
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/iamheet/grandstay
+cd grandstay
+
+# Install backend dependencies
+cd backend
+npm install
+
+# Install frontend dependencies
+cd ../src
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Fill in your MongoDB URI, JWT secret, Razorpay keys, email config
+```
+
+### Running the App
+
+```bash
+# Start backend
+cd backend
+npm run dev
+
+# Start frontend (new terminal)
+cd src
+npm run dev
+```
 
 ---
 
+## 🔑 Environment Variables
+
+```env
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+RAZORPAY_KEY_ID=your_razorpay_key
+RAZORPAY_KEY_SECRET=your_razorpay_secret
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_email_app_password
+```
+
+---
+
+## 💡 Key Highlights
+
+- **Complete Full-Stack Ownership** — designed, built, and shipped solo from database to UI
+- **Production-Grade Auth** — JWT + bcrypt + middleware-protected routes + RBAC
+- **Real Payment Integration** — not mocked; actual Razorpay payment gateway wired up
+- **Scalable Architecture** — clean MVC structure built to grow beyond MVP
+- **Admin System** — full multi-role management panel, not just a basic CRUD app
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Real-time room availability with WebSockets
+- [ ] Advanced search & filtering (location, price, ratings)
+- [ ] SMS notifications via Twilio
+- [ ] Full UI/UX upgrade with animations and improved design system
+- [ ] Reviews & ratings system
+- [ ] Analytics dashboard for admins
+
+---
+
+## 👨‍💻 Author
+
+**Heet Chokshi** — Full Stack Developer
+
+
+
+## ⭐ Support
+
+If GrandStay helped you learn something or sparked an idea, drop a **star** on GitHub — it genuinely means a lot!
+
+---
+
+_Built with Node.js, strong coffee, and a deep respect for clean architecture_ ☕🏗️
