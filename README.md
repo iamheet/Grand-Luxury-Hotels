@@ -209,7 +209,6 @@ EMAIL_PASS=your_email_app_password
 
 ## 🗺️ Roadmap
 
-- [ ] Real-time room availability with WebSockets
 - [ ] Advanced search & filtering (location, price, ratings)
 - [ ] SMS notifications via Twilio
 - [ ] Full UI/UX upgrade with animations and improved design system
@@ -217,6 +216,14 @@ EMAIL_PASS=your_email_app_password
 - [ ] Analytics dashboard for admins
 
 ---
+🔮 Future Improvements
+Beyond the roadmap, here are some bigger, more ambitious ideas planned for GrandStay's evolution:
+Real-time room availability using WebSockets — instant updates without page refresh
+Dynamic Pricing Engine — automatically adjusts room prices based on demand, seasonality, and occupancy patterns — like how airlines price tickets
+Multi-currency support — for international users and properties
+AI-powered hotel recommendations — personalised suggestions based on user behaviour
+
+These ideas reflect my interest in building scalable, intelligent systems and exploring advanced product capabilities. While not implemented yet, they represent potential directions for future development.
 
 ## 👨‍💻 Author
 
