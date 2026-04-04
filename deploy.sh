@@ -1,18 +1,15 @@
 #!/bin/bash
-# Simple deployment script
 
-echo "🚀 Preparing backend for deployment..."
+# Azure deployment script for Node.js
+echo "Starting Azure deployment script..."
 
-# Navigate to backend directory
-cd backend
+# Navigate to the app directory
+cd /home/site/wwwroot
 
-# Install production dependencies
-echo "📦 Installing dependencies..."
-npm ci --production
+# Install dependencies
+echo "Installing dependencies..."
+npm install --production
 
-# Create deployment zip
-echo "📁 Creating deployment package..."
-zip -r ../backend-deploy.zip . -x "node_modules/.cache/*" "*.log" ".env"
-
-echo "✅ Deployment package created: backend-deploy.zip"
-echo "📤 Upload this file manually to Azure App Service"
+# Start the application
+echo "Starting the application..."
+exec node server.js

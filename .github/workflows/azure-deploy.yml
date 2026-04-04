@@ -37,4 +37,4 @@ jobs:
       with:
         azcliversion: 2.30.0
         inlineScript: |
-          az webapp restart --name royalstay --resource-group your-resource-group-name
+          az webapp restart --name royalstay --resource-group $(az webapp show --name royalstay --query resourceGroup -o tsv)

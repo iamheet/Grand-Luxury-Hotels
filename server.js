@@ -5,6 +5,13 @@ const http = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
 
+// Log startup information
+console.log('🚀 Starting The Grand Stay API...');
+console.log('📍 Environment:', process.env.NODE_ENV || 'development');
+console.log('🔌 Port:', process.env.PORT || 5000);
+console.log('📂 Working Directory:', process.cwd());
+console.log('📋 Node Version:', process.version);
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
