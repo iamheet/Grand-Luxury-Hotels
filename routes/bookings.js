@@ -1,0 +1,157 @@
+const express = require('express');
+const router = express.Router();
+const Booking = require('../models/Booking');
+const auth = require('../middleware/auth');
+
+// Get user bookings (My Bookings)
+router.get('/', auth, async (req, res) => {
+  try {
+    console.log('=== FETCHING BOOKINGS ===');
+    console.log('User ID from token:', req.userId);
+    console.log('User Type:', req.userType);
+    console.log('Is Exclusive:', req.isExclusive);
+    
+    const bookings = await Booking.find({ userId: req.userId }).sort({ createdAt: -1 });
+    console.log('Found bookings count:', bookings.length);
+    console.log('Booking user IDs:', bookings.map(b => b.userId));
+    
+    // Add booking type to each booking
+    const bookingsWithType = bookings.map(booking => ({
+      ...booking.toObject(),
+      bookingType: req.isExclusive ? 'Exclusive Member' : 'Regular User',
+      memberTier: req.memberTier || null
+    }));
+    
+    res.json({
+      success: true,
+      count: bookings.length,
+      bookings: bookingsWithType,
+      currentUserId: req.userId // Add this for debugging
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Get all bookings (Admin only)
+router.get('/admin/all', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const search = req.query.search || '';
+    
+    // Build search query
+    let query = {};
+    if (search) {
+      query = {
+        $or: [
+          { hotelName: { $regex: search, $options: 'i' } },
+          { 'guest.name': { $regex: search, $options: 'i' } },
+          { 'guest.email': { $regex: search, $options: 'i' } },
+          { 'member.name': { $regex: search, $options: 'i' } },
+          { 'member.email': { $regex: search, $options: 'i' } }
+        ]
+      };
+    }
+    
+    const total = await Booking.countDocuments(query);
+    const bookings = await Booking.find(query)
+      .populate('userId', 'name email phone')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    
+    // Transform bookings to show proper customer names
+    const transformedBookings = bookings.map(booking => {
+      const bookingObj = booking.toObject();
+      // Use guest name first, then member name, then user name as fallback
+      const customerName = bookingObj.guest?.name || 
+                          bookingObj.member?.name || 
+                          bookingObj.userId?.name || 
+                          'Unknown Guest';
+      
+      return {
+        ...bookingObj,
+        customerName,
+        customerEmail: bookingObj.guest?.email || bookingObj.member?.email || bookingObj.userId?.email,
+        customerPhone: bookingObj.guest?.phone || bookingObj.member?.phone || bookingObj.userId?.phone
+      };
+    });
+    
+    res.json({
+      success: true,
+      count: transformedBookings.length,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+      bookings: transformedBookings
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Create booking
+router.post('/', auth, async (req, res) => {
+  try {
+    // Additional validation - user already validated in auth middleware
+    const bookingData = {
+      ...req.body,
+      userId: req.userId,
+      bookingType: req.isExclusive ? 'Exclusive Member' : 'Regular User',
+      memberTier: req.memberTier || null
+    };
+    
+    const booking = new Booking(bookingData);
+    await booking.save();
+    
+    // Emit real-time notification to all connected admins
+    const io = req.app.get('io');
+    if (io) {
+      const customerName = req.body.guest?.name || 
+                          req.body.member?.name || 
+                          req.body.customerName || 
+                          'Guest';
+      
+      io.emit('newBooking', {
+        message: 'New booking created',
+        booking: {
+          id: booking._id,
+          hotelName: booking.hotelName,
+          customerName: customerName,
+          amount: booking.total || booking.totalPrice || booking.price,
+          createdAt: booking.createdAt
+        }
+      });
+    }
+    
+    res.status(201).json({
+      success: true,
+      message: 'Booking created successfully',
+      booking
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Cancel booking
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const booking = await Booking.findOneAndDelete({ 
+      _id: req.params.id, 
+      userId: req.userId 
+    });
+    
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+    
+    res.json({ message: 'Booking cancelled successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+module.exports = router;

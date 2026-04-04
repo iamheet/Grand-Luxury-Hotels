@@ -13,45 +13,77 @@ export default function MyBookings() {
   useEffect(() => {
     const memberData = localStorage.getItem('member') || localStorage.getItem('memberCheckout')
     const userData = localStorage.getItem('user')
+    const token = localStorage.getItem('token')
+    const isExclusive = localStorage.getItem('isExclusiveMember') === 'true'
     
+    // Check if user/member exists and has valid token
     if (!memberData && !userData) {
       navigate('/')
-    } else {
-      if (memberData) {
-        const parsedMember = JSON.parse(memberData)
-        setMember(parsedMember)
-      }
-      
-      // Load all bookings and sort by booking date (newest first)
-      const allBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
-      const bookingsWithType = allBookings.map((booking: any) => {
-        // Add type field if missing (for backward compatibility)
-        if (!booking.type) {
-          if ([booking.aircraft, booking.room, booking.car, booking.travel, booking.yacht, booking.airport].filter(Boolean).length > 1) {
-            booking.type = 'combined'
-          } else if (booking.aircraft) {
-            booking.type = 'aircraft'
-          } else if (booking.car) {
-            booking.type = 'car'
-          } else if (booking.yacht || (booking.travel && booking.travel.category?.includes('Charter'))) {
-            booking.type = 'yacht'
-          } else if (booking.airport || (booking.travel && booking.travel.type === 'airport')) {
-            booking.type = 'airport'
-          } else if (booking.travel) {
-            booking.type = 'travel'
-          } else {
-            booking.type = 'hotel'
-          }
-        }
-        return booking
-      })
-      const sortedBookings = bookingsWithType.sort((a: any, b: any) => {
-        const dateA = new Date(a.bookingDate || a.id).getTime()
-        const dateB = new Date(b.bookingDate || b.id).getTime()
-        return dateB - dateA // Newest first
-      })
-      setBookings(sortedBookings)
+      return
     }
+    
+    // Validate token if exists
+    if (token) {
+      fetch('http://localhost:5000/api/auth/validate-token', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.valid) {
+          // Token expired - clear data and redirect to appropriate login
+          localStorage.removeItem('user')
+          localStorage.removeItem('member')
+          localStorage.removeItem('memberCheckout')
+          localStorage.removeItem('token')
+          localStorage.removeItem('isAuthenticated')
+          localStorage.removeItem('memberBookings')
+          localStorage.removeItem('spentPoints')
+          localStorage.removeItem('isExclusiveMember')
+          
+          // Redirect to appropriate login page
+          navigate(isExclusive ? '/login' : '/login')
+        }
+      })
+      .catch(() => {
+        // Network error - redirect to login
+        navigate('/login')
+      })
+    }
+    
+    if (memberData) {
+      const parsedMember = JSON.parse(memberData)
+      setMember(parsedMember)
+    }
+    
+    // Load all bookings and sort by booking date (newest first)
+    const allBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
+    const bookingsWithType = allBookings.map((booking: any) => {
+      // Add type field if missing (for backward compatibility)
+      if (!booking.type) {
+        if ([booking.aircraft, booking.room, booking.car, booking.travel, booking.yacht, booking.airport].filter(Boolean).length > 1) {
+          booking.type = 'combined'
+        } else if (booking.aircraft) {
+          booking.type = 'aircraft'
+        } else if (booking.car) {
+          booking.type = 'car'
+        } else if (booking.yacht || (booking.travel && booking.travel.category?.includes('Charter'))) {
+          booking.type = 'yacht'
+        } else if (booking.airport || (booking.travel && booking.travel.type === 'airport')) {
+          booking.type = 'airport'
+        } else if (booking.travel) {
+          booking.type = 'travel'
+        } else {
+          booking.type = 'hotel'
+        }
+      }
+      return booking
+    })
+    const sortedBookings = bookingsWithType.sort((a: any, b: any) => {
+      const dateA = new Date(a.bookingDate || a.id).getTime()
+      const dateB = new Date(b.bookingDate || b.id).getTime()
+      return dateB - dateA // Newest first
+    })
+    setBookings(sortedBookings)
   }, [navigate])
 
   // Allow access for both members and regular users

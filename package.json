@@ -1,33 +1,32 @@
 {
-  "name": "the-grand-stay",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "name": "the-grand-stay-backend",
+  "version": "1.0.0",
+  "description": "Backend API for The Grand Stay hotel booking system",
+  "main": "server.js",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "@types/react": "^19.2.9",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.2",
-    "autoprefixer": "^10.4.23",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.19",
-    "typescript": "~5.9.3",
-    "vite": "^7.1.7"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "dependencies": {
     "axios": "^1.13.2",
-    "embla-carousel-react": "^8.6.0",
-    "firebase": "^12.8.0",
-    "jwt-decode": "^4.0.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-hot-toast": "^2.6.0",
-    "react-router-dom": "^7.9.4",
-    "recharts": "^3.6.0",
-    "socket.io-client": "^4.8.3"
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.0",
+    "node-fetch": "^3.3.2",
+    "nodemailer": "^7.0.12",
+    "razorpay": "^2.9.6",
+    "socket.io": "^4.8.3",
+    "stripe": "^14.25.0",
+    "twilio": "^5.11.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  },
+  "engines": {
+    "node": "20.x"
   }
 }

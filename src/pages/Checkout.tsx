@@ -223,6 +223,26 @@ export default function Checkout() {
     try {
       // Get auth token
       const userToken = localStorage.getItem('token') || localStorage.getItem('authToken')
+      
+      // Validate token first
+      if (userToken) {
+        const validateResponse = await fetch('http://localhost:5000/api/auth/validate-token', {
+          headers: { 'Authorization': `Bearer ${userToken}` }
+        })
+        const validateData = await validateResponse.json()
+        
+        if (!validateData.valid) {
+          // Token expired - clear and redirect to login
+          localStorage.removeItem('user')
+          localStorage.removeItem('token')
+          localStorage.removeItem('authToken')
+          localStorage.removeItem('isAuthenticated')
+          setError('Your session has expired. Please login again.')
+          setTimeout(() => navigate('/login'), 2000)
+          return
+        }
+      }
+      
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       }
@@ -235,7 +255,7 @@ export default function Checkout() {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          amount: total * 100,
+          amount: total * 1,
           currency: 'INR',
           bookingData: {
             hotelName: room.hotelName || room.hotel || room.title || room.name,
@@ -303,6 +323,26 @@ export default function Checkout() {
     try {
       // Get auth token
       const userToken = localStorage.getItem('token') || localStorage.getItem('authToken')
+      
+      // Validate token first
+      if (userToken) {
+        const validateResponse = await fetch('http://localhost:5000/api/auth/validate-token', {
+          headers: { 'Authorization': `Bearer ${userToken}` }
+        })
+        const validateData = await validateResponse.json()
+        
+        if (!validateData.valid) {
+          // Token expired - clear and redirect to login
+          localStorage.removeItem('user')
+          localStorage.removeItem('token')
+          localStorage.removeItem('authToken')
+          localStorage.removeItem('isAuthenticated')
+          setError('Your session has expired. Please login again.')
+          setTimeout(() => navigate('/login'), 2000)
+          return
+        }
+      }
+      
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       }

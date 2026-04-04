@@ -130,6 +130,8 @@ export default function AdminDashboard() {
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null)
   const [showTransactionModal, setShowTransactionModal] = useState(false)
   const [transactionLoading, setTransactionLoading] = useState(false)
+  const [newsletterSubscribers, setNewsletterSubscribers] = useState<any[]>([])
+  const [totalNewsletterSubscribers, setTotalNewsletterSubscribers] = useState(0)
 
   // Debounced search functions
   const debouncedUserSearch = useCallback(
@@ -362,6 +364,25 @@ export default function AdminDashboard() {
     }
   }
 
+  const fetchNewsletterSubscribers = async () => {
+    setLoading(true)
+    try {
+      const token = localStorage.getItem('adminToken')
+      const response = await fetch('http://localhost:5000/api/newsletter/subscribers', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      const data = await response.json()
+      if (data.success) {
+        setNewsletterSubscribers(data.subscribers)
+        setTotalNewsletterSubscribers(data.count)
+      }
+    } catch (error) {
+      console.error('Error fetching newsletter subscribers:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const fetchHotels = async () => {
     setLoading(true)
     try {
@@ -488,6 +509,8 @@ export default function AdminDashboard() {
       fetchUsers()
     } else if (activeSection === 'paid-members') {
       fetchPaidMembers()
+    } else if (activeSection === 'newsletter') {
+      fetchNewsletterSubscribers()
     } else if (activeSection === 'transactions') {
       fetchBookings()
     } else if (activeSection === 'database') {
@@ -686,6 +709,16 @@ export default function AdminDashboard() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             {sidebarOpen && <span>Paid Members</span>}
+          </button>
+
+          <button onClick={() => setActiveSection('newsletter')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${adminType === 'hotel' ? 'hidden' : activeSection === 'newsletter' 
+              ? `bg-gradient-to-r ${themeColors.primary} text-white shadow-lg transform hover:scale-105` 
+              : `text-gray-600 hover:bg-gradient-to-r hover:${themeColors.light}`
+          }`}>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            {sidebarOpen && <span>Newsletter</span>}
           </button>
 
           <button onClick={() => setActiveSection('transactions')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -1333,6 +1366,66 @@ export default function AdminDashboard() {
               )}
             </div>
           )}
+          {/* Newsletter Subscribers Section */}
+          {activeSection === 'newsletter' && (
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Newsletter Subscribers</h2>
+                  <p className={`text-sm mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Users subscribed to newsletter</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
+                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Total: </span>
+                    <span className={`text-lg font-bold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>{totalNewsletterSubscribers}</span>
+                  </div>
+                  <button onClick={() => fetchNewsletterSubscribers()} className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                    🔄 Refresh
+                  </button>
+                </div>
+              </div>
+
+              {loading ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading subscribers...</p>
+                  </div>
+                </div>
+              ) : (
+                <div className={`rounded-xl shadow-sm overflow-hidden transition-all duration-500 ${darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className={`transition-all duration-300 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                        <tr>
+                          <th className={`px-6 py-3 text-left text-xs font-medium uppercase transition-colors duration-300 ${darkMode ? 'text-gray-300' : 'text-gray-500'}`}>Email</th>
+                          <th className={`px-6 py-3 text-left text-xs font-medium uppercase transition-colors duration-300 ${darkMode ? 'text-gray-300' : 'text-gray-500'}`}>Subscribed Date</th>
+                        </tr>
+                      </thead>
+                      <tbody className={`transition-all duration-300 ${darkMode ? 'divide-y divide-gray-700' : 'divide-y divide-gray-200'}`}>
+                        {newsletterSubscribers.length === 0 ? (
+                          <tr>
+                            <td colSpan={2} className={`px-6 py-8 text-center transition-colors duration-300 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                              No newsletter subscribers found
+                            </td>
+                          </tr>
+                        ) : (
+                          newsletterSubscribers.map((subscriber) => (
+                            <tr key={subscriber._id} className={`transition-all duration-300 ${darkMode ? 'hover:bg-gradient-to-r hover:from-gray-700/50 hover:to-gray-600/50' : 'hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-blue-50/50'}`}>
+                              <td className={`px-6 py-4 text-sm font-medium transition-colors duration-300 ${darkMode ? 'text-white' : 'text-gray-900'}`}>{subscriber.email}</td>
+                              <td className={`px-6 py-4 text-sm transition-colors duration-300 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{new Date(subscriber.createdAt).toLocaleDateString()}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+
 
           {/* Revenue Section */}
           {activeSection === 'revenue' && (
@@ -2333,3 +2426,4 @@ export default function AdminDashboard() {
     </div>
   )
 }
+
