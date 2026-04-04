@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - azure-deployment-fix
   workflow_dispatch:
 
 jobs:
