@@ -52,7 +52,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Routes
 const passwordResetRoutes = require('./routes/passwordReset');
 const paymentRoutes = require('./routes/payment');
-const emailRoutes = require('./routes/emailNew');
+const emailRoutes = require('./routes/emailService');
 const newsletterRoutes = require('./routes/newsletter');
 const otpRoutes = require('./routes/otp');
 app.use('/api/password', passwordResetRoutes);
