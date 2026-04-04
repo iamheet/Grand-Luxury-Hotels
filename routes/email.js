@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { sendBookingConfirmationEmail, sendCustomEmail, sendWhatsAppBookingConfirmation } = require('../emailService');
+const { sendBookingConfirmationEmail, sendCustomEmail, sendWhatsAppBookingConfirmation } = require('./emailService');
 
 // Send booking confirmation email
 router.post('/booking-confirmation', async (req, res) => {
