@@ -11,6 +11,7 @@ console.log('📍 Environment:', process.env.NODE_ENV || 'development');
 console.log('🔌 Port:', process.env.PORT || 5000);
 console.log('📂 Working Directory:', process.cwd());
 console.log('📋 Node Version:', process.version);
+console.log('📁 Files in directory:', require('fs').readdirSync('.').slice(0, 10));
 
 const app = express();
 const server = http.createServer(app);
