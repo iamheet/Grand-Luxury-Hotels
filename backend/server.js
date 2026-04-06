@@ -10,7 +10,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.NODE_ENV === 'production' 
-      ? ['https://royalstay.azurewebsites.net', 'https://your-frontend-domain.com']
+      ? ['https://www.royalstay.me', 'https://royalstay.me']
       : 'http://localhost:5173',
     methods: ['GET', 'POST']
   }
@@ -22,7 +22,7 @@ app.set('io', io);
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://royalstay.azurewebsites.net', 'https://your-frontend-domain.com']
+    ? ['https://www.royalstay.me', 'https://royalstay.me']
     : 'http://localhost:5173',
   credentials: true
 }));
