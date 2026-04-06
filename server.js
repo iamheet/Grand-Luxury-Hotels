@@ -13,6 +13,8 @@ console.log('📂 Working Directory:', process.cwd());
 console.log('📋 Node Version:', process.version);
 console.log('📁 Files in directory:', require('fs').readdirSync('.').slice(0, 10));
 console.log('🔄 Deployment timestamp:', new Date().toISOString());
+console.log('🔍 MongoDB URI exists:', !!process.env.MONGODB_URI);
+console.log('🔍 Available env vars:', Object.keys(process.env).filter(key => key.includes('MONGO') || key.includes('JWT') || key.includes('RAZORPAY')));
 
 const app = express();
 const server = http.createServer(app);
@@ -39,7 +41,10 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI, {
+const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://GrandStay:heet0403@grand.wcqrzhk.mongodb.net/grandstay?appName=Grand';
+console.log('📄 Using MongoDB URI:', mongoUri ? 'URI found' : 'URI missing');
+
+mongoose.connect(mongoUri, {
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
 })
