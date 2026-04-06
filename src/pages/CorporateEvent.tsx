@@ -308,8 +308,8 @@ export default function CorporateEvent() {
                 transition: 'all 0.3s ease',
                 marginBottom: '30px'
               }}
-              onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
-              onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+              onMouseOver={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
+              onMouseOut={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
             >
               💼 Request Corporate Event Planning - Starting at $2,500
             </button>
@@ -329,8 +329,8 @@ export default function CorporateEvent() {
               cursor: 'pointer',
               transition: 'all 0.3s ease'
             }}
-            onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'}
-            onMouseOut={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
+            onMouseOver={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.2)')}
+            onMouseOut={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
           >
             ← Back to Business Services
           </button>

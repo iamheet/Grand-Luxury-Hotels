@@ -1,10 +1,15 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import Chatbot from './Chatbot'
 import { auth } from '../firebase'
 import { signOut } from 'firebase/auth'
 
-export default function Layout() {
+interface LayoutProps {
+  children?: ReactNode
+}
+
+export default function Layout({ children }: LayoutProps) {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -202,7 +207,7 @@ export default function Layout() {
       </header>
 
       <main className="flex-1">
-        <Outlet />
+        {children ?? <Outlet />}
       </main>
 
       <Chatbot />

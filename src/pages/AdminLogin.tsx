@@ -189,12 +189,12 @@ export default function AdminLogin() {
                 backdropFilter: 'blur(10px)'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#fbbf24'
-                e.target.style.boxShadow = '0 0 20px rgba(251, 191, 36, 0.3)'
+                e.currentTarget.style.borderColor = '#fbbf24'
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(251, 191, 36, 0.3)'
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = 'rgba(251, 191, 36, 0.3)'
-                e.target.style.boxShadow = 'none'
+                e.currentTarget.style.borderColor = 'rgba(251, 191, 36, 0.3)'
+                e.currentTarget.style.boxShadow = 'none'
               }}
               required
             />
@@ -228,12 +228,12 @@ export default function AdminLogin() {
                 backdropFilter: 'blur(10px)'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#fbbf24'
-                e.target.style.boxShadow = '0 0 20px rgba(251, 191, 36, 0.3)'
+                e.currentTarget.style.borderColor = '#fbbf24'
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(251, 191, 36, 0.3)'
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = 'rgba(251, 191, 36, 0.3)'
-                e.target.style.boxShadow = 'none'
+                e.currentTarget.style.borderColor = 'rgba(251, 191, 36, 0.3)'
+                e.currentTarget.style.boxShadow = 'none'
               }}
               required
             />
@@ -276,14 +276,14 @@ export default function AdminLogin() {
             }}
             onMouseEnter={(e) => {
               if (!isLoading) {
-                e.target.style.transform = 'scale(1.02)'
-                e.target.style.boxShadow = '0 15px 40px rgba(251, 191, 36, 0.4)'
+                e.currentTarget.style.transform = 'scale(1.02)'
+                e.currentTarget.style.boxShadow = '0 15px 40px rgba(251, 191, 36, 0.4)'
               }
             }}
             onMouseLeave={(e) => {
               if (!isLoading) {
-                e.target.style.transform = 'scale(1)'
-                e.target.style.boxShadow = '0 10px 30px rgba(251, 191, 36, 0.3)'
+                e.currentTarget.style.transform = 'scale(1)'
+                e.currentTarget.style.boxShadow = '0 10px 30px rgba(251, 191, 36, 0.3)'
               }
             }}
           >

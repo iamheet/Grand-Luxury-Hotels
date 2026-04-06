@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom'
 
 declare global {
   interface Window {
-    triggerSessionExpired: () => void
+    triggerSessionExpired?: () => void
   }
 }
 

@@ -232,8 +232,8 @@ export default function RedCarpetStyling() {
                 transition: 'all 0.3s ease',
                 marginBottom: '30px'
               }}
-              onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
-              onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+              onMouseOver={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
+              onMouseOut={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
             >
               👑 Reserve Royal Red Carpet Styling - $1,500 👑
             </button>
@@ -253,8 +253,8 @@ export default function RedCarpetStyling() {
               cursor: 'pointer',
               transition: 'all 0.3s ease'
             }}
-            onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'}
-            onMouseOut={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
+            onMouseOver={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.2)')}
+            onMouseOut={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
           >
             ← Back to Personal Shopping
           </button>
