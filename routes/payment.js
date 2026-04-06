@@ -9,11 +9,21 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// Initialize Razorpay with your existing keys
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID, // rzp_test_S4XQEjfZfBmeYM
-  key_secret: process.env.RAZORPAY_SECRET_KEY // 4QF4Y2D5xflavcXJC9dRnjcm
-});
+// Initialize Razorpay with error handling
+let razorpay;
+try {
+  if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_SECRET_KEY) {
+    razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_SECRET_KEY
+    });
+    console.log('✅ Razorpay initialized successfully');
+  } else {
+    console.log('⚠️ Razorpay credentials not found, payment routes will be disabled');
+  }
+} catch (error) {
+  console.error('❌ Razorpay initialization failed:', error.message);
+}
 
 // Helper function for HTTP requests with timeout
 function makeRequest(url, options) {
@@ -442,6 +452,13 @@ const optionalAuth = (req, res, next) => {
 
 router.post('/create-order', auth, async (req, res) => {
   try {
+    if (!razorpay) {
+      return res.status(503).json({ 
+        success: false, 
+        message: 'Payment service unavailable - Razorpay not configured' 
+      });
+    }
+
     const { amount, currency = 'INR', bookingData } = req.body;
     
     console.log('💰 Payment order request:', { amount, currency });
