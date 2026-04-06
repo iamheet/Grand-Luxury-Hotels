@@ -79,8 +79,11 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static('public'));
 
-// MongoDB Connection with proper error handling
+// MongoDB Connection with retry logic
 console.log('🔗 Attempting MongoDB connection...');
+
+let retryCount = 0;
+const maxRetries = 5;
 
 const connectToMongoDB = async () => {
   try {
@@ -98,6 +101,7 @@ const connectToMongoDB = async () => {
     console.log('✅ MongoDB Connected Successfully');
     console.log('📊 Database:', mongoose.connection.name);
     console.log('🌐 Host:', mongoose.connection.host);
+    retryCount = 0;
     
   } catch (error) {
     console.error('❌ MongoDB Connection Failed:');
@@ -111,9 +115,15 @@ const connectToMongoDB = async () => {
     } else if (error.message.includes('timeout')) {
       console.error('   💡 MongoDB server might be unreachable or slow');
     }
-    
-    console.error('   🔧 Retrying connection in 5 seconds...');
-    setTimeout(connectToMongoDB, 5000);
+
+    if (retryCount < maxRetries) {
+      retryCount++;
+      console.log(`🔄 Retrying connection (${retryCount}/${maxRetries})...`);
+      setTimeout(connectToMongoDB, 5000);
+    } else {
+      console.error('❌ Max retries reached. Exiting...');
+      process.exit(1);
+    }
   }
 };
 
