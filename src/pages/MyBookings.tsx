@@ -24,7 +24,7 @@ export default function MyBookings() {
     
     // Validate token if exists
     if (token) {
-      fetch('http://localhost:5000/api/auth/validate-token', {
+      fetch('https://thegrandstay.azurewebsites.net/api/auth/validate-token', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       .then(res => res.json())

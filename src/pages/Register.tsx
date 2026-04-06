@@ -60,7 +60,7 @@ export default function Register() {
 			const user = result.user
 			
 			// Sync user to backend database
-			const response = await axios.post('http://localhost:5000/api/auth/sync-firebase-user', {
+			const response = await axios.post('https://thegrandstay.azurewebsites.net/api/auth/sync-firebase-user', {
 				firebaseUid: user.uid,
 				email: user.email,
 				name: user.displayName,
@@ -80,7 +80,7 @@ export default function Register() {
 
 	const handleExistingUser = async () => {
 		try {
-			const loginResponse = await axios.post('http://localhost:5000/api/auth/login', {
+			const loginResponse = await axios.post('https://thegrandstay.azurewebsites.net/api/auth/login', {
 				email: email.trim().toLowerCase(),
 				password
 			})
@@ -99,7 +99,7 @@ export default function Register() {
 
 	const checkUserExists = async (email: string) => {
 		try {
-			const response = await axios.post('http://localhost:5000/api/auth/check-user', {
+			const response = await axios.post('https://thegrandstay.azurewebsites.net/api/auth/check-user', {
 				email: email.trim().toLowerCase()
 			}, {
 				headers: {
@@ -115,7 +115,7 @@ export default function Register() {
 
 	const registerUser = async (emailVerified: boolean, phoneVerified: boolean) => {
 		try {
-			const response = await axios.post('http://localhost:5000/api/auth/register', {
+			const response = await axios.post('https://thegrandstay.azurewebsites.net/api/auth/register', {
 				name: name.trim(),
 				email: email.trim().toLowerCase(),
 				password,

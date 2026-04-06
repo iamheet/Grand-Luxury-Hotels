@@ -15,7 +15,7 @@ export interface WhatsAppMessage {
 }
 
 export class WhatsAppService {
-  private static readonly API_BASE_URL = 'http://localhost:5000/api'
+  private static readonly API_BASE_URL = 'https://thegrandstay.azurewebsites.net/api'
 
   static async sendMessage(message: WhatsAppMessage): Promise<boolean> {
     try {

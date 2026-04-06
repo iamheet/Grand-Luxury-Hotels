@@ -20,7 +20,7 @@ export default function FeaturedDestinations() {
   useEffect(() => {
     const fetchDestinations = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/hotels')
+        const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels')
         const data = await response.json()
         if (data.success) {
           // Group hotels by location and show ALL hotels

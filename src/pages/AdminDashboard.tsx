@@ -226,7 +226,7 @@ export default function AdminDashboard() {
 
       // Verify token with backend
       try {
-        const response = await fetch('http://localhost:5000/api/admin/database', {
+        const response = await fetch('https://thegrandstay.azurewebsites.net/api/admin/database', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -283,7 +283,7 @@ export default function AdminDashboard() {
     checkAuthentication()
 
     // Socket.io connection for real-time notifications
-    const socket = io('http://localhost:5000')
+    const socket = io('https://thegrandstay.azurewebsites.net')
     
     socket.on('connect', () => {
       console.log('✅ Connected to notification server')
@@ -335,7 +335,7 @@ export default function AdminDashboard() {
     setLoading(true)
     try {
       const searchParam = search ? `&search=${encodeURIComponent(search)}` : ''
-      const response = await fetch(`http://localhost:5000/api/users?page=${page}&limit=${usersPerPage}${searchParam}`)
+      const response = await fetch(`https://thegrandstay.azurewebsites.net/api/users?page=${page}&limit=${usersPerPage}${searchParam}`)
       const data = await response.json()
       if (data.success) {
         setUsers(data.users)
@@ -351,7 +351,7 @@ export default function AdminDashboard() {
   const fetchPaidMembers = async (page = 1) => {
     setLoading(true)
     try {
-      const response = await fetch(`http://localhost:5000/api/members?page=${page}&limit=${membersPerPage}`)
+      const response = await fetch(`https://thegrandstay.azurewebsites.net/api/members?page=${page}&limit=${membersPerPage}`)
       const data = await response.json()
       if (data.success) {
         setPaidMembers(data.members)
@@ -368,7 +368,7 @@ export default function AdminDashboard() {
     setLoading(true)
     try {
       const token = localStorage.getItem('adminToken')
-      const response = await fetch('http://localhost:5000/api/newsletter/subscribers', {
+      const response = await fetch('https://thegrandstay.azurewebsites.net/api/newsletter/subscribers', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       const data = await response.json()
@@ -386,7 +386,7 @@ export default function AdminDashboard() {
   const fetchHotels = async () => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:5000/api/hotels')
+      const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels')
       const data = await response.json()
       if (data.success) {
         setHotels(data.hotels)
@@ -417,7 +417,7 @@ export default function AdminDashboard() {
     setLoading(true)
     try {
       const searchParam = search ? `&search=${encodeURIComponent(search)}` : ''
-      const response = await fetch(`http://localhost:5000/api/bookings/admin/all?page=${page}&limit=${itemsPerPage}${searchParam}`)
+      const response = await fetch(`https://thegrandstay.azurewebsites.net/api/bookings/admin/all?page=${page}&limit=${itemsPerPage}${searchParam}`)
       const data = await response.json()
       if (data.success) {
         console.log('Bookings data:', data.bookings)
@@ -488,7 +488,7 @@ export default function AdminDashboard() {
     setLoading(true)
     try {
       const token = localStorage.getItem('adminToken')
-      const response = await fetch('http://localhost:5000/api/subadmin', {
+      const response = await fetch('https://thegrandstay.azurewebsites.net/api/subadmin', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -623,7 +623,7 @@ export default function AdminDashboard() {
     setTransactionLoading(true)
     try {
       const token = localStorage.getItem('adminToken')
-      const response = await fetch(`http://localhost:5000/api/payment/transaction/${bookingId}`, {
+      const response = await fetch(`https://thegrandstay.azurewebsites.net/api/payment/transaction/${bookingId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -2105,7 +2105,7 @@ export default function AdminDashboard() {
                   
                   if (name && username && password && email) {
                     const token = localStorage.getItem('adminToken')
-                    fetch('http://localhost:5000/api/subadmin', {
+                    fetch('https://thegrandstay.azurewebsites.net/api/subadmin', {
                       method: 'POST',
                       headers: {
                         'Authorization': `Bearer ${token}`,
@@ -2180,7 +2180,7 @@ export default function AdminDashboard() {
                                 <button onClick={() => {
                                   if (confirm(`Delete sub-admin ${subAdmin.name}?`)) {
                                     const token = localStorage.getItem('adminToken')
-                                    fetch(`http://localhost:5000/api/subadmin/${subAdmin._id}`, {
+                                    fetch(`https://thegrandstay.azurewebsites.net/api/subadmin/${subAdmin._id}`, {
                                       method: 'DELETE',
                                       headers: { 'Authorization': `Bearer ${token}` }
                                     })

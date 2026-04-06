@@ -38,7 +38,7 @@ export default function MemberDashboard() {
     // Load exclusive hotels from database instead of localStorage
     const fetchExclusiveHotels = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/hotels/exclusive')
+        const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels/exclusive')
         const data = await response.json()
         if (data.success && data.hotels.length > 0) {
           // Convert database format to UI format
@@ -86,7 +86,7 @@ export default function MemberDashboard() {
     // Load regular hotels from database
     const fetchRegularHotels = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/hotels/normal')
+        const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels/normal')
         const data = await response.json()
         if (data.success) {
           // Convert database format to UI format

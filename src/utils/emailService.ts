@@ -14,7 +14,7 @@ export interface BookingEmailData {
 }
 
 export class EmailService {
-  private static readonly API_BASE_URL = 'http://localhost:5000/api'
+  private static readonly API_BASE_URL = 'https://thegrandstay.azurewebsites.net/api'
 
   static async sendBookingConfirmation(bookingData: BookingEmailData): Promise<boolean> {
     try {

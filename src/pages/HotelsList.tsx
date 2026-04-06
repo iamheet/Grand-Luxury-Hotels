@@ -12,7 +12,7 @@ export default function HotelsList() {
     const fetchHotels = async () => {
       setLoading(true)
       try {
-        const response = await fetch('http://localhost:5000/api/hotels')
+        const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels')
         const data = await response.json()
         if (data.success) {
           setDbHotels(data.hotels)

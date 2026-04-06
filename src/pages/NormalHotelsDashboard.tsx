@@ -44,7 +44,7 @@ export default function NormalHotelsDashboard() {
   const fetchHotels = async () => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:5000/api/hotels')
+      const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels')
       const data = await response.json()
       if (data.success) {
         setHotels(data.hotels)
@@ -61,7 +61,7 @@ export default function NormalHotelsDashboard() {
 
   const seedDefaultHotels = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/hotels/seed', {
+      const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels/seed', {
         method: 'POST'
       })
       const data = await response.json()
@@ -85,7 +85,7 @@ export default function NormalHotelsDashboard() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/hotels', {
+      const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -140,7 +140,7 @@ export default function NormalHotelsDashboard() {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/hotels/${editingHotel._id}`, {
+      const response = await fetch(`https://thegrandstay.azurewebsites.net/api/hotels/${editingHotel._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -175,7 +175,7 @@ export default function NormalHotelsDashboard() {
   const handleDeleteHotel = async (id: string) => {
     if (confirm('Are you sure you want to delete this hotel?')) {
       try {
-        const response = await fetch(`http://localhost:5000/api/hotels/${id}`, {
+        const response = await fetch(`https://thegrandstay.azurewebsites.net/api/hotels/${id}`, {
           method: 'DELETE'
         })
         

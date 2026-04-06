@@ -28,7 +28,7 @@ export default function SearchResults() {
   useEffect(() => {
     const fetchDbHotels = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/hotels/normal')
+        const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels/normal')
         const data = await response.json()
         if (data.success) {
           setDbHotels(data.hotels)

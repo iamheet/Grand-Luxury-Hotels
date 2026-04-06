@@ -33,7 +33,7 @@ export default function Login() {
 			
 			if (isExclusive) {
 				// Automatically login as exclusive member
-				const memberResponse = await axios.post('http://localhost:5000/api/auth/get-member-by-email', {
+				const memberResponse = await axios.post('https://thegrandstay.azurewebsites.net/api/auth/get-member-by-email', {
 					email: user.email
 				})
 				
@@ -48,7 +48,7 @@ export default function Login() {
 			}
 			
 			// Sync user to backend database
-			const response = await axios.post('http://localhost:5000/api/auth/sync-firebase-user', {
+			const response = await axios.post('https://thegrandstay.azurewebsites.net/api/auth/sync-firebase-user', {
 				firebaseUid: user.uid,
 				email: user.email,
 				name: user.displayName,
@@ -97,7 +97,7 @@ export default function Login() {
 		}
 
 		try {
-			const response = await axios.post('http://localhost:5000/api/auth/login', {
+			const response = await axios.post('https://thegrandstay.azurewebsites.net/api/auth/login', {
 				...(isExclusiveLogin ? { membershipId, password, isExclusive: true } : { email, password }),
 			}, {
 				headers: { 'Content-Type': 'application/json' }

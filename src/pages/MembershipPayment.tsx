@@ -40,7 +40,7 @@ export default function MembershipPayment() {
     const checkExistingMembership = async () => {
       if (isLoggedIn && parsedUser?.email) {
         try {
-          const response = await fetch(`http://localhost:5000/api/members?email=${parsedUser.email}`)
+          const response = await fetch(`https://thegrandstay.azurewebsites.net/api/members?email=${parsedUser.email}`)
           const data = await response.json()
           
           if (data.success && data.members && data.members.length > 0) {
@@ -210,7 +210,7 @@ export default function MembershipPayment() {
       }
 
       // Create Razorpay order first
-      const orderResponse = await fetch('http://localhost:5000/api/payment/create-order', {
+      const orderResponse = await fetch('https://thegrandstay.azurewebsites.net/api/payment/create-order', {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -280,7 +280,7 @@ export default function MembershipPayment() {
       // If user is not logged in, register them first
       if (!isLoggedIn) {
         console.log('Registering new user...')
-        const registerResponse = await fetch('http://localhost:5000/api/auth/register', {
+        const registerResponse = await fetch('https://thegrandstay.azurewebsites.net/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -308,7 +308,7 @@ export default function MembershipPayment() {
       const memberPassword = isLoggedIn ? Math.random().toString(36).slice(-8) : formData.password
       console.log('Creating membership with ID:', membershipId)
       
-      const memberResponse = await fetch('http://localhost:5000/api/members/register', {
+      const memberResponse = await fetch('https://thegrandstay.azurewebsites.net/api/members/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -370,7 +370,7 @@ export default function MembershipPayment() {
     
     localStorage.setItem('pendingMembershipPayment', JSON.stringify(membershipData))
 
-    const response = await fetch('http://localhost:5000/api/payment/create-paypal-order', {
+    const response = await fetch('https://thegrandstay.azurewebsites.net/api/payment/create-paypal-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

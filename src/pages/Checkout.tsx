@@ -54,7 +54,7 @@ export default function Checkout() {
       const userToken = localStorage.getItem('token') || localStorage.getItem('authToken')
       if (userToken) {
         try {
-          const response = await fetch('http://localhost:5000/api/bookings', {
+          const response = await fetch('https://thegrandstay.azurewebsites.net/api/bookings', {
             headers: {
               'Authorization': `Bearer ${userToken}`,
               'Content-Type': 'application/json'
@@ -226,7 +226,7 @@ export default function Checkout() {
       
       // Validate token first
       if (userToken) {
-        const validateResponse = await fetch('http://localhost:5000/api/auth/validate-token', {
+        const validateResponse = await fetch('https://thegrandstay.azurewebsites.net/api/auth/validate-token', {
           headers: { 'Authorization': `Bearer ${userToken}` }
         })
         const validateData = await validateResponse.json()
@@ -251,7 +251,7 @@ export default function Checkout() {
       }
 
       // Create Razorpay order first
-      const orderResponse = await fetch('http://localhost:5000/api/payment/create-order', {
+      const orderResponse = await fetch('https://thegrandstay.azurewebsites.net/api/payment/create-order', {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -326,7 +326,7 @@ export default function Checkout() {
       
       // Validate token first
       if (userToken) {
-        const validateResponse = await fetch('http://localhost:5000/api/auth/validate-token', {
+        const validateResponse = await fetch('https://thegrandstay.azurewebsites.net/api/auth/validate-token', {
           headers: { 'Authorization': `Bearer ${userToken}` }
         })
         const validateData = await validateResponse.json()
@@ -377,7 +377,7 @@ export default function Checkout() {
       localStorage.setItem('pendingPayPalBooking', JSON.stringify(bookingData))
 
       // Create PayPal order
-      const orderResponse = await fetch('http://localhost:5000/api/payment/create-paypal-order', {
+      const orderResponse = await fetch('https://thegrandstay.azurewebsites.net/api/payment/create-paypal-order', {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -419,7 +419,7 @@ export default function Checkout() {
         headers['Authorization'] = `Bearer ${userToken}`
       }
 
-      await fetch('http://localhost:5000/api/payment/payment-failed', {
+      await fetch('https://thegrandstay.azurewebsites.net/api/payment/payment-failed', {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -464,7 +464,7 @@ export default function Checkout() {
       }
 
       // Verify payment
-      const verifyResponse = await fetch('http://localhost:5000/api/payment/verify-payment', {
+      const verifyResponse = await fetch('https://thegrandstay.azurewebsites.net/api/payment/verify-payment', {
         method: 'POST',
         headers: authHeaders,
         body: JSON.stringify({

@@ -72,7 +72,7 @@ export const validateToken = async (): Promise<boolean> => {
   if (!token) return false
 
   try {
-    const response = await axios.get('http://localhost:5000/api/auth/validate-token')
+    const response = await axios.get('https://thegrandstay.azurewebsites.net/api/auth/validate-token')
     return response.data.valid
   } catch (error) {
     return false

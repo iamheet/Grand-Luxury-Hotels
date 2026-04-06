@@ -47,7 +47,7 @@ export default function Layout({ children }: LayoutProps) {
     e.preventDefault()
     if (email.trim()) {
       try {
-        const response = await fetch('http://localhost:5000/api/newsletter/subscribe', {
+        const response = await fetch('https://thegrandstay.azurewebsites.net/api/newsletter/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email })

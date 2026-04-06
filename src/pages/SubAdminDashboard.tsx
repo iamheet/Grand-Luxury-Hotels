@@ -71,7 +71,7 @@ export default function SubAdminDashboard() {
     
     try {
       const token = localStorage.getItem('adminToken')
-      const response = await fetch('http://localhost:5000/api/hotels', {
+      const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -99,7 +99,7 @@ export default function SubAdminDashboard() {
     
     try {
       const token = localStorage.getItem('adminToken')
-      const response = await fetch(`http://localhost:5000/api/hotels/${editingHotel._id}`, {
+      const response = await fetch(`https://thegrandstay.azurewebsites.net/api/hotels/${editingHotel._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -132,7 +132,7 @@ export default function SubAdminDashboard() {
     
     try {
       const token = localStorage.getItem('adminToken')
-      const response = await fetch(`http://localhost:5000/api/hotels/${hotelId}`, {
+      const response = await fetch(`https://thegrandstay.azurewebsites.net/api/hotels/${hotelId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -189,7 +189,7 @@ export default function SubAdminDashboard() {
     checkAuth()
 
     // Socket.io connection for real-time notifications
-    const socket = io('http://localhost:5000')
+    const socket = io('https://thegrandstay.azurewebsites.net')
     
     socket.on('connect', () => {
       console.log('✅ SubAdmin connected to notification server')
@@ -203,7 +203,7 @@ export default function SubAdminDashboard() {
       // Get hotel location by fetching hotel details
       const getHotelLocation = async () => {
         try {
-          const response = await fetch('http://localhost:5000/api/hotels')
+          const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels')
           const hotelsData = await response.json()
           if (hotelsData.success) {
             const hotel = hotelsData.hotels.find(h => h.name === data.booking.hotelName)
@@ -264,7 +264,7 @@ export default function SubAdminDashboard() {
     if (!subAdminData?.permissions?.viewUsers) return
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:5000/api/users')
+      const response = await fetch('https://thegrandstay.azurewebsites.net/api/users')
       const data = await response.json()
       if (data.success) setUsers(data.users)
     } catch (error) {
@@ -277,7 +277,7 @@ export default function SubAdminDashboard() {
   const fetchBookings = async () => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:5000/api/bookings/admin/all')
+      const response = await fetch('https://thegrandstay.azurewebsites.net/api/bookings/admin/all')
       const data = await response.json()
       if (data.success) {
         console.log('📊 All bookings from database:', data.bookings)
@@ -287,7 +287,7 @@ export default function SubAdminDashboard() {
         
         if (adminLocation) {
           // Fetch hotels once
-          const hotelsResponse = await fetch('http://localhost:5000/api/hotels')
+          const hotelsResponse = await fetch('https://thegrandstay.azurewebsites.net/api/hotels')
           const hotelsData = await hotelsResponse.json()
           
           if (hotelsData.success) {
@@ -328,7 +328,7 @@ export default function SubAdminDashboard() {
   const fetchHotels = async () => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:5000/api/hotels')
+      const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels')
       const data = await response.json()
       if (data.success) {
         console.log('📊 All hotels from database:', data.hotels)

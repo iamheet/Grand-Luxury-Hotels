@@ -57,7 +57,7 @@ export default function BookingSuccess() {
       const bookingData = JSON.parse(pendingBooking)
 
       // Capture PayPal payment
-      const response = await fetch('http://localhost:5000/api/payment/capture-paypal-payment', {
+      const response = await fetch('https://thegrandstay.azurewebsites.net/api/payment/capture-paypal-payment', {
         method: 'POST',
         headers,
         body: JSON.stringify({

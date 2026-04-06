@@ -40,7 +40,7 @@ export default function MembershipSuccess() {
       const membershipData = JSON.parse(pendingMembership)
 
       // Create membership after PayPal payment (skip existence check)
-      const memberResponse = await fetch('http://localhost:5000/api/members/register', {
+      const memberResponse = await fetch('https://thegrandstay.azurewebsites.net/api/members/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

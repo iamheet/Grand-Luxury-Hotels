@@ -174,7 +174,7 @@ export default function MemberCheckout() {
       }
 
       // Create Razorpay order first
-      const orderResponse = await fetch('http://localhost:5000/api/payment/create-order', {
+      const orderResponse = await fetch('https://thegrandstay.azurewebsites.net/api/payment/create-order', {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -264,7 +264,7 @@ export default function MemberCheckout() {
         headers['Authorization'] = `Bearer ${userToken}`
       }
 
-      const response = await fetch('http://localhost:5000/api/payment/create-stripe-session', {
+      const response = await fetch('https://thegrandstay.azurewebsites.net/api/payment/create-stripe-session', {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -322,7 +322,7 @@ export default function MemberCheckout() {
         headers['Authorization'] = `Bearer ${userToken}`
       }
 
-      await fetch('http://localhost:5000/api/payment/payment-failed', {
+      await fetch('https://thegrandstay.azurewebsites.net/api/payment/payment-failed', {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -361,7 +361,7 @@ export default function MemberCheckout() {
       }
 
       // Verify payment
-      const verifyResponse = await fetch('http://localhost:5000/api/payment/verify-payment', {
+      const verifyResponse = await fetch('https://thegrandstay.azurewebsites.net/api/payment/verify-payment', {
         method: 'POST',
         headers: authHeaders,
         body: JSON.stringify({

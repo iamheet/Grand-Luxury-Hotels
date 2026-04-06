@@ -1,6 +1,6 @@
 // OTP Service for phone and email verification
 export class OTPService {
-  private static readonly API_BASE_URL = 'http://localhost:5000/api'
+  private static readonly API_BASE_URL = 'https://thegrandstay.azurewebsites.net/api'
 
   static async sendOTP(phoneNumber: string): Promise<{ success: boolean; message: string }> {
     try {
