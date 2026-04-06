@@ -36,7 +36,8 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use(express.static('public'));
+const STATIC_DIR = process.env.NODE_ENV === 'production' ? 'dist' : 'public';
+app.use(express.static(STATIC_DIR));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI, {
