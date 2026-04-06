@@ -9,11 +9,41 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// Initialize Razorpay with your existing keys
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID, // rzp_test_S4XQEjfZfBmeYM
-  key_secret: process.env.RAZORPAY_SECRET_KEY // 4QF4Y2D5xflavcXJC9dRnjcm
-});
+// Safe Razorpay initialization - only initialize if keys are available
+let razorpay = null;
+
+function initializeRazorpay() {
+  const keyId = process.env.RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_SECRET_KEY;
+  
+  if (!keyId || !keySecret) {
+    console.warn('⚠️ Razorpay credentials not found. Razorpay payments will be disabled.');
+    return null;
+  }
+  
+  try {
+    return new Razorpay({
+      key_id: keyId,
+      key_secret: keySecret
+    });
+  } catch (error) {
+    console.error('❌ Failed to initialize Razorpay:', error.message);
+    return null;
+  }
+}
+
+// Initialize Razorpay on first use (lazy initialization)
+function getRazorpayInstance() {
+  if (razorpay === null) {
+    razorpay = initializeRazorpay();
+  }
+  return razorpay;
+}
+
+// Helper function to check if Razorpay is available
+function isRazorpayAvailable() {
+  return getRazorpayInstance() !== null;
+}
 
 // Helper function for HTTP requests with timeout
 function makeRequest(url, options) {
@@ -66,193 +96,6 @@ async function getPayPalAccessToken() {
   return data.access_token;
 }
 
-// STRIPE ROUTES (COMMENTED FOR FUTURE USE)
-// Create Stripe checkout session (with fallback to Razorpay for Indian accounts)
-/*
-router.post('/create-stripe-session', auth, async (req, res) => {
-  try {
-    const { amount, currency = 'usd', bookingData } = req.body;
-    
-    console.log('💳 Stripe checkout session request:', { amount, currency, bookingData });
-    console.log('🔑 Stripe key exists:', !!process.env.STRIPE_SECRET_KEY);
-
-    // Validate required data
-    if (!bookingData || !bookingData.hotelName || !bookingData.customerEmail) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Missing required booking data' 
-      });
-    }
-
-    // For Indian regulations, fallback to Razorpay
-    if (currency.toLowerCase() === 'inr') {
-      console.log('🇮🇳 Indian currency detected, using Razorpay instead');
-      const options = {
-        amount: Math.round(amount * 100), // Convert to paise
-        currency: 'INR',
-        receipt: `booking_${Date.now()}`,
-        payment_capture: 1
-      };
-      
-      const order = await razorpay.orders.create(options);
-      
-      return res.json({
-        success: true,
-        useRazorpay: true,
-        orderId: order.id,
-        amount: order.amount,
-        currency: order.currency,
-        key: process.env.RAZORPAY_KEY_ID
-      });
-    }
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: currency,
-            product_data: {
-              name: `${bookingData.hotelName} - ${bookingData.roomTitle || 'Room'}`,
-              description: `${bookingData.nights || 1} night(s) for ${bookingData.guests || 1} guest(s)`,
-            },
-            unit_amount: Math.round(amount),
-          },
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      success_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/booking-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/checkout`,
-      customer_email: bookingData.customerEmail,
-      metadata: {
-        hotelName: bookingData.hotelName,
-        customerName: bookingData.customerName || 'Guest',
-        customerEmail: bookingData.customerEmail
-      }
-    });
-
-    console.log('✅ Stripe session created:', session.id);
-
-    res.json({
-      success: true,
-      sessionId: session.id
-    });
-  } catch (error) {
-    console.error('❌ Stripe checkout session error:', error.message);
-    console.error('❌ Full error:', error);
-    
-    // If Stripe fails due to Indian regulations, fallback to Razorpay
-    if (error.message.includes('Indian regulations')) {
-      console.log('🔄 Falling back to Razorpay due to Indian regulations');
-      try {
-        const options = {
-          amount: Math.round(req.body.amount * 100), // Convert to paise
-          currency: 'INR',
-          receipt: `booking_${Date.now()}`,
-          payment_capture: 1
-        };
-        
-        const order = await razorpay.orders.create(options);
-        
-        return res.json({
-          success: true,
-          useRazorpay: true,
-          orderId: order.id,
-          amount: order.amount,
-          currency: order.currency,
-          key: process.env.RAZORPAY_KEY_ID
-        });
-      } catch (razorpayError) {
-        return res.status(500).json({ success: false, message: razorpayError.message });
-      }
-    }
-    
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-*/
-
-// Create Stripe payment intent (with fallback to Razorpay)
-/*
-router.post('/create-stripe-intent', auth, async (req, res) => {
-  try {
-    const { amount, currency = 'usd', bookingData } = req.body;
-    
-    console.log('💳 Stripe payment intent request:', { amount, currency });
-
-    // For Indian regulations, fallback to Razorpay
-    if (currency.toLowerCase() === 'inr') {
-      console.log('🇮🇳 Indian currency detected, using Razorpay instead');
-      const options = {
-        amount: Math.round(amount * 100), // Convert to paise
-        currency: 'INR',
-        receipt: `booking_${Date.now()}`,
-        payment_capture: 1
-      };
-      
-      const order = await razorpay.orders.create(options);
-      
-      return res.json({
-        success: true,
-        useRazorpay: true,
-        orderId: order.id,
-        amount: order.amount,
-        currency: order.currency,
-        key: process.env.RAZORPAY_KEY_ID
-      });
-    }
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount), // Amount in cents
-      currency,
-      metadata: {
-        hotelName: bookingData.hotelName,
-        customerName: bookingData.customerName,
-        customerEmail: bookingData.customerEmail
-      }
-    });
-
-    res.json({
-      success: true,
-      client_secret: paymentIntent.client_secret,
-      payment_intent_id: paymentIntent.id
-    });
-  } catch (error) {
-    console.error('❌ Stripe payment intent error:', error);
-    
-    // If Stripe fails due to Indian regulations, fallback to Razorpay
-    if (error.message.includes('Indian regulations')) {
-      console.log('🔄 Falling back to Razorpay due to Indian regulations');
-      try {
-        const options = {
-          amount: Math.round(req.body.amount * 100), // Convert to paise
-          currency: 'INR',
-          receipt: `booking_${Date.now()}`,
-          payment_capture: 1
-        };
-        
-        const order = await razorpay.orders.create(options);
-        
-        return res.json({
-          success: true,
-          useRazorpay: true,
-          orderId: order.id,
-          amount: order.amount,
-          currency: order.currency,
-          key: process.env.RAZORPAY_KEY_ID
-        });
-      } catch (razorpayError) {
-        return res.status(500).json({ success: false, message: razorpayError.message });
-      }
-    }
-    
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-*/
-
-// PAYPAL ROUTES
 // Create PayPal order
 router.post('/create-paypal-order', async (req, res) => {
   try {
@@ -422,7 +265,6 @@ router.post('/capture-paypal-payment', async (req, res) => {
   }
 });
 
-
 // Optional auth middleware - allows both authenticated and unauthenticated requests
 const optionalAuth = (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -446,6 +288,16 @@ router.post('/create-order', auth, async (req, res) => {
     
     console.log('💰 Payment order request:', { amount, currency });
 
+    // Check if Razorpay is available
+    if (!isRazorpayAvailable()) {
+      return res.status(503).json({ 
+        success: false, 
+        message: 'Payment service temporarily unavailable. Please try again later.' 
+      });
+    }
+
+    const razorpayInstance = getRazorpayInstance();
+    
     const options = {
       amount: Math.round(amount), // Amount already in paise from frontend
       currency,
@@ -455,14 +307,14 @@ router.post('/create-order', auth, async (req, res) => {
 
     console.log('📋 Razorpay options:', options);
 
-    const order = await razorpay.orders.create(options);
+    const order = await razorpayInstance.orders.create(options);
 
     res.json({
       success: true,
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      key: process.env.RAZORPAY_KEY_ID // rzp_test_S4XQEjfZfBmeYM
+      key: process.env.RAZORPAY_KEY_ID
     });
   } catch (error) {
     console.error('❌ Payment order error:', error);
@@ -483,6 +335,13 @@ router.post('/verify-payment', auth, async (req, res) => {
     // Only handle Razorpay verification here - PayPal is handled in capture-paypal-payment
     if (!razorpay_payment_id || !razorpay_signature) {
       return res.status(400).json({ success: false, message: 'Missing Razorpay payment details' });
+    }
+
+    if (!isRazorpayAvailable()) {
+      return res.status(503).json({ 
+        success: false, 
+        message: 'Payment service temporarily unavailable.' 
+      });
     }
 
     // Handle Razorpay verification
@@ -539,7 +398,15 @@ router.post('/verify-payment', auth, async (req, res) => {
 // Get payment details
 router.get('/payment/:paymentId', auth, async (req, res) => {
   try {
-    const payment = await razorpay.payments.fetch(req.params.paymentId);
+    if (!isRazorpayAvailable()) {
+      return res.status(503).json({ 
+        success: false, 
+        message: 'Payment service temporarily unavailable.' 
+      });
+    }
+
+    const razorpayInstance = getRazorpayInstance();
+    const payment = await razorpayInstance.payments.fetch(req.params.paymentId);
     res.json({ success: true, payment });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -587,7 +454,12 @@ router.get('/transaction/:bookingId', async (req, res) => {
     // Fetch payment details from Razorpay or PayPal
     let payment;
     try {
-      payment = await razorpay.payments.fetch(booking.paymentId);
+      if (isRazorpayAvailable()) {
+        const razorpayInstance = getRazorpayInstance();
+        payment = await razorpayInstance.payments.fetch(booking.paymentId);
+      } else {
+        throw new Error('Razorpay not available');
+      }
     } catch (razorpayError) {
       // If Razorpay fails, try PayPal
       try {
@@ -608,23 +480,6 @@ router.get('/transaction/:bookingId', async (req, res) => {
           error_description: null
         };
       } catch (paypalError) {
-        /* STRIPE FALLBACK (COMMENTED FOR FUTURE USE)
-        try {
-          const session = await stripe.checkout.sessions.retrieve(booking.paymentId);
-          payment = {
-            currency: session.currency,
-            method: 'card',
-            email: session.customer_email,
-            contact: null,
-            created_at: session.created,
-            status: session.payment_status,
-            error_code: null,
-            error_description: null
-          };
-        } catch (stripeError) {
-          throw new Error('Payment details not found in any payment provider');
-        }
-        */
         throw new Error('Payment details not found in Razorpay or PayPal');
       }
     }
