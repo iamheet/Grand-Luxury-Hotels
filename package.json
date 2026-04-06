@@ -1,12 +1,11 @@
 {
   "name": "the-grand-stay",
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
+    "start": "node server.js",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "backend:start": "node server.js",
     "backend:dev": "nodemon server.js"
   },
   "dependencies": {
@@ -41,6 +40,6 @@
     "nodemon": "^3.1.11"
   },
   "engines": {
-    "node": "18.x"
+    "node": "20.x"
   }
 }
