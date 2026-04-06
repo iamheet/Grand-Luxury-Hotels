@@ -29,13 +29,32 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static('public'));
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ MongoDB Connected'))
-  .catch(err => {
+// MongoDB Connection with retry logic
+let retryCount = 0;
+const maxRetries = 5;
+
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    console.log('✅ MongoDB Connected');
+    retryCount = 0;
+  } catch (err) {
     console.error('❌ MongoDB Connection Error:', err.message);
-    process.exit(1);
-  });
+    if (retryCount < maxRetries) {
+      retryCount++;
+      console.log(`🔄 Retrying connection (${retryCount}/${maxRetries})...`);
+      setTimeout(connectDB, 5000);
+    } else {
+      console.error('❌ Max retries reached. Exiting...');
+      process.exit(1);
+    }
+  }
+};
+
+connectDB();
 
 // Routes
 const passwordResetRoutes = require('./routes/passwordReset');
