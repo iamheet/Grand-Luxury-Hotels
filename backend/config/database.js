@@ -73,18 +73,8 @@ class DatabaseConnection {
   async connectWithRetry(mongoUri) {
     console.log('🔄 Attempting MongoDB connection...');
     
-    const options = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-      maxPoolSize: 10,
-      minPoolSize: 5,
-      maxIdleTimeMS: 30000,
-      bufferMaxEntries: 0,
-    };
-
-    await mongoose.connect(mongoUri, options);
+    // Modern Mongoose doesn't need these deprecated options
+    await mongoose.connect(mongoUri);
     
     this.isConnected = true;
     this.retryCount = 0;

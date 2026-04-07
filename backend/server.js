@@ -67,14 +67,9 @@ async function connectToMongoDB() {
       throw new Error(`Invalid MongoDB URI scheme. Expected 'mongodb://' or 'mongodb+srv://', got: ${mongoUri.substring(0, 20)}...`);
     }
     
-    // Connect to MongoDB
+    // Connect to MongoDB with modern options only
     console.log('🔄 Attempting MongoDB connection...');
-    await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 10000, // 10 second timeout
-      socketTimeoutMS: 45000, // 45 second socket timeout
-    });
+    await mongoose.connect(mongoUri);
     
     console.log('✅ MongoDB Connected successfully');
     console.log('📊 Database:', mongoose.connection.db.databaseName);
