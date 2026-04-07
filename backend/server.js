@@ -3,7 +3,11 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
-require('dotenv').config();
+
+// Only load dotenv in development
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -29,13 +33,97 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static('public'));
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ MongoDB Connected'))
-  .catch(err => {
-    console.error('❌ MongoDB Connection Error:', err.message);
+// Production-ready MongoDB Connection with debugging
+async function connectToMongoDB() {
+  try {
+    // Debug: Print environment info
+    console.log('🔍 Environment Debug Info:');
+    console.log('NODE_ENV:', process.env.NODE_ENV || 'undefined');
+    console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
+    console.log('MONGODB_URI type:', typeof process.env.MONGODB_URI);
+    
+    // Get MongoDB URI with validation
+    const mongoUri = process.env.MONGODB_URI;
+    
+    // Debug: Print URI info (without exposing credentials)
+    if (mongoUri) {
+      console.log('MONGODB_URI length:', mongoUri.length);
+      console.log('MONGODB_URI starts with:', mongoUri.substring(0, 20) + '...');
+      console.log('MONGODB_URI scheme valid:', mongoUri.startsWith('mongodb://') || mongoUri.startsWith('mongodb+srv://'));
+    } else {
+      console.log('❌ MONGODB_URI is undefined or empty');
+    }
+    
+    // Validate URI format
+    if (!mongoUri) {
+      throw new Error('MONGODB_URI environment variable is not defined');
+    }
+    
+    if (typeof mongoUri !== 'string') {
+      throw new Error(`MONGODB_URI must be a string, got ${typeof mongoUri}`);
+    }
+    
+    if (!mongoUri.startsWith('mongodb://') && !mongoUri.startsWith('mongodb+srv://')) {
+      throw new Error(`Invalid MongoDB URI scheme. Expected 'mongodb://' or 'mongodb+srv://', got: ${mongoUri.substring(0, 20)}...`);
+    }
+    
+    // Connect to MongoDB
+    console.log('🔄 Attempting MongoDB connection...');
+    await mongoose.connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 10000, // 10 second timeout
+      socketTimeoutMS: 45000, // 45 second socket timeout
+    });
+    
+    console.log('✅ MongoDB Connected successfully');
+    console.log('📊 Database:', mongoose.connection.db.databaseName);
+    console.log('🌐 Host:', mongoose.connection.host);
+    
+  } catch (error) {
+    console.error('❌ MongoDB Connection Failed:');
+    console.error('   Error:', error.message);
+    console.error('   Code:', error.code);
+    
+    // In production, we might want to retry or use a fallback
+    if (process.env.NODE_ENV === 'production') {
+      console.log('🔧 Retrying connection in 5 seconds...');
+      setTimeout(() => {
+        connectToMongoDB();
+      }, 5000);
+    } else {
+      process.exit(1);
+    }
+  }
+}
+
+// Handle MongoDB connection events
+mongoose.connection.on('connected', () => {
+  console.log('🟢 Mongoose connected to MongoDB');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('🔴 Mongoose connection error:', err.message);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('🟡 Mongoose disconnected from MongoDB');
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  try {
+    await mongoose.connection.close();
+    console.log('🔒 MongoDB connection closed through app termination');
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Error during graceful shutdown:', error);
     process.exit(1);
-  });
+  }
+});
+
+// Initialize MongoDB connection
+connectToMongoDB();
 
 // Routes
 const passwordResetRoutes = require('./routes/passwordReset');
