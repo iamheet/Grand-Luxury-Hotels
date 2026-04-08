@@ -122,11 +122,11 @@ router.post('/create-paypal-order', async (req, res) => {
       }],
       application_context: {
         return_url: isMembership 
-          ? `${process.env.FRONTEND_URL || 'http://localhost:3000'}/membership-success`
-          : `${process.env.FRONTEND_URL || 'http://localhost:3000'}/booking-success`,
+          ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/membership-success`
+          : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/booking-success`,
         cancel_url: isMembership 
-          ? `${process.env.FRONTEND_URL || 'http://localhost:3000'}/membership-payment`
-          : `${process.env.FRONTEND_URL || 'http://localhost:3000'}/checkout`
+          ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/membership-payment`
+          : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout`
       }
     };
 

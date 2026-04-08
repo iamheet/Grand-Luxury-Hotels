@@ -142,7 +142,7 @@ export default function Checkout() {
     // returns token or null
     if (!createAccount) return null
     try {
-      const res = await fetch('/api/register', {
+      const res = await fetch('https://thegrandstay.azurewebsites.net/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim(), email: email.trim().toLowerCase(), password }),
