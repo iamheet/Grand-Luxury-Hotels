@@ -43,7 +43,7 @@ export default function RegistrationOTPVerification({
     setError('')
     
     try {
-      const response = await fetch('https://thegrandstay.azurewebsites.net/api/otp/send-email', {
+      const response = await fetch('https://thegrandstay.azurewebsites.net/api/otp/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -96,7 +96,7 @@ export default function RegistrationOTPVerification({
     setError('')
 
     try {
-      const response = await fetch('https://thegrandstay.azurewebsites.net/api/otp/verify-email', {
+      const response = await fetch('https://thegrandstay.azurewebsites.net/api/otp/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp: emailOtp })
