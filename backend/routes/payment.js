@@ -309,6 +309,8 @@ router.post('/create-order', auth, async (req, res) => {
 
     const order = await razorpayInstance.orders.create(options);
 
+    console.log('🔑 Sending Razorpay key to frontend:', process.env.RAZORPAY_KEY_ID);
+
     res.json({
       success: true,
       orderId: order.id,
