@@ -37,7 +37,7 @@ export class OTPService {
 
   static async sendEmailOTP(email: string): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await fetch(`${this.API_BASE_URL}/otp/send-email`, {
+      const response = await fetch(`${this.API_BASE_URL}/otp/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ export class OTPService {
 
   static async verifyEmailOTP(email: string, otp: string): Promise<{ success: boolean; message: string; token?: string }> {
     try {
-      const response = await fetch(`${this.API_BASE_URL}/otp/verify-email`, {
+      const response = await fetch(`${this.API_BASE_URL}/otp/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
