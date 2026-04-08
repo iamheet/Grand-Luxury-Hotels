@@ -1,9 +1,8 @@
 // Payment Gateway Configuration
 export const PAYMENT_CONFIG = {
   razorpay: {
-    // Using your existing Razorpay keys
-    keyId: 'rzp_test_S4XQEjfZfBmeYM',
-    keySecret: '4QF4Y2D5xflavcXJC9dRnjcm',
+    // Keys are now fetched from backend API response
+    // No hardcoded keys for security
     
     // Razorpay API endpoints
     baseUrl: 'https://api.razorpay.com/v1',
@@ -35,7 +34,7 @@ export const PAYMENT_CONFIG = {
 // Helper function to get Razorpay options
 export const getRazorpayOptions = (orderData: any, callbacks: any) => {
   return {
-    key: PAYMENT_CONFIG.razorpay.keyId,
+    key: orderData.key, // Use key from backend API response
     amount: orderData.amount,
     currency: orderData.currency || 'INR',
     name: 'The Grand Stay',
