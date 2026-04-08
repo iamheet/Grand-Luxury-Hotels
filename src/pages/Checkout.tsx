@@ -282,6 +282,7 @@ export default function Checkout() {
       // Initialize Razorpay with centralized config
       const options = getRazorpayOptions(
         {
+          key: orderData.key, // Add the key from backend response
           amount: total * 100,
           currency: 'INR',
           orderId: orderData.orderId,
