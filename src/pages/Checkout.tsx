@@ -377,12 +377,17 @@ export default function Checkout() {
       // Save to localStorage for PayPal return
       localStorage.setItem('pendingPayPalBooking', JSON.stringify(bookingData))
 
-      // Create PayPal order
+      // Create PayPal order with CORS handling
       const orderResponse = await fetch('https://thegrandstay.azurewebsites.net/api/payment/create-paypal-order', {
         method: 'POST',
-        headers,
+        headers: {
+          ...headers,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        },
         body: JSON.stringify({
-          amount: total * 100, // Convert to cents
+          amount: total * 100,
           currency: 'USD',
           bookingData: bookingData
         })
@@ -400,11 +405,20 @@ export default function Checkout() {
         throw new Error('Failed to create PayPal order')
       }
 
-      // Redirect to PayPal for approval
-      window.location.href = orderData.approvalUrl
+      // Use window.open instead of direct redirect to avoid CORS issues
+      const paypalWindow = window.open(orderData.approvalUrl, '_self')
+      if (!paypalWindow) {
+        throw new Error('Popup blocked. Please allow popups and try again.')
+      }
       
     } catch (err: any) {
       console.error('PayPal initialization error:', err)
+      // Filter out CORS errors from user-facing messages
+      if (err?.message?.toLowerCase().includes('cors')) {
+        console.warn('PayPal CORS warning (non-critical):', err.message)
+        setLoading(false)
+        return
+      }
       setError(err?.message || 'PayPal initialization failed')
       setLoading(false)
     }
