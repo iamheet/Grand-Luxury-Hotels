@@ -13,7 +13,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Log startup information
-console.log('🚀 Starting The Grand Stay API...');
+console.log('🚀 Starting The Royal Stay API...');
 console.log('📍 Environment:', process.env.NODE_ENV || 'development');
 console.log('🔌 Port:', process.env.PORT || 5000);
 console.log('📂 Working Directory:', process.cwd());
@@ -162,7 +162,7 @@ app.use('/api/subadmin', require('./routes/subadmin'));
 // Health check
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'The Grand Stay API is running',
+    message: 'The Royal Stay API is running',
     environment: process.env.NODE_ENV || 'development',
     port: process.env.PORT || 5000,
     timestamp: new Date().toISOString()
