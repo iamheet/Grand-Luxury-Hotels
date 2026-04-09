@@ -9,19 +9,6 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ['GET', 'POST'],
-    credentials: true
-  }
-});
-
-// Make io accessible to routes
-app.set('io', io);
-
 // Debug CORS configuration
 const allowedOrigins = [
   'https://www.royalstay.me', 
@@ -35,6 +22,19 @@ const allowedOrigins = [
 
 console.log('🌐 CORS Allowed Origins:', allowedOrigins);
 console.log('🔧 LOCALHOST_URL from env:', process.env.LOCALHOST_URL);
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
+
+// Make io accessible to routes
+app.set('io', io);
 
 // Middleware
 app.use(cors({
