@@ -13,22 +13,35 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' 
-      ? ['https://www.royalstay.me', 'https://royalstay.me']
-      : 'http://localhost:5173',
-    methods: ['GET', 'POST']
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true
   }
 });
 
 // Make io accessible to routes
 app.set('io', io);
 
+// Debug CORS configuration
+const allowedOrigins = [
+  'https://www.royalstay.me', 
+  'https://royalstay.me',
+  'https://throyal.azurewebsites.net',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  process.env.LOCALHOST_URL
+].filter(Boolean);
+
+console.log('🌐 CORS Allowed Origins:', allowedOrigins);
+console.log('🔧 LOCALHOST_URL from env:', process.env.LOCALHOST_URL);
+
 // Middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? ['https://www.royalstay.me', 'https://royalstay.me']
-    : 'http://localhost:5173',
-  credentials: true
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 app.use(express.static('public'));
@@ -142,7 +155,7 @@ app.use('/api/subadmin', require('./routes/subadmin'));
 // Health check
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'The Grand Stay API is running',
+    message: 'The Royal Stay API is running',
     environment: process.env.NODE_ENV || 'development',
     port: process.env.PORT || 5000,
     timestamp: new Date().toISOString()
