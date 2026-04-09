@@ -49,13 +49,15 @@ const app = express();
 const server = http.createServer(app);
 
 // Determine frontend URLs based on environment
-const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [
-      'https://throyal.azurewebsites.net',
-      'https://your-frontend-domain.com',
-      process.env.FRONTEND_URL
-    ].filter(Boolean)
-  : ['http://localhost:5173', 'http://localhost:3000'];
+const allowedOrigins = [
+  'https://throyal.azurewebsites.net',
+  'https://your-frontend-domain.com', 
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  process.env.FRONTEND_URL,
+  process.env.LOCALHOST_URL
+].filter(Boolean);
 
 console.log('🌐 Allowed CORS origins:', allowedOrigins);
 
@@ -72,8 +74,18 @@ app.set('io', io);
 
 // Middleware
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
+  origin: [
+    'https://throyal.azurewebsites.net',
+    'https://your-frontend-domain.com',
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    process.env.FRONTEND_URL,
+    process.env.LOCALHOST_URL
+  ].filter(Boolean),
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
