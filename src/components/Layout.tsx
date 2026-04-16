@@ -184,7 +184,6 @@ export default function Layout({ children }: LayoutProps) {
               {isLoggedIn && (
                 <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium text-center">My Profile</Link>
               )}
-              <Link to="/admin-login" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-red-700 text-white font-medium text-center">Admin</Link>
               {isLoggedIn ? (
                 <button
                   onClick={async () => {
