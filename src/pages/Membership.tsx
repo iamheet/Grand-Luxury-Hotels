@@ -75,11 +75,7 @@ export default function Membership() {
             Elevate your luxury travel experience with our premium membership programs. 
             Each tier unlocks extraordinary benefits and personalized services.
           </p>
-          <button 
-            onClick={() => navigate('/membership-payment', { state: { plan: 'platinum' } })}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
-          >
-            Test Payment Page (Platinum)
+        
           </button>
         </div>
 
