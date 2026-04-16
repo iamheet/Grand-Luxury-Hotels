@@ -121,6 +121,16 @@ export default function Layout({ children }: LayoutProps) {
                 Help
               </span>
             </Link>
+            {isLoggedIn && (
+              <Link to="/profile" className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                <span className="flex items-center gap-2 text-white font-medium">
+                  <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  My Profile
+                </span>
+              </Link>
+            )}
             {isLoggedIn ? (
               <button
                 onClick={async () => {
@@ -171,6 +181,9 @@ export default function Layout({ children }: LayoutProps) {
               <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium text-center">Home</Link>
               <Link to="/membership" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium text-center">Join Membership</Link>
               <Link to="/help" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 text-white font-medium text-center">Help</Link>
+              {isLoggedIn && (
+                <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium text-center">My Profile</Link>
+              )}
               <Link to="/admin-login" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-red-700 text-white font-medium text-center">Admin</Link>
               {isLoggedIn ? (
                 <button

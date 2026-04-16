@@ -151,6 +151,7 @@ app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/members', require('./routes/members'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/subadmin', require('./routes/subadmin'));
+app.use('/api/profile', require('./routes/profile'));
 
 // Health check
 app.get('/', (req, res) => {

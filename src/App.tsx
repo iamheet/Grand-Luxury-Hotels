@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import ScrollToTop from './components/ScrollToTop'
 import SessionExpiredManager from './components/SessionExpiredModal'
 import { setupAxiosInterceptors, checkTokenExpiry } from './utils/auth'
+import UserProfile from './pages/UserProfile'
 import Home from './pages/Home'
 import SearchResults from './pages/SearchResults'
 import HotelDetails from './pages/HotelDetails'
@@ -156,6 +157,7 @@ export default function App() {
           <Route path="membership" element={<Membership />} />
           <Route path="membership-payment" element={<MembershipPayment />} />
           <Route path="membership-success" element={<MembershipSuccess />} />
+          <Route path="profile" element={<UserProfile />} />
           <Route path="help" element={<Help />} />
           <Route path="*" element={<NotFound />} />
         </Route>
