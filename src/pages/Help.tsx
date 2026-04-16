@@ -29,7 +29,7 @@ export default function Help() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hello! I'm here to help you with any questions about The Grand Stay. How can I assist you today?",
+      text: "Hello! I'm here to help you with any questions about The Royal Stay. How can I assist you today?",
       isUser: false,
       timestamp: new Date()
     }
@@ -137,7 +137,7 @@ export default function Help() {
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-3 border-white animate-pulse"></div>
               </div>
               <div>
-                <h3 className="text-xl font-bold">Grand Stay Assistant</h3>
+                <h3 className="text-xl font-bold">Royal Stay Assistant</h3>
                 <div className="flex items-center gap-2 mt-1">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                   <p className="text-sm text-blue-100">Online • Ready to help</p>
@@ -282,7 +282,7 @@ export default function Help() {
             </div>
             <h3 className="font-bold text-gray-900 mb-3 text-xl">Email Support</h3>
             <p className="text-gray-600 mb-4">Send us a detailed message</p>
-            <p className="font-bold text-blue-600 text-lg">support@grandstay.com</p>
+            <p className="font-bold text-blue-600 text-lg">support@royalstay.me</p>
           </div>
 
           <div className="bg-white/95 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border-2 border-white/50 hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-2">

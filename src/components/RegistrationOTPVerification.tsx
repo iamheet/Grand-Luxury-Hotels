@@ -65,24 +65,7 @@ export default function RegistrationOTPVerification({
   }
 
   const handleSendPhoneOTP = async () => {
-    if (!phone) {
-      setError('Phone number is required')
-      return
-    }
-    
-    setLoading(true)
-    setError('')
-    
-    const formattedPhone = OTPService.formatPhoneNumber(phone)
-    const result = await OTPService.sendOTP(formattedPhone)
-    
-    if (result.success) {
-      setStep('phone-otp')
-      startCountdown()
-    } else {
-      setError(result.message)
-    }
-    
+    setError('Phone verification has been disabled')
     setLoading(false)
   }
 
@@ -119,25 +102,7 @@ export default function RegistrationOTPVerification({
   }
 
   const handleVerifyPhoneOTP = async () => {
-    if (!phoneOtp || phoneOtp.length !== 6) {
-      setError('Please enter a valid 6-digit OTP')
-      return
-    }
-
-    setLoading(true)
-    setError('')
-
-    const formattedPhone = OTPService.formatPhoneNumber(phone)
-    const result = await OTPService.verifyOTP(formattedPhone, phoneOtp)
-
-    if (result.success) {
-      setPhoneVerified(true)
-      setStep('choose')
-      setPhoneOtp('')
-    } else {
-      setError(result.message)
-    }
-
+    setError('Phone verification has been disabled')
     setLoading(false)
   }
 

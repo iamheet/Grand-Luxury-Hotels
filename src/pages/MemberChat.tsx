@@ -75,7 +75,7 @@ export default function MemberChat() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              contents: [{ parts: [{ text: `You are Sophie, a dedicated ${member?.tier} tier luxury concierge at The Grand Stay. Speak naturally like a real person - use casual language, contractions (I'm, you're, we'll), and be warm and conversational. Don't be overly formal or robotic. Show personality and empathy. Provide detailed answers naturally. Never say you're an AI - you're Sophie, their personal concierge. Question: ${message}` }] }],
+              contents: [{ parts: [{ text: `You are Sophie, a dedicated ${member?.tier} tier luxury concierge at The Royal Stay. Speak naturally like a real person - use casual language, contractions (I'm, you're, we'll), and be warm and conversational. Don't be overly formal or robotic. Show personality and empathy. Provide detailed answers naturally. Never say you're an AI - you're Sophie, their personal concierge. Question: ${message}` }] }],
               generationConfig: { temperature: 0.7, maxOutputTokens: maxTokens }
             })
           })
@@ -249,7 +249,7 @@ export default function MemberChat() {
     
     // Contact questions
     if (lowerMessage.match(/\b(contact|call|phone|email|reach|speak|talk)\b/)) {
-      return `You can reach our ${member?.tier} concierge team 24/7 at: Phone: +1 (800) ROYAL-01, Email: concierge@thegrandstay.com, or continue chatting here. We also offer video consultations. Would you like to schedule a call?`
+      return `You can reach our ${member?.tier} concierge team 24/7 at: Phone: +1 (800) ROYAL-01, Email: concierge@royalstay.me, or continue chatting here. We also offer video consultations. Would you like to schedule a call?`
     }
     
     // Time/hours questions

@@ -1,9 +1,9 @@
-# GrandStay 🏨
+# The Royal Stay 🏨
 ### Full-Stack Luxury Hotel Booking Platform
 
 > A complete, production-inspired hotel booking system — built end-to-end with secure authentication, role-based access control, payment integration, and a scalable REST API architecture.
 
-GrandStay is a full-stack MVP that covers the entire hotel booking lifecycle — from user registration and room browsing to secure payments and admin management. Built solo with Node.js, Express, MongoDB, and React, it demonstrates real-world backend architecture, clean API design, and third-party service integration.
+The Royal Stay is a full-stack MVP that covers the entire hotel booking lifecycle — from user registration and room browsing to secure payments and admin management. Built solo with Node.js, Express, MongoDB, and React, it demonstrates real-world backend architecture, clean API design, and third-party service integration.
 
 ---
 
@@ -125,7 +125,7 @@ All schemas are optimised for query performance with proper indexing and validat
 ## 📁 Project Structure
 
 ```
-GrandStay/
+The Royal Stay/
 ├── backend/
 │   ├── controllers/       # Route logic & business rules
 │   ├── models/            # MongoDB schemas
@@ -154,8 +154,8 @@ GrandStay/
 
 ```bash
 # Clone the repository
-git clone https://github.com/iamheet/grandstay
-cd grandstay
+git clone https://github.com/iamheet/the-royal-stay
+cd the-royal-stay
 
 # Install backend dependencies
 cd backend
@@ -220,7 +220,7 @@ EMAIL_PASS=your_email_app_password
 
 ## 🔮 Future Improvements
 
-Beyond the roadmap, here are some bigger, more ambitious ideas planned for GrandStay's evolution:
+Beyond the roadmap, here are some bigger, more ambitious ideas planned for The Royal Stay's evolution:
 
 - **Real-time Room Availability using WebSockets** — instant updates without page refresh
 - **Dynamic Pricing Engine** — automatically adjusts room prices based on demand, seasonality, and occupancy patterns — like how airlines price tickets
@@ -240,7 +240,7 @@ Beyond the roadmap, here are some bigger, more ambitious ideas planned for Grand
 
 ## ⭐ Support
 
-If GrandStay helped you learn something or sparked an idea, drop a **star** on GitHub — it genuinely means a lot!
+If The Royal Stay helped you learn something or sparked an idea, drop a **star** on GitHub — it genuinely means a lot!
 
 ---
 

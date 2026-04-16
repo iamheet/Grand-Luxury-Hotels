@@ -27,11 +27,11 @@ const sendEmail = async (email, otp) => {
     const mailOptions = {
       from: process.env.GMAIL_USER,
       to: email,
-      subject: '🔐 Your Grand Stay OTP Code',
+      subject: '🔐 Your Royal Stay OTP Code',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; border-radius: 10px;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #fbbf24; font-size: 32px; margin: 0;">👑 The Grand Stay</h1>
+            <h1 style="color: #fbbf24; font-size: 32px; margin: 0;">👑 The Royal Stay</h1>
             <p style="color: #d1d5db; margin-top: 10px;">Your OTP Verification Code</p>
           </div>
           
@@ -52,7 +52,7 @@ const sendEmail = async (email, otp) => {
           </div>
           
           <div style="text-align: center; margin-top: 20px; color: #6b7280; font-size: 12px;">
-            <p>© 2024 The Grand Stay. All rights reserved.</p>
+            <p>© 2024 The Royal Stay. All rights reserved.</p>
           </div>
         </div>
       `

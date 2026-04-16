@@ -1,7 +1,7 @@
 # Sub-Admin System Documentation
 
 ## Overview
-The Grand Stay now has a complete Sub-Admin management system where the Main Admin can create and manage Sub-Admins with limited permissions.
+The Royal Stay now has a complete Sub-Admin management system where the Main Admin can create and manage Sub-Admins with limited permissions.
 
 ## Admin Hierarchy
 

@@ -210,7 +210,7 @@ export default function NormalHotelsDashboard() {
       <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-200 transition-all duration-300 flex flex-col shadow-xl`}>
         <div className="p-6 border-b border-gray-200">
           <h1 className={`font-bold text-xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent ${!sidebarOpen && 'text-center'}`}>
-            {sidebarOpen ? '✨ The Grand Stay' : '✨'}
+            {sidebarOpen ? '✨ The Royal Stay' : '✨'}
           </h1>
         </div>
         

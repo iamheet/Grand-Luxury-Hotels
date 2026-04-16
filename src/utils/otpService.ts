@@ -1,38 +1,9 @@
-// OTP Service for phone and email verification
+// OTP Service for phone and email verification - PHONE LOGIN DISABLED
 export class OTPService {
   private static readonly API_BASE_URL = 'https://thegrandstay.azurewebsites.net/api'
 
   static async sendOTP(phoneNumber: string): Promise<{ success: boolean; message: string }> {
-    try {
-      const response = await fetch(`${this.API_BASE_URL}/otp/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          phoneNumber: phoneNumber
-        })
-      })
-
-      // Check if response is JSON
-      const contentType = response.headers.get('content-type')
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text()
-        console.error('Non-JSON response:', text)
-        return { success: false, message: 'Server error - please check backend' }
-      }
-
-      const result = await response.json()
-      
-      if (!response.ok) {
-        return { success: false, message: result.message || 'Failed to send OTP' }
-      }
-
-      return { success: true, message: 'OTP sent successfully' }
-    } catch (error) {
-      console.error('OTP send error:', error)
-      return { success: false, message: 'Backend not running or endpoint missing' }
-    }
+    return { success: false, message: 'Phone login feature has been disabled' }
   }
 
   static async sendEmailOTP(email: string): Promise<{ success: boolean; message: string }> {
@@ -105,41 +76,7 @@ export class OTPService {
   }
 
   static async verifyOTP(phoneNumber: string, otp: string): Promise<{ success: boolean; message: string; token?: string }> {
-    try {
-      const response = await fetch(`${this.API_BASE_URL}/otp/verify`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          phoneNumber: phoneNumber,
-          otp: otp
-        })
-      })
-
-      // Check if response is JSON
-      const contentType = response.headers.get('content-type')
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text()
-        console.error('Non-JSON response:', text)
-        return { success: false, message: 'Server error - please check backend' }
-      }
-
-      const result = await response.json()
-      
-      if (!response.ok) {
-        return { success: false, message: result.message || 'Invalid OTP' }
-      }
-
-      return { 
-        success: true, 
-        message: 'OTP verified successfully',
-        token: result.token 
-      }
-    } catch (error) {
-      console.error('OTP verify error:', error)
-      return { success: false, message: 'Backend not running or endpoint missing' }
-    }
+    return { success: false, message: 'Phone login feature has been disabled' }
   }
 
   static formatPhoneNumber(phone: string): string {

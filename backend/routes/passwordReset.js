@@ -47,10 +47,10 @@ router.post('/reset-request', async (req, res) => {
     const mailOptions = {
       from: process.env.GMAIL_USER,
       to: email,
-      subject: 'Password Reset - The Grand Stay',
+      subject: 'Password Reset - The Royal Stay',
       html: `
         <h2>Password Reset Request</h2>
-        <p>You requested a password reset for your The Grand Stay account.</p>
+        <p>You requested a password reset for your The Royal Stay account.</p>
         <p>Click the link below to reset your password:</p>
         <a href="${resetUrl}" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a>
         <p>This link will expire in 1 hour.</p>
@@ -97,10 +97,10 @@ router.post('/forgot-password', async (req, res) => {
     const mailOptions = {
       from: process.env.GMAIL_USER,
       to: email,
-      subject: 'Password Reset - The Grand Stay',
+      subject: 'Password Reset - The Royal Stay',
       html: `
         <h2>Password Reset Request</h2>
-        <p>You requested a password reset for your The Grand Stay account.</p>
+        <p>You requested a password reset for your The Royal Stay account.</p>
         <p>Click the link below to reset your password:</p>
         <a href="${resetUrl}" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a>
         <p>This link will expire in 1 hour.</p>

@@ -45,7 +45,7 @@ export default function Chatbot() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: `You are Emma, a friendly and professional luxury hotel concierge at The Grand Stay. Speak naturally like a real person - use casual language, contractions (I'm, you're, we'll), and be warm and conversational. Don't be overly formal or robotic. Show personality and empathy. If asked about itineraries, provide detailed day-by-day plans. For hotel questions, give thorough but friendly descriptions. Remember the conversation context and refer back to it naturally. Never say you're an AI - you're Emma, the concierge. Previous conversation: ${fullPrompt}` }] }],
+            contents: [{ parts: [{ text: `You are Emma, a friendly and professional luxury hotel concierge at The Royal Stay. Speak naturally like a real person - use casual language, contractions (I'm, you're, we'll), and be warm and conversational. Don't be overly formal or robotic. Show personality and empathy. If asked about itineraries, provide detailed day-by-day plans. For hotel questions, give thorough but friendly descriptions. Remember the conversation context and refer back to it naturally. Never say you're an AI - you're Emma, the concierge. Previous conversation: ${fullPrompt}` }] }],
             generationConfig: { temperature: 0.7, maxOutputTokens: maxTokens }
           })
         })
@@ -90,7 +90,7 @@ export default function Chatbot() {
       const itemQ = item.question.toLowerCase()
       return itemQ.includes(userQuestion.toLowerCase()) || userQuestion.toLowerCase().split(' ').some(word => word.length > 3 && itemQ.includes(word))
     })
-    return result?.answer || 'I can help you book rooms, check amenities, or answer questions about The Grand Stay.'
+    return result?.answer || 'I can help you book rooms, check amenities, or answer questions about The Royal Stay.'
   }
 
   const handleAutoBook = () => {
@@ -207,7 +207,7 @@ export default function Chatbot() {
                 {loading ? 'Thinking...' : 'Ask Question'}
               </button>
               <div className="mt-4 h-72 overflow-auto bg-blue-50 border-l-4 border-[var(--color-brand-gold)] rounded-lg p-4">
-                <div className="text-sm text-gray-700 leading-relaxed" style={{ whiteSpace: 'pre-wrap' }} dangerouslySetInnerHTML={{ __html: (answer || 'Hi there! I\'m Emma, your personal concierge at The Grand Stay. How can I help make your stay extraordinary today? 😊') }} />
+                <div className="text-sm text-gray-700 leading-relaxed" style={{ whiteSpace: 'pre-wrap' }} dangerouslySetInnerHTML={{ __html: (answer || 'Hi there! I\'m Emma, your personal concierge at The Royal Stay. How can I help make your stay extraordinary today? 😊') }} />
               </div>
             </>
           ) : (

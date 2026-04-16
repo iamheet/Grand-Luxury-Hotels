@@ -664,7 +664,7 @@ export default function AdminDashboard() {
       <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} transition-all duration-500 ease-in-out flex flex-col shadow-xl ${darkMode ? 'bg-gray-800 border-r border-gray-700' : 'bg-white border-r border-gray-200'}`}>
         <div className={`p-6 ${darkMode ? 'border-b border-gray-700' : 'border-b border-gray-200'}`}>
           <h1 className={`font-bold text-xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent ${!sidebarOpen && 'text-center'}`}>
-            {sidebarOpen ? '✨ The Grand Stay' : '✨'}
+            {sidebarOpen ? '✨ The Royal Stay' : '✨'}
           </h1>
         </div>
         

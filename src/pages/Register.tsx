@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { auth, googleProvider } from '../firebase'
 import { signInWithPopup } from 'firebase/auth'
-import RegistrationOTPVerification from '../components/RegistrationOTPVerification'
 
 export default function Register() {
 	const navigate = useNavigate()
@@ -15,8 +14,6 @@ export default function Register() {
 	const [showPassword, setShowPassword] = useState(false)
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 	const [error, setError] = useState<string | null>(null)
-	const [showOTPVerification, setShowOTPVerification] = useState(false)
-	const [formSubmitted, setFormSubmitted] = useState(false)
 	const [showExistingAccountPopup, setShowExistingAccountPopup] = useState(false)
 	const [emailCheckLoading, setEmailCheckLoading] = useState(false)
 
@@ -113,15 +110,15 @@ export default function Register() {
 		}
 	}
 
-	const registerUser = async (emailVerified: boolean, phoneVerified: boolean) => {
+	const registerUser = async () => {
 		try {
 			const response = await axios.post('https://thegrandstay.azurewebsites.net/api/auth/register', {
 				name: name.trim(),
 				email: email.trim().toLowerCase(),
 				password,
 				phone: phone.trim(),
-				emailVerified,
-				phoneVerified
+				emailVerified: false,
+				phoneVerified: false
 			})
 
 			if (response.data.success) {
@@ -132,8 +129,6 @@ export default function Register() {
 		} catch (error: any) {
 			console.error('Registration error:', error)
 			setError(error.response?.data?.message || 'Registration failed. Please try again.')
-			setShowOTPVerification(false)
-			setFormSubmitted(false)
 		}
 	}
 
@@ -174,9 +169,8 @@ export default function Register() {
 			return
 		}
 
-		// Show OTP verification for new users
-		setFormSubmitted(true)
-		setShowOTPVerification(true)
+		// Register user directly without OTP verification
+		await registerUser()
 	}
 
 	return (
@@ -191,7 +185,7 @@ export default function Register() {
 				<div className="text-center lg:text-left text-white/90 space-y-4">
 					<div className="inline-block rounded-full border border-white/30 px-3 py-1 text-xs tracking-wider uppercase">Exclusive Membership</div>
 					<h1 className="text-3xl md:text-4xl font-semibold">
-						Join <span className="text-[var(--color-brand-gold)]">The Grand Stay</span>
+						Join <span className="text-[var(--color-brand-gold)]">The Royal Stay</span>
 					</h1>
 					<div className="text-white/90 max-w-lg mx-auto lg:mx-0 flex flex-wrap items-center gap-2">
 						<span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs">Member‑only rates</span>
@@ -285,7 +279,7 @@ export default function Register() {
 									required
 								/>
 								<div className="text-xs text-gray-500 mt-1">
-									Required for account verification
+									Required for booking confirmations
 								</div>
 							</div>
 							<div>
@@ -364,7 +358,7 @@ export default function Register() {
 								type="submit"
 								className="w-full rounded-lg bg-[var(--color-brand-gold)] px-4 py-2.5 font-semibold text-white hover:bg-[var(--color-brand-gold)]/90 transition-colors"
 							>
-								{formSubmitted ? 'Verify Account' : 'Verify & Create Account'}
+								Create Account
 							</button>
 						</form>
 
@@ -377,22 +371,6 @@ export default function Register() {
 					</div>
 				</div>
 			</div>
-
-			{showOTPVerification && (
-				<RegistrationOTPVerification
-					email={email}
-					phone={phone}
-					onVerified={(emailVerified, phoneVerified) => {
-						setShowOTPVerification(false)
-						registerUser(emailVerified, phoneVerified)
-					}}
-					onCancel={() => {
-						setShowOTPVerification(false)
-						setFormSubmitted(false)
-					}}
-					requirePhoneVerification={true}
-				/>
-			)}
 
 			{/* Existing Account Popup */}
 			{showExistingAccountPopup && (

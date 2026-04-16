@@ -337,13 +337,13 @@ export default function AIConcierge() {
     
     // GREETINGS & GENERAL
     if (input.match(/\b(hello|hi|hey|good morning|good evening|greetings)\b/)) {
-      return 'Hello! Welcome to The Grand Stay - your premier luxury hospitality destination. I can help you with hotels, memberships, events, travel, dining, wellness, and all our exclusive services. What would you like to know?'
+      return 'Hello! Welcome to The Royal Stay - your premier luxury hospitality destination. I can help you with hotels, memberships, events, travel, dining, wellness, and all our exclusive services. What would you like to know?'
     }
-    if (input.includes('what is') && (input.includes('grand stay') || input.includes('this'))) {
-      return 'The Grand Stay is a luxury hospitality platform offering premium hotels worldwide, exclusive memberships, concierge services, event planning, travel arrangements, dining experiences, wellness services, and much more. We cater to discerning travelers seeking exceptional experiences.'
+    if (input.includes('what is') && (input.includes('royal stay') || input.includes('this'))) {
+      return 'The Royal Stay is a luxury hospitality platform offering premium hotels worldwide, exclusive memberships, concierge services, event planning, travel arrangements, dining experiences, wellness services, and much more. We cater to discerning travelers seeking exceptional experiences.'
     }
     if (input.includes('who are you') || input.includes('what are you')) {
-      return 'I\'m your AI Concierge assistant for The Grand Stay. I\'m here 24/7 to answer questions, help you book services, provide information about our offerings, and ensure you have the best luxury experience possible.'
+      return 'I\'m your AI Concierge assistant for The Royal Stay. I\'m here 24/7 to answer questions, help you book services, provide information about our offerings, and ensure you have the best luxury experience possible.'
     }
     
     // HOTELS & ACCOMMODATIONS
@@ -519,7 +519,7 @@ export default function AIConcierge() {
       return 'Our Royal Concierge provides 24/7 personalized assistance for: travel arrangements, restaurant reservations, event planning, special requests, local recommendations, and anything you need. Available via chat, phone, or email. Members get priority service.'
     }
     if (input.match(/\b(help|support|assistance|contact|question|problem|issue)\b/)) {
-      return 'Need help? We\'re here 24/7! Contact us via: Live chat (instant response), Email (support@thegrandstay.com), Phone (toll-free), or visit our Help page for FAQs. Members receive priority support with dedicated assistance.'
+      return 'Need help? We\'re here 24/7! Contact us via: Live chat (instant response), Email (support@royalstay.me), Phone (toll-free), or visit our Help page for FAQs. Members receive priority support with dedicated assistance.'
     }
     if (input.includes('24/7') || input.includes('available') || input.includes('hours')) {
       return 'We\'re available 24/7/365! Our concierge team, customer support, and emergency assistance are always ready to help. Chat, call, or email anytime - we never close. Your comfort and satisfaction are our priority.'
@@ -557,10 +557,10 @@ export default function AIConcierge() {
     
     // THANK YOU & GOODBYE
     if (input.includes('thank') || input.includes('thanks')) {
-      return 'You\'re very welcome! It\'s my pleasure to assist you. If you have any other questions or need help with bookings, feel free to ask anytime. Enjoy your luxury experience with The Grand Stay! 🏨✨'
+      return 'You\'re very welcome! It\'s my pleasure to assist you. If you have any other questions or need help with bookings, feel free to ask anytime. Enjoy your luxury experience with The Royal Stay! 🏨✨'
     }
     if (input.includes('bye') || input.includes('goodbye')) {
-      return 'Goodbye! Thank you for choosing The Grand Stay. I\'m here 24/7 whenever you need assistance. Have a wonderful day and we look forward to serving you soon! 👋'
+      return 'Goodbye! Thank you for choosing The Royal Stay. I\'m here 24/7 whenever you need assistance. Have a wonderful day and we look forward to serving you soon! 👋'
     }
     
     // DEFAULT RESPONSE

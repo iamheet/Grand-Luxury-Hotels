@@ -1,4 +1,4 @@
-# The Grand Stay - Backend API
+# The Royal Stay - Backend API
 
 ## Setup Instructions
 

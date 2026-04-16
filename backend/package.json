@@ -1,7 +1,7 @@
 {
   "name": "the-grand-stay-backend",
   "version": "1.0.0",
-  "description": "Backend API for The Grand Stay hotel booking system",
+  "description": "Backend API for The Royal Stay hotel booking system",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

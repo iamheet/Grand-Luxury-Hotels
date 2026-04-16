@@ -156,7 +156,7 @@ export default function AdminLogin() {
             fontWeight: '300',
             letterSpacing: '0.5px'
           }}>
-            The Grand Stay Management System
+            The Royal Stay Management System
           </p>
         </div>
 

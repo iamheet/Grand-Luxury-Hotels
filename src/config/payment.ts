@@ -37,7 +37,7 @@ export const getRazorpayOptions = (orderData: any, callbacks: any) => {
     key: orderData.key, // Use key from backend API response
     amount: orderData.amount,
     currency: orderData.currency || 'INR',
-    name: 'The Grand Stay',
+    name: 'The Royal Stay',
     description: orderData.description || 'Payment for booking',
     order_id: orderData.orderId,
     handler: callbacks.onSuccess,

@@ -93,7 +93,7 @@ export default function MembershipPayment() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">You're Already a Member!</h1>
-          <p className="text-gray-600 mb-6">You already have an active membership with The Grand Stay. You cannot register for another membership.</p>
+          <p className="text-gray-600 mb-6">You already have an active membership with The Royal Stay. You cannot register for another membership.</p>
           <div className="space-y-3">
             <button 
               onClick={() => navigate('/profile')}
@@ -401,7 +401,7 @@ export default function MembershipPayment() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Membership</h1>
-          <p className="text-gray-600">Join The Grand Stay exclusive member program</p>
+          <p className="text-gray-600">Join The Royal Stay exclusive member program</p>
           <p className="text-sm text-gray-500 mt-2">Selected Plan: {currentPlan.name} - ${currentPlan.price}</p>
         </div>
 

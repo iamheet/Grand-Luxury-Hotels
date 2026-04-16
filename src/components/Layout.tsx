@@ -66,7 +66,7 @@ export default function Layout({ children }: LayoutProps) {
     }
   }
 
-  const handleEmailQuery = (e: React.FormEvent) => {
+  const handleEmailQuery = async (e: React.FormEvent) => {
     e.preventDefault()
     setEmailSent(true)
     setTimeout(() => {
@@ -81,7 +81,7 @@ export default function Layout({ children }: LayoutProps) {
       <header className={`${getHeaderStyle()} z-30 text-white/95`}>
         <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between w-full">
           <Link to="/" className="font-semibold tracking-wide text-lg whitespace-nowrap text-white/95 flex-shrink-0" style={{minWidth: '140px'}}>
-            The <span className="text-[var(--color-brand-gold)]">Grand</span> Stay
+            The <span className="text-[var(--color-brand-gold)]">Royal</span> Stay
           </Link>
           
           {/* Mobile Menu Button */}
@@ -218,7 +218,7 @@ export default function Layout({ children }: LayoutProps) {
             
             {/* Brand Section */}
             <div className="space-y-4">
-              <div className="text-white font-semibold text-xl">The <span className="text-[var(--color-brand-gold)]">Grand</span> Stay</div>
+              <div className="text-white font-semibold text-xl">The <span className="text-[var(--color-brand-gold)]">Royal</span> Stay</div>
               <p className="text-white/70 text-sm leading-relaxed">A curated collection of exceptional hotels and bespoke experiences around the world.</p>
               
               <div className="p-4 rounded-lg bg-gradient-to-r from-[var(--color-brand-gold)]/10 to-transparent border border-[var(--color-brand-gold)]/20">
@@ -280,7 +280,7 @@ export default function Layout({ children }: LayoutProps) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-white font-medium text-sm">Email Support</div>
-                      <div className="text-white/70 text-xs mt-0.5 truncate">concierge@grandstay.example</div>
+                      <div className="text-white/70 text-xs mt-0.5 truncate">concierge@royalstay.me</div>
                       <div className="text-[var(--color-brand-gold)] text-xs mt-1">Click to send query</div>
                     </div>
                   </div>
@@ -374,7 +374,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="mt-12 pt-8 border-t border-white/15">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="text-xs text-white/60">
-                © {new Date().getFullYear()} The Grand Stay. All rights reserved. | Luxury hospitality redefined.
+                © {new Date().getFullYear()} The Royal Stay. All rights reserved. | Luxury hospitality redefined.
               </div>
               <div className="flex items-center gap-6 text-xs">
                 <a href="#" className="text-white/60 hover:text-[var(--color-brand-gold)] transition-colors">Privacy Policy</a>

@@ -18,21 +18,17 @@ export default function BookingSuccess() {
       // Handle PayPal return
       handlePayPalReturn(paypalOrderId, payerId)
     } else if (booking) {
-      // Save booking to localStorage when we reach success page
-      console.log('BookingSuccess - Full booking object:', booking)
-      console.log('BookingSuccess - hotelName:', booking.hotelName)
-      console.log('BookingSuccess - roomTitle:', booking.roomTitle)
-      
-      const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
-      
-      // Check if this booking already exists
-      const bookingExists = existingBookings.find((b: any) => b.id === booking.id)
-      
-      if (!bookingExists) {
-        existingBookings.push(booking)
-        localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
-        console.log('Booking saved:', booking)
-        console.log('All bookings:', existingBookings)
+      // Save booking to localStorage immediately without complex processing
+      try {
+        const existingBookings = JSON.parse(localStorage.getItem('memberBookings') || '[]')
+        const bookingExists = existingBookings.some((b: any) => b.id === booking.id)
+        
+        if (!bookingExists) {
+          existingBookings.push(booking)
+          localStorage.setItem('memberBookings', JSON.stringify(existingBookings))
+        }
+      } catch (error) {
+        console.error('Error saving booking:', error)
       }
     }
   }, [booking])
@@ -56,33 +52,36 @@ export default function BookingSuccess() {
       
       const bookingData = JSON.parse(pendingBooking)
 
-      // Capture PayPal payment
+      // Capture PayPal payment with timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+      
       const response = await fetch('https://thegrandstay.azurewebsites.net/api/payment/capture-paypal-payment', {
         method: 'POST',
         headers,
         body: JSON.stringify({
           orderId: orderId,
           bookingData: bookingData
-        })
+        }),
+        signal: controller.signal
       })
+      
+      clearTimeout(timeoutId)
 
       if (!response.ok) {
-        throw new Error('Payment capture failed')
+        throw new Error(`Payment capture failed: ${response.status}`)
       }
 
       const result = await response.json()
       
       if (result.success) {
-        // Set the booking data
         setBooking(result.booking)
-        // Clean up pending booking
         localStorage.removeItem('pendingPayPalBooking')
       } else {
         throw new Error(result.message || 'Payment capture failed')
       }
     } catch (error) {
       console.error('PayPal return handling error:', error)
-      // Don't redirect, just show error state
       setBooking(null)
     } finally {
       setLoading(false)

@@ -122,7 +122,7 @@ export default function MembershipSuccess() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to The Grand Stay!</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to The Royal Stay!</h1>
           <p className="text-gray-600">Your membership has been activated successfully</p>
         </div>
 
@@ -130,7 +130,7 @@ export default function MembershipSuccess() {
         <div className="bg-gradient-to-r from-[var(--color-brand-navy)] to-blue-700 rounded-2xl p-8 text-white mb-8 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-300">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-bold">The Grand Stay</h2>
+              <h2 className="text-xl font-bold">The Royal Stay</h2>
               <p className="text-blue-200 text-sm">Exclusive Member</p>
             </div>
             <div className="w-12 h-12 bg-[var(--color-brand-gold)] rounded-full flex items-center justify-center">
@@ -222,7 +222,7 @@ export default function MembershipSuccess() {
 
         {/* Contact Info */}
         <div className="mt-8 text-center text-gray-500 text-sm">
-          <p>Need help? Contact us at <span className="text-[var(--color-brand-navy)] font-medium">support@grandstay.com</span></p>
+          <p>Need help? Contact us at <span className="text-[var(--color-brand-navy)] font-medium">support@royalstay.me</span></p>
         </div>
       </div>
     </div>

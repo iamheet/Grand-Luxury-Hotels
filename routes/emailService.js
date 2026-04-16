@@ -17,11 +17,11 @@ router.post('/booking-confirmation', async (req, res) => {
     const mailOptions = {
       from: process.env.EMAIL_USER || 'your-email@gmail.com',
       to: to,
-      subject: '✅ Booking Confirmed - The Grand Stay',
+      subject: '✅ Booking Confirmed - The Royal Stay',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; border-radius: 10px;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #fbbf24; font-size: 32px; margin: 0;">👑 The Grand Stay</h1>
+            <h1 style="color: #fbbf24; font-size: 32px; margin: 0;">👑 The Royal Stay</h1>
             <p style="color: #d1d5db; margin-top: 10px;">Booking Confirmation</p>
           </div>
           <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 10px; border: 1px solid rgba(251, 191, 36, 0.3);">
@@ -44,7 +44,7 @@ router.post('/booking-confirmation', async (req, res) => {
             <p style="color: #e5e7eb;">We look forward to hosting you!</p>
           </div>
           <div style="text-align: center; margin-top: 20px; color: #6b7280; font-size: 12px;">
-            <p>© 2024 The Grand Stay. All rights reserved.</p>
+            <p>© 2024 The Royal Stay. All rights reserved.</p>
           </div>
         </div>
       `
@@ -68,7 +68,7 @@ router.post('/send', async (req, res) => {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; border-radius: 10px;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #fbbf24; font-size: 32px; margin: 0;">👑 The Grand Stay</h1>
+            <h1 style="color: #fbbf24; font-size: 32px; margin: 0;">👑 The Royal Stay</h1>
           </div>
           <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 10px; border: 1px solid rgba(251, 191, 36, 0.3);">
             <div style="color: #e5e7eb; line-height: 1.6;">
@@ -76,7 +76,7 @@ router.post('/send', async (req, res) => {
             </div>
           </div>
           <div style="text-align: center; margin-top: 20px; color: #6b7280; font-size: 12px;">
-            <p>© 2024 The Grand Stay. All rights reserved.</p>
+            <p>© 2024 The Royal Stay. All rights reserved.</p>
           </div>
         </div>
       `
@@ -93,7 +93,7 @@ router.post('/whatsapp-booking', async (req, res) => {
   try {
     const { phoneNumber, guestName, hotelName, roomType, checkIn, checkOut, nights, guests, total, bookingId } = req.body;
     
-    const message = `🏨 *The Grand Stay - Booking Confirmed!*\\n\\n✅ Dear ${guestName}, your booking is confirmed!\\n\\n📋 *Booking Details:*\\n🏨 Hotel: ${hotelName}\\n🛏️ Room: ${roomType}\\n📅 Check-in: ${checkIn}\\n📅 Check-out: ${checkOut}\\n🌙 Nights: ${nights}\\n👥 Guests: ${guests}\\n💰 Total: ₹${total}\\n\\n🆔 Booking ID: ${bookingId}\\n\\n🙏 Thank you for choosing The Grand Stay!\\n\\n*Contact us:* +91-XXXXXXXXXX`;
+    const message = `🏨 *The Royal Stay - Booking Confirmed!*\\n\\n✅ Dear ${guestName}, your booking is confirmed!\\n\\n📋 *Booking Details:*\\n🏨 Hotel: ${hotelName}\\n🛏️ Room: ${roomType}\\n📅 Check-in: ${checkIn}\\n📅 Check-out: ${checkOut}\\n🌙 Nights: ${nights}\\n👥 Guests: ${guests}\\n💰 Total: ₹${total}\\n\\n🆔 Booking ID: ${bookingId}\\n\\n🙏 Thank you for choosing The Royal Stay!\\n\\n*Contact us:* +91-XXXXXXXXXX`;
 
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     

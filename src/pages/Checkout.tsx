@@ -255,7 +255,7 @@ export default function Checkout() {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          amount: total * 1,
+          amount: total * 100, // Convert to paise (1 INR = 100 paise)
           currency: 'INR',
           bookingData: {
             hotelName: room.hotelName || room.hotel || room.title || room.name,

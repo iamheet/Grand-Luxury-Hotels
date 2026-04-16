@@ -27,7 +27,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: '*', // Allow all origins for testing
     methods: ['GET', 'POST'],
     credentials: true
   }
@@ -38,7 +38,7 @@ app.set('io', io);
 
 // Middleware
 app.use(cors({
-  origin: allowedOrigins,
+  origin: '*', // Allow all origins for testing
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
