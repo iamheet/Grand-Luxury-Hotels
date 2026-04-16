@@ -1,7 +1,7 @@
-export const API_BASE_URL = process.env.NODE_ENV === 'production' 
+export const API_BASE_URL = import.meta.env.MODE === 'production' 
   ? 'https://thegrandstay.azurewebsites.net/api'
   : 'http://localhost:5000/api'
-export const SOCKET_URL = process.env.NODE_ENV === 'production'
+export const SOCKET_URL = import.meta.env.MODE === 'production'
   ? 'https://thegrandstay.azurewebsites.net'
   : 'http://localhost:5000'
 
