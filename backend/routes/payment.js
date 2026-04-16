@@ -282,7 +282,7 @@ const optionalAuth = (req, res, next) => {
   next();
 };
 
-router.post('/create-order', auth, async (req, res) => {
+router.post('/create-order', optionalAuth, async (req, res) => {
   try {
     const { amount, currency = 'INR', bookingData } = req.body;
     
