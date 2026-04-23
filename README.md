@@ -9,7 +9,7 @@ The Royal Stay is a full-stack MVP that covers the entire hotel booking lifecycl
 
 ## 🚀 Live Demo
 
-Currently not deployed. Available locally — can provide a live demo on request.
+ 🌐 https://www.royalstay.me/
 
 ---
 
