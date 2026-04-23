@@ -6,7 +6,7 @@ const cities = [
   { name: 'Paris', image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2070&auto=format&fit=crop' },
   { name: 'New York', image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/615410548.jpg?k=b2b223272c1bc38f8394f18a125a73d52160c4c566cda040687d91fa997ed6c7&o=' },
   { name: 'Tokyo', image: 'https://cf.bstatic.com/xdata/images/hotel/max500/97986399.jpg?k=cd109a8cb120efa5414c04f2f64bbaf0168431f2f78d79f4e4b3026f50c1852a&o=' },
-  { name: 'Dubai', image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/402062213.jpg?k=b210cfef3e9c3450e72a0c21675110a1b62f2f2174a276eb8c2762a99a5cd61d&o=' },
+  { name: 'Dubai', image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/673286253.jpg?k=a821795382abf30e537ddbc44786d629c5d99ba43e4bbb886a2049f7e78f3a24&o=' },
   { name: 'Rome', image: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?q=80&w=2070&auto=format&fit=crop' },
   { name: 'Singapore', image: 'https://cf.bstatic.com/xdata/images/hotel/max300/281047348.jpg?k=16b2802339249d3978326b7f570026ae77af5ff78716646a46b6dbabdbc5ffcc&o=' },
   { name: 'Malaysia', image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/604095272.jpg?k=27eaf1958876c206e4284916e2655a042b9d79269204d4e5d24221a885f64a7b&o=' },
