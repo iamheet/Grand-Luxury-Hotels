@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAllHotels } from '../services/hongkongHotelsApi'
+import api from '../services/api'
 
 export default function MemberDashboard() {
   const [member, setMember] = useState<any>(null)
@@ -38,8 +39,8 @@ export default function MemberDashboard() {
     // Load exclusive hotels from database instead of localStorage
     const fetchExclusiveHotels = async () => {
       try {
-        const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels/exclusive')
-        const data = await response.json()
+        const response = await api.get('/hotels/exclusive')
+        const data = response.data
         if (data.success && data.hotels.length > 0) {
           // Convert database format to UI format
           const convertedHotels = data.hotels.map((hotel: any) => ({
@@ -86,8 +87,8 @@ export default function MemberDashboard() {
     // Load regular hotels from database
     const fetchRegularHotels = async () => {
       try {
-        const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels/normal')
-        const data = await response.json()
+        const response = await api.get('/hotels/normal')
+        const data = response.data
         if (data.success) {
           // Convert database format to UI format
           const convertedHotels = data.hotels.map((hotel: any) => ({

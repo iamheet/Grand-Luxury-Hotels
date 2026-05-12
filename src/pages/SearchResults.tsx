@@ -4,6 +4,7 @@ import HotelCard from '../components/HotelCard'
 import HotelSkeleton from '../components/HotelSkeleton'
 import Pagination from '../components/Pagination'
 import { hotelsByCity, type Hotel } from '../data/hotels'
+import api from '../services/api'
 
 export default function SearchResults() {
   const [params] = useSearchParams()
@@ -28,8 +29,8 @@ export default function SearchResults() {
   useEffect(() => {
     const fetchDbHotels = async () => {
       try {
-        const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels/normal')
-        const data = await response.json()
+        const response = await api.get('/hotels/normal')
+        const data = response.data
         if (data.success) {
           setDbHotels(data.hotels)
         }
