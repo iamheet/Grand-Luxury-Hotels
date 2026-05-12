@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import api from '../services/api'
 
 interface Hotel {
   _id: string
@@ -44,8 +45,8 @@ export default function NormalHotelsDashboard() {
   const fetchHotels = async () => {
     setLoading(true)
     try {
-      const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels')
-      const data = await response.json()
+      const response = await api.get('/hotels')
+      const data = response.data
       if (data.success) {
         setHotels(data.hotels)
       } else {
@@ -61,10 +62,8 @@ export default function NormalHotelsDashboard() {
 
   const seedDefaultHotels = async () => {
     try {
-      const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels/seed', {
-        method: 'POST'
-      })
-      const data = await response.json()
+      const response = await api.post('/hotels/seed')
+      const data = response.data
       if (data.success) {
         fetchHotels()
       }
@@ -85,24 +84,18 @@ export default function NormalHotelsDashboard() {
     }
 
     try {
-      const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          location: formData.location.trim(),
-          price: parseFloat(formData.price),
-          image: formData.image.trim(),
-          rating: parseFloat(formData.rating),
-          exclusive: false,
-          email: formData.email.trim(),
-          password: formData.password.trim()
-        })
+      const response = await api.post('/hotels', {
+        name: formData.name.trim(),
+        location: formData.location.trim(),
+        price: parseFloat(formData.price),
+        image: formData.image.trim(),
+        rating: parseFloat(formData.rating),
+        exclusive: false,
+        email: formData.email.trim(),
+        password: formData.password.trim()
       })
 
-      const data = await response.json()
+      const data = response.data
       if (data.success) {
         fetchHotels()
         setFormData({ name: '', location: '', price: '', image: '', rating: '', email: '', password: '' })
@@ -140,23 +133,17 @@ export default function NormalHotelsDashboard() {
     }
 
     try {
-      const response = await fetch(`https://thegrandstay.azurewebsites.net/api/hotels/${editingHotel._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          location: formData.location.trim(),
-          price: parseFloat(formData.price),
-          image: formData.image.trim(),
-          rating: parseFloat(formData.rating),
-          email: formData.email.trim(),
-          password: formData.password.trim()
-        })
+      const response = await api.put(`/hotels/${editingHotel._id}`, {
+        name: formData.name.trim(),
+        location: formData.location.trim(),
+        price: parseFloat(formData.price),
+        image: formData.image.trim(),
+        rating: parseFloat(formData.rating),
+        email: formData.email.trim(),
+        password: formData.password.trim()
       })
 
-      const data = await response.json()
+      const data = response.data
       if (data.success) {
         fetchHotels()
         setFormData({ name: '', location: '', price: '', image: '', rating: '', email: '', password: '' })
@@ -175,11 +162,9 @@ export default function NormalHotelsDashboard() {
   const handleDeleteHotel = async (id: string) => {
     if (confirm('Are you sure you want to delete this hotel?')) {
       try {
-        const response = await fetch(`https://thegrandstay.azurewebsites.net/api/hotels/${id}`, {
-          method: 'DELETE'
-        })
+        const response = await api.delete(`/hotels/${id}`)
         
-        const data = await response.json()
+        const data = response.data
         if (data.success) {
           fetchHotels()
           showToast('Hotel deleted successfully!', 'success')

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Pagination from '../components/Pagination'
+import api from '../services/api'
 
 export default function HotelsList() {
   const [dbHotels, setDbHotels] = useState<any[]>([])
@@ -12,8 +13,8 @@ export default function HotelsList() {
     const fetchHotels = async () => {
       setLoading(true)
       try {
-        const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels')
-        const data = await response.json()
+        const response = await api.get('/hotels')
+        const data = response.data
         if (data.success) {
           setDbHotels(data.hotels)
         }

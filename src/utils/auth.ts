@@ -42,16 +42,30 @@ const getRedirectPath = () => {
 }
 
 export const setupAxiosInterceptors = () => {
+  console.log('🔧 Setting up axios interceptors...')
+  
   // Request interceptor to add token
   axios.interceptors.request.use(
     (config) => {
       const token = localStorage.getItem('token') || localStorage.getItem('adminToken')
+      console.log('🔍 Interceptor check:', {
+        hasToken: !!token,
+        tokenPreview: token ? `${token.substring(0, 20)}...` : 'none',
+        url: config.url
+      })
+      
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
+        console.log('✅ Bearer token added to request')
+      } else {
+        console.log('❌ No token found in localStorage')
       }
       return config
     },
-    (error) => Promise.reject(error)
+    (error) => {
+      console.log('❌ Request interceptor error:', error)
+      return Promise.reject(error)
+    }
   )
 
   // Response interceptor to handle 401/403 errors
@@ -59,12 +73,15 @@ export const setupAxiosInterceptors = () => {
     (response) => response,
     (error) => {
       if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log('🚫 Authentication error:', error.response.status)
         // Trigger session expired modal
         window.triggerSessionExpired?.()
       }
       return Promise.reject(error)
     }
   )
+  
+  console.log('✅ Axios interceptors setup complete')
 }
 
 export const validateToken = async (): Promise<boolean> => {
