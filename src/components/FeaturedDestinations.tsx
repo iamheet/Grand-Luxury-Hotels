@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import ImageWithFallback from './ImageWithFallback'
 import { useState, useEffect } from 'react'
+import api from '../services/api'
 
 const cities = [
   { name: 'Paris', image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2070&auto=format&fit=crop' },
@@ -20,8 +21,8 @@ export default function FeaturedDestinations() {
   useEffect(() => {
     const fetchDestinations = async () => {
       try {
-        const response = await fetch('https://thegrandstay.azurewebsites.net/api/hotels')
-        const data = await response.json()
+        const response = await api.get('/hotels')
+        const data = response.data
         if (data.success) {
           // Group hotels by location and show ALL hotels
           const locationMap = new Map()
