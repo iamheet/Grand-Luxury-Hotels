@@ -1,13 +1,10 @@
-const express = require('express');
+import express from 'express';
 const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
 
-// Only load dotenv in development
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
+
 
 // Debug CORS configuration
 const allowedOrigins = [
